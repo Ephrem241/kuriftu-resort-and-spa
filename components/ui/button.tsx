@@ -32,6 +32,12 @@ const buttonVariants = cva(
         default: "h-12 px-8 [&_svg]:size-4",
         sm: "h-8 px-5 [&_svg]:size-3.5",
         icon: "size-10 [&_svg]:size-4",
+        /** Sentence-case pill from the home page reference. */
+        pill: "h-11 px-6 text-small! font-bold normal-case! tracking-normal! [&_svg]:size-4",
+      },
+      shape: {
+        default: "",
+        pill: "rounded-full",
       },
     },
     compoundVariants: [
@@ -41,6 +47,7 @@ const buttonVariants = cva(
     defaultVariants: {
       variant: "primary",
       size: "default",
+      shape: "default",
     },
   }
 )
@@ -64,6 +71,7 @@ function Button({
   className,
   variant,
   size,
+  shape,
   arrow = false,
   children,
   ...props
@@ -71,7 +79,7 @@ function Button({
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size }), className)}
+      className={cn(buttonVariants({ variant, size, shape }), className)}
       {...props}
     >
       {children}
@@ -85,6 +93,7 @@ function ButtonLink({
   className,
   variant,
   size,
+  shape,
   arrow = false,
   children,
   ...props
@@ -92,7 +101,7 @@ function ButtonLink({
   return (
     <Link
       data-slot="button"
-      className={cn(buttonVariants({ variant, size }), className)}
+      className={cn(buttonVariants({ variant, size, shape }), className)}
       {...props}
     >
       {children}
