@@ -13,3 +13,7 @@ A rebuild of the [Kuriftu Resorts & Spa](https://www.kurifturesorts.com/) websit
 - Playfair Display and Lato, self-hosted with `next/font`
 
 Planned: Sanity (content), Zod (form validation), Resend (email), PostHog (analytics).
+
+## Sanity Studio
+
+The Studio is its own workspace in `studio/`. Copy `studio/.env.example` to `studio/.env`, then run `npm install` and `npm run dev` in `studio/` (http://localhost:3333).
