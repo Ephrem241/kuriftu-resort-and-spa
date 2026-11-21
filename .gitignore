@@ -44,3 +44,8 @@ next-env.d.ts
 /design/
 /prompts/
 /AGENTS.md
+
+# agent skills (local tooling)
+/.agents/skills/
+/.claude/skills/
+/agent/skills/
