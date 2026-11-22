@@ -32,6 +32,11 @@ export function captureOrQueue(event: string, props: Record<string, unknown>): b
   return false
 }
 
+/** Report an error to PostHog, only when it is loaded (consent given). */
+export function captureException(error: unknown): void {
+  instance?.captureException(error)
+}
+
 /** Idempotent. Call only once the guest has granted consent. */
 export function loadPostHog(): Promise<PostHog | null> {
   if (typeof window === "undefined" || !analyticsEnabled()) return Promise.resolve(null)
@@ -54,6 +59,9 @@ export function loadPostHog(): Promise<PostHog | null> {
         person_profiles: "identified_only",
         persistence: "localStorage+cookie",
         respect_dnt: true,
+        // Session replay and autocapture follow the project settings; both
+        // run only after consent. Replay masks form inputs by default.
+        capture_exceptions: true,
       })
       // A previous withdrawal opts out; a fresh grant opts back in.
       if (posthog.has_opted_out_capturing()) posthog.opt_in_capturing()

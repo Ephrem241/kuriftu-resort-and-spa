@@ -12,6 +12,10 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
+    "@opentelemetry/api-logs": "^0.223.0",
+    "@opentelemetry/exporter-logs-otlp-http": "^0.301.2",
+    "@opentelemetry/resources": "^3.1.1",
+    "@opentelemetry/sdk-logs": "^3.1.1",
     "@portabletext/react": "^8.0.1",
     "@sanity/image-url": "^2.2.0",
     "class-variance-authority": "^0.7.1",

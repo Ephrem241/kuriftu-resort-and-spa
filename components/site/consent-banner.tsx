@@ -62,8 +62,8 @@ export function ConsentBanner() {
         Your privacy
       </h2>
       <p className="mt-2 text-small text-charcoal">
-        We use analytics cookies to understand how guests use our site and improve it. Nothing is
-        tracked unless you accept.
+        We use analytics cookies and session recordings to understand how guests use our site and
+        improve it. Nothing is tracked or recorded unless you accept.
       </p>
       <div className="mt-4 flex gap-3">
         <Button size="sm" onClick={() => choose("granted")}>
