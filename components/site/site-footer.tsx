@@ -2,9 +2,11 @@ import Link from "next/link"
 import { Mail, MapPin, Phone } from "lucide-react"
 
 import { BookStayLink } from "@/components/booking/book-stay-link"
+import { analyticsEnabled } from "@/lib/analytics/posthog"
 import { getSiteSettings } from "@/lib/content"
 
 import { ContactLink } from "./contact-link"
+import { CookieSettingsButton } from "./cookie-settings-button"
 import { Wordmark } from "./wordmark"
 
 const headingClass = "border-b border-ivory/15 pb-3 font-sans text-small font-bold text-ivory"
@@ -105,6 +107,14 @@ export async function SiteFooter() {
                 </Link>
               </li>
             ))}
+            {analyticsEnabled() ? (
+              <li className="flex items-center gap-3">
+                {settings.legalLinks.length > 0 ? (
+                  <span aria-hidden="true" className="h-3 w-px bg-gold/60" />
+                ) : null}
+                <CookieSettingsButton className="cursor-pointer text-gold hover:text-ivory" />
+              </li>
+            ) : null}
           </ul>
         </div>
       </div>

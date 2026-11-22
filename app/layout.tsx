@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Lato, Playfair_Display } from "next/font/google";
 import { JsonLd } from "@/components/seo/json-ld";
+import { ConsentBanner } from "@/components/site/consent-banner";
+import { analyticsEnabled } from "@/lib/analytics/posthog";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { getSiteSettings } from "@/lib/content";
@@ -60,6 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         {children}
         <SiteFooter />
+        {analyticsEnabled() ? <ConsentBanner /> : null}
       </body>
     </html>
   );
