@@ -160,3 +160,21 @@ export const SITEMAP_QUERY = defineQuery(`{
     "slug": slug.current, "resortSlug": resort->slug.current, _updatedAt
   }
 }`)
+
+const ENQUIRY_CONTACT = /* groq */ `{ phones[]{ display, tel }, emails[]{ address } }`
+
+/**
+ * Enquiry route only (never page rendering): the chosen resort and the
+ * site-wide contacts used to pick a recipient and a fallback phone.
+ */
+export const ENQUIRY_CONTEXT_QUERY = defineQuery(`{
+  "resort": *[_type == "resort" && slug.current == $slug][0]{
+    _id,
+    name,
+    reservationContact${ENQUIRY_CONTACT}
+  },
+  "settings": *[_type == "siteSettings"][0]{
+    reservations${ENQUIRY_CONTACT},
+    headOffice${ENQUIRY_CONTACT}
+  }
+}`)

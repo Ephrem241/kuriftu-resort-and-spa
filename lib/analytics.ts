@@ -11,6 +11,7 @@ type AnalyticsEvents = {
   booking_handoff_clicked: { source: string; resort?: string; room?: string }
   video_played: { source: string }
   contact_tap: { method: "phone" | "email"; source: string }
+  enquiry_submitted: { type: "event" | "meeting" | "spa" | "contact" }
 }
 
 type PostHogLike = {
