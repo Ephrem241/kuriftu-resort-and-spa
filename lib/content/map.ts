@@ -1,5 +1,7 @@
 import type {
   HOME_PAGE_QUERY_RESULT,
+  OFFER_PAGE_QUERY_RESULT,
+  OFFERS_QUERY_RESULT,
   RESORT_PAGE_QUERY_RESULT,
   ROOM_PAGE_QUERY_RESULT,
   SITEMAP_QUERY_RESULT,
@@ -14,6 +16,8 @@ import type {
   ContentImage,
   HomePage,
   NavLink,
+  OfferPage,
+  OfferSummary,
   PageSeo,
   PostalAddress,
   PropertyContact,
@@ -364,6 +368,61 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
     spaImage: doc.spaImage?.asset ? toContentImage(doc.spaImage) : null,
     diningImage: doc.diningImage?.asset ? toContentImage(doc.diningImage) : null,
   }
+}
+
+type OfferDoc = OFFERS_QUERY_RESULT[number]
+
+export function mapOffer(doc: OfferDoc): OfferSummary {
+  return {
+    title: doc.title,
+    slug: doc.slug,
+    shortLine: doc.shortLine?.trim() ?? "",
+    startDate: doc.startDate,
+    endDate: doc.endDate,
+    showAsPopup: doc.showAsPopup === true,
+    image: toContentImage(doc.image, doc.title),
+    resorts: (doc.resorts ?? []).filter((r) => r.slug).map((r) => ({ name: r.name, slug: r.slug })),
+    noIndex: doc.seo?.noIndex === true,
+    lastModified: doc._updatedAt,
+  }
+}
+
+type OfferPageDoc = NonNullable<OFFER_PAGE_QUERY_RESULT>
+
+export function mapOfferPage(doc: OfferPageDoc): OfferPage {
+  const shortLine = doc.shortLine?.trim() ?? ""
+  const image = toContentImage(doc.image, doc.title)
+  return {
+    title: doc.title,
+    slug: doc.slug,
+    shortLine,
+    startDate: doc.startDate,
+    endDate: doc.endDate,
+    showAsPopup: doc.showAsPopup === true,
+    image,
+    description: (doc.description ?? []) as RichText,
+    terms: (doc.terms ?? []) as RichText,
+    promoCode: doc.promoCode?.trim() ?? "",
+    seo: mapSeo(doc.seo, { title: doc.title, description: shortLine }),
+    resorts: (doc.resorts ?? [])
+      .filter((r) => r.slug)
+      .map((r) => ({
+        name: r.name,
+        heading: r.fullName?.trim() || r.name,
+        slug: r.slug,
+        bookable: r.bookable ?? true,
+        bookingPropertyId: r.bookingPropertyId ?? null,
+        ...mapContact(r.phone, r.email),
+      })),
+  }
+}
+
+/** Sitemap rows for live, indexable offers. */
+export function offerSitemapEntries(offers: OfferSummary[]): SitemapEntry[] {
+  return offers.flatMap((o) => {
+    const path = o.noIndex ? null : pathForDocument({ _type: "offer", slug: o.slug })
+    return path ? [{ path, lastModified: o.lastModified }] : []
+  })
 }
 
 /** Indexable pages for sitemap.xml, home first; rows without a path are dropped. */

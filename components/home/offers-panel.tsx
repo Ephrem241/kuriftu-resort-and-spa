@@ -2,7 +2,7 @@ import { ButtonLink } from "@/components/ui/button"
 import { MediaImage } from "@/components/ui/media-image"
 import type { HomePage } from "@/lib/content/types"
 
-/** "Special Offers" link panel. Dated offers and the popup are a later step. */
+/** "Special Offers" link panel to /offers. */
 export function OffersPanel({ content }: { content: HomePage["offersPanel"] }) {
   return (
     <aside

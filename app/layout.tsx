@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
+import { OfferPopup } from "@/components/offers/offer-popup";
 import { Lato, Playfair_Display } from "next/font/google";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ConsentBanner } from "@/components/site/consent-banner";
@@ -62,6 +64,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         {children}
         <SiteFooter />
+        <Suspense fallback={null}>
+          <OfferPopup />
+        </Suspense>
         {analyticsEnabled() ? <ConsentBanner /> : null}
       </body>
     </html>

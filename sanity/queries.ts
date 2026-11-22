@@ -161,6 +161,44 @@ export const SITEMAP_QUERY = defineQuery(`{
   }
 }`)
 
+const OFFER_FIELDS = /* groq */ `
+  _updatedAt,
+  title,
+  "slug": slug.current,
+  shortLine,
+  startDate,
+  endDate,
+  showAsPopup,
+  image${IMAGE}`
+
+/**
+ * Offers that haven't ended at $now (live or upcoming). Callers drop the
+ * upcoming ones and cache until the next start or end.
+ */
+export const OFFERS_QUERY = defineQuery(`*[_type == "offer" && defined(slug.current) && endDate > $now] | order(endDate asc){
+  ${OFFER_FIELDS},
+  seo { noIndex },
+  "resorts": resorts[]->{ name, "slug": slug.current }
+}`)
+
+/** One offer by slug, whatever its dates; the caller checks it is live. */
+export const OFFER_PAGE_QUERY = defineQuery(`*[_type == "offer" && slug.current == $slug][0]{
+  ${OFFER_FIELDS},
+  description,
+  terms,
+  promoCode,
+  seo${SEO},
+  "resorts": resorts[]->{
+    name,
+    fullName,
+    "slug": slug.current,
+    bookable,
+    bookingPropertyId,
+    "phone": reservationContact.phones[0]{ display, tel },
+    "email": reservationContact.emails[0].address
+  }
+}`)
+
 const ENQUIRY_CONTACT = /* groq */ `{ phones[]{ display, tel }, emails[]{ address } }`
 
 /**
