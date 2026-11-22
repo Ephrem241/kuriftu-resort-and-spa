@@ -8,6 +8,7 @@ import {
   HOME_PAGE_QUERY,
   OFFER_PAGE_QUERY,
   OFFERS_QUERY,
+  OFFERS_PAGE_QUERY,
   RESORT_PAGE_QUERY,
   RESORT_SLUGS_QUERY,
   ROOM_PAGE_QUERY,
@@ -20,6 +21,7 @@ import {
   mapHomePage,
   mapOffer,
   mapOfferPage,
+  mapOffersPage,
   mapResortPage,
   mapRoomPage,
   mapSiteSettings,
@@ -29,6 +31,7 @@ import { cacheSeconds, isLive, type Dated } from "./offers"
 import type {
   HomePage,
   OfferPage,
+  OffersPage,
   OfferSummary,
   ResortPage,
   RoomPage,
@@ -151,6 +154,17 @@ export async function getOfferPage(slug: string): Promise<OfferPage | null> {
   }
   cacheLife(offerLifetime([doc], now))
   return isLive(doc, now) ? mapOfferPage(doc) : null
+}
+
+/** Hero, banner and SEO copy for /offers; renders with fallbacks if unpublished. */
+export async function getOffersPage(fallbackDescription: string): Promise<OffersPage> {
+  "use cache"
+  const tags = ["offersPage", ...LINKED_TYPES]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: OFFERS_PAGE_QUERY, tags })
+  return mapOffersPage(doc, fallbackDescription)
 }
 
 /** Revalidate at the next start or end. Next requires expire > revalidate. */

@@ -21,7 +21,7 @@ export function OfferDetail({ offer, reservations }: OfferDetailProps) {
   const subtitle = offerSubtitle(offer.title, offer.shortLine)
   const start = formatOfferDate(offer.startDate)
   const end = formatOfferDate(offer.endDate)
-  const where = offer.resorts.length > 0 ? offer.resorts.map((r) => r.heading).join(", ") : "All resorts"
+  const where = offer.resorts.length > 0 ? offer.resorts.map((r) => r.heading).join(", ") : "All Resorts"
   const action = offerAction(offer.resorts)
 
   return (

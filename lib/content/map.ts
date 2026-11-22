@@ -1,6 +1,7 @@
 import type {
   HOME_PAGE_QUERY_RESULT,
   OFFER_PAGE_QUERY_RESULT,
+  OFFERS_PAGE_QUERY_RESULT,
   OFFERS_QUERY_RESULT,
   RESORT_PAGE_QUERY_RESULT,
   ROOM_PAGE_QUERY_RESULT,
@@ -10,13 +11,17 @@ import type {
 import { urlFor } from "@/sanity/lib/image"
 
 import { isIconName } from "./icons"
+import { isOfferCategory } from "./offers"
 import { hrefFor, pathForDocument, type ContentLink } from "./routes"
 import type {
   Amenity,
   ContentImage,
   HomePage,
   NavLink,
+  OfferCategory,
   OfferPage,
+  OfferResort,
+  OffersPage,
   OfferSummary,
   PageSeo,
   PostalAddress,
@@ -371,17 +376,37 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
 }
 
 type OfferDoc = OFFERS_QUERY_RESULT[number]
+type OfferResortDoc = NonNullable<OfferDoc["resorts"]>[number]
+
+function mapOfferResorts(resorts: OfferResortDoc[] | null | undefined): OfferResort[] {
+  return (resorts ?? [])
+    .filter((r) => r.slug)
+    .map((r) => ({
+      name: r.name,
+      heading: r.fullName?.trim() || r.name,
+      slug: r.slug,
+      bookable: r.bookable ?? true,
+      bookingPropertyId: r.bookingPropertyId ?? null,
+      ...mapContact(r.phone, r.email),
+    }))
+}
+
+function mapOfferCategory(value: string | null | undefined): OfferCategory {
+  return isOfferCategory(value) ? value : "deals"
+}
 
 export function mapOffer(doc: OfferDoc): OfferSummary {
   return {
     title: doc.title,
     slug: doc.slug,
     shortLine: doc.shortLine?.trim() ?? "",
+    category: mapOfferCategory(doc.category),
+    badge: doc.badge?.trim() ?? "",
     startDate: doc.startDate,
     endDate: doc.endDate,
     showAsPopup: doc.showAsPopup === true,
     image: toContentImage(doc.image, doc.title),
-    resorts: (doc.resorts ?? []).filter((r) => r.slug).map((r) => ({ name: r.name, slug: r.slug })),
+    resorts: mapOfferResorts(doc.resorts),
     noIndex: doc.seo?.noIndex === true,
     lastModified: doc._updatedAt,
   }
@@ -396,6 +421,8 @@ export function mapOfferPage(doc: OfferPageDoc): OfferPage {
     title: doc.title,
     slug: doc.slug,
     shortLine,
+    category: mapOfferCategory(doc.category),
+    badge: doc.badge?.trim() ?? "",
     startDate: doc.startDate,
     endDate: doc.endDate,
     showAsPopup: doc.showAsPopup === true,
@@ -404,16 +431,34 @@ export function mapOfferPage(doc: OfferPageDoc): OfferPage {
     terms: (doc.terms ?? []) as RichText,
     promoCode: doc.promoCode?.trim() ?? "",
     seo: mapSeo(doc.seo, { title: doc.title, description: shortLine }),
-    resorts: (doc.resorts ?? [])
-      .filter((r) => r.slug)
-      .map((r) => ({
-        name: r.name,
-        heading: r.fullName?.trim() || r.name,
-        slug: r.slug,
-        bookable: r.bookable ?? true,
-        bookingPropertyId: r.bookingPropertyId ?? null,
-        ...mapContact(r.phone, r.email),
-      })),
+    resorts: mapOfferResorts(doc.resorts),
+  }
+}
+
+/** Offers page copy; null-safe so a missing singleton still renders. */
+export function mapOffersPage(doc: OFFERS_PAGE_QUERY_RESULT, fallbackDescription: string): OffersPage {
+  const hero = doc?.hero
+  const banner = doc?.banner
+  const title = hero?.title?.trim() || "Offers & Packages"
+  const intro = hero?.intro?.trim() ?? ""
+  return {
+    hero: {
+      eyebrow: hero?.eyebrow?.trim() || "Special Offers",
+      title,
+      intro,
+      image: hero?.image?.asset ? toContentImage(hero.image) : null,
+    },
+    banner:
+      banner?.title?.trim() && banner.image?.asset
+        ? {
+            eyebrow: banner.eyebrow?.trim() ?? "",
+            title: banner.title.trim(),
+            text: banner.text?.trim() ?? "",
+            image: toContentImage(banner.image),
+            link: banner.link ? { label: banner.link.label, href: hrefFor(banner.link) } : null,
+          }
+        : null,
+    seo: mapSeo(doc?.seo, { title, description: intro || fallbackDescription }),
   }
 }
 

@@ -6,7 +6,7 @@
 
 import { RESORT_TIME_ZONE } from "@/lib/booking/dates"
 
-import type { OfferResort } from "./types"
+import type { OfferCategory, OfferResort } from "./types"
 
 export type Dated = { startDate: string; endDate: string }
 
@@ -52,16 +52,42 @@ export function pickPopupOffer<T extends Dated & { showAsPopup: boolean }>(liveO
   return pick
 }
 
-/** "30 Nov 2026", in the resorts' time zone so dates don't shift abroad. */
+/** "Nov 30, 2026", in the resorts' time zone so dates don't shift abroad. */
 export function formatOfferDate(iso: string): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return ""
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat("en-US", {
     timeZone: RESORT_TIME_ZONE,
-    day: "numeric",
     month: "short",
+    day: "numeric",
     year: "numeric",
   }).format(date)
+}
+
+/** Offer filters on /offers, in tile order. Keep in sync with the Studio schema. */
+export const OFFER_CATEGORIES: ReadonlyArray<{ value: OfferCategory; label: string }> = [
+  { value: "deals", label: "Special Deals" },
+  { value: "stay", label: "Stay Packages" },
+  { value: "wellness", label: "Wellness Retreats" },
+  { value: "dining", label: "Dining Offers" },
+  { value: "family", label: "Family Packages" },
+]
+
+export function isOfferCategory(value: unknown): value is OfferCategory {
+  return OFFER_CATEGORIES.some((c) => c.value === value)
+}
+
+/** Offers in one category, or all of them when none is chosen. */
+export function filterByCategory<T extends { category: OfferCategory }>(
+  offers: T[],
+  category: OfferCategory | null
+): T[] {
+  return category ? offers.filter((o) => o.category === category) : offers
+}
+
+/** Where an offer applies: resort names, or "All Resorts" when it lists none. */
+export function offerWhere(resorts: { name: string }[]): string {
+  return resorts.length > 0 ? resorts.map((r) => r.name).join(", ") : "All Resorts"
 }
 
 export type OfferAction =

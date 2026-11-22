@@ -3,12 +3,16 @@ import { describe, expect, it } from "vitest"
 import {
   MAX_CACHE_SECONDS,
   MIN_CACHE_SECONDS,
+  OFFER_CATEGORIES,
   cacheSeconds,
+  filterByCategory,
   formatOfferDate,
   isLive,
+  isOfferCategory,
   nextBoundary,
   offerAction,
   offerSubtitle,
+  offerWhere,
   pickPopupOffer,
 } from "./offers"
 
@@ -82,12 +86,49 @@ describe("pickPopupOffer", () => {
 describe("formatOfferDate", () => {
   it("formats in Addis Ababa time, not UTC", () => {
     // 30 Nov 23:59 +03:00 is 20:59 UTC; 21:30 UTC on 30 Nov is already 1 Dec in Addis Ababa.
-    expect(formatOfferDate(november.endDate)).toBe("30 Nov 2026")
-    expect(formatOfferDate("2026-11-30T21:30:00Z")).toBe("1 Dec 2026")
+    expect(formatOfferDate(november.endDate)).toBe("Nov 30, 2026")
+    expect(formatOfferDate("2026-11-30T21:30:00Z")).toBe("Dec 1, 2026")
   })
 
   it("is empty for an invalid date", () => {
     expect(formatOfferDate("nope")).toBe("")
+  })
+})
+
+describe("offer categories", () => {
+  const offers = [
+    { slug: "a", category: "deals" as const },
+    { slug: "b", category: "dining" as const },
+    { slug: "c", category: "deals" as const },
+  ]
+
+  it("lists the five tiles in design order", () => {
+    expect(OFFER_CATEGORIES.map((c) => c.label)).toEqual([
+      "Special Deals",
+      "Stay Packages",
+      "Wellness Retreats",
+      "Dining Offers",
+      "Family Packages",
+    ])
+  })
+
+  it("recognises only known categories", () => {
+    expect(isOfferCategory("wellness")).toBe(true)
+    expect(isOfferCategory("spa")).toBe(false)
+    expect(isOfferCategory(null)).toBe(false)
+  })
+
+  it("filters by category, keeping order, and returns all for none", () => {
+    expect(filterByCategory(offers, "deals").map((o) => o.slug)).toEqual(["a", "c"])
+    expect(filterByCategory(offers, "family")).toEqual([])
+    expect(filterByCategory(offers, null)).toBe(offers)
+  })
+})
+
+describe("offerWhere", () => {
+  it("joins resort names, or says All Resorts", () => {
+    expect(offerWhere([{ name: "Bishoftu" }, { name: "Arba Minch" }])).toBe("Bishoftu, Arba Minch")
+    expect(offerWhere([])).toBe("All Resorts")
   })
 })
 
