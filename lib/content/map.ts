@@ -1,5 +1,7 @@
 import type {
   DESTINATIONS_PAGE_QUERY_RESULT,
+  EXPERIENCE_PAGE_QUERY_RESULT,
+  EXPERIENCES_PAGE_QUERY_RESULT,
   HOME_PAGE_QUERY_RESULT,
   OFFER_PAGE_QUERY_RESULT,
   OFFERS_PAGE_QUERY_RESULT,
@@ -19,6 +21,10 @@ import type {
   Amenity,
   ContentImage,
   DestinationsPage,
+  ExperiencePage,
+  ExperienceResort,
+  ExperiencesPage,
+  ExperienceSummary,
   HomePage,
   NavLink,
   OfferCategory,
@@ -463,6 +469,70 @@ export function mapDestinationsPage(doc: DESTINATIONS_PAGE_QUERY_RESULT, fallbac
   }
 }
 
+type ExperienceCardDoc = EXPERIENCES_PAGE_QUERY_RESULT["experiences"][number]
+
+function mapExperienceResorts(
+  resorts: { name: string; fullName: string | null; slug: string | null }[] | null | undefined
+): ExperienceResort[] {
+  return (resorts ?? []).flatMap((r) =>
+    r?.slug ? [{ name: r.name, heading: r.fullName?.trim() || r.name, slug: r.slug }] : []
+  )
+}
+
+export function mapExperience(doc: ExperienceCardDoc): ExperienceSummary {
+  return {
+    title: doc.title,
+    slug: doc.slug,
+    category: doc.category,
+    summary: doc.summary?.trim() ?? "",
+    duration: doc.duration?.trim() ?? "",
+    image: toContentImage(doc.image, doc.title),
+    resorts: mapExperienceResorts(doc.resorts),
+  }
+}
+
+/** Experiences page copy and every experience; null-safe so a missing singleton still renders. */
+export function mapExperiencesPage(doc: EXPERIENCES_PAGE_QUERY_RESULT, fallbackDescription: string): ExperiencesPage {
+  const hero = doc.page?.hero
+  const title = hero?.title?.trim() || "Experiences"
+  const intro = hero?.intro?.trim() ?? ""
+  return {
+    hero: {
+      eyebrow: hero?.eyebrow?.trim() || "Experiences",
+      title,
+      intro,
+      image: hero?.image?.asset ? toContentImage(hero.image) : null,
+    },
+    experiences: doc.experiences.map(mapExperience),
+    seo: mapSeo(doc.page?.seo, { title, description: intro || fallbackDescription }),
+  }
+}
+
+type ExperiencePageDoc = NonNullable<EXPERIENCE_PAGE_QUERY_RESULT>
+
+export function mapExperiencePage(doc: ExperiencePageDoc): ExperiencePage {
+  const summary = doc.summary?.trim() ?? ""
+  const images = (doc.images ?? [])
+    .filter((img) => img.asset)
+    .map((img, i) => toContentImage(img, `${doc.title}, photo ${i + 1}`))
+  const description = (doc.description ?? []) as RichText
+
+  return {
+    title: doc.title,
+    slug: doc.slug,
+    category: doc.category,
+    summary,
+    duration: doc.duration?.trim() ?? "",
+    // Images are required in Studio; an alt-only placeholder covers a missing asset.
+    images: images.length > 0 ? images : [toContentImage(null, doc.title)],
+    description: description.length > 0 ? description : summary ? paragraph(summary, "summary") : [],
+    action: doc.action === "enquire" ? "enquire" : "book",
+    seo: mapSeo(doc.seo, { title: doc.title, description: summary }),
+    resorts: mapOfferResorts(doc.resorts),
+    related: (doc.related ?? []).map(mapExperience),
+  }
+}
+
 /** Offers page copy; null-safe so a missing singleton still renders. */
 export function mapOffersPage(doc: OFFERS_PAGE_QUERY_RESULT, fallbackDescription: string): OffersPage {
   const hero = doc?.hero
@@ -509,6 +579,10 @@ export function mapSitemap(doc: SITEMAP_QUERY_RESULT): SitemapEntry[] {
   for (const r of doc.rooms) {
     const path = pathForDocument({ _type: "room", slug: r.slug, resortSlug: r.resortSlug })
     if (path) entries.push({ path, lastModified: r._updatedAt })
+  }
+  for (const e of doc.experiences) {
+    const path = pathForDocument({ _type: "experience", slug: e.slug })
+    if (path) entries.push({ path, lastModified: e._updatedAt })
   }
   return entries
 }

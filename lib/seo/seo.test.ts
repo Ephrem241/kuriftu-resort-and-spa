@@ -74,18 +74,20 @@ describe("robotsRules", () => {
 })
 
 describe("mapSitemap", () => {
-  it("lists home, resorts and rooms by path, and skips a noindexed home", () => {
+  it("lists home, resorts, rooms and experiences by path, and skips a noindexed home", () => {
     const rows = {
       home: { _updatedAt: "2026-11-01T00:00:00Z", noIndex: false },
       resorts: [{ slug: "bishoftu", _updatedAt: "2026-11-02T00:00:00Z" }],
       rooms: [{ slug: "lake-side", resortSlug: "bishoftu", _updatedAt: "2026-11-03T00:00:00Z" }],
+      experiences: [{ slug: "zipline", _updatedAt: "2026-11-04T00:00:00Z" }],
     }
     expect(mapSitemap(rows as Parameters<typeof mapSitemap>[0])).toEqual([
       { path: "/", lastModified: "2026-11-01T00:00:00Z" },
       { path: "/resorts/bishoftu", lastModified: "2026-11-02T00:00:00Z" },
       { path: "/resorts/bishoftu/rooms/lake-side", lastModified: "2026-11-03T00:00:00Z" },
+      { path: "/experience/zipline", lastModified: "2026-11-04T00:00:00Z" },
     ])
-    const hidden = { ...rows, home: { ...rows.home, noIndex: true }, resorts: [], rooms: [] }
+    const hidden = { ...rows, home: { ...rows.home, noIndex: true }, resorts: [], rooms: [], experiences: [] }
     expect(mapSitemap(hidden as Parameters<typeof mapSitemap>[0])).toEqual([])
   })
 })

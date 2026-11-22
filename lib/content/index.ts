@@ -6,6 +6,9 @@ import { client } from "@/sanity/lib/client"
 import { sanityFetch } from "@/sanity/lib/fetch"
 import {
   DESTINATIONS_PAGE_QUERY,
+  EXPERIENCE_PAGE_QUERY,
+  EXPERIENCE_SLUGS_QUERY,
+  EXPERIENCES_PAGE_QUERY,
   HOME_PAGE_QUERY,
   OFFER_PAGE_QUERY,
   OFFERS_QUERY,
@@ -20,6 +23,8 @@ import {
 
 import {
   mapDestinationsPage,
+  mapExperiencePage,
+  mapExperiencesPage,
   mapHomePage,
   mapOffer,
   mapOfferPage,
@@ -32,6 +37,8 @@ import {
 import { cacheSeconds, isLive, type Dated } from "./offers"
 import type {
   DestinationsPage,
+  ExperiencePage,
+  ExperiencesPage,
   HomePage,
   OfferPage,
   OffersPage,
@@ -118,7 +125,7 @@ export async function getRoomPage(resort: string, room: string): Promise<RoomPag
 /** Indexable home, resort and room paths with their last change, for sitemap.xml. */
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   "use cache"
-  const tags = ["homePage", "resort", "room"]
+  const tags = ["homePage", "resort", "room", "experience"]
   cacheTag(...tags)
   cacheLife("days")
 
@@ -179,6 +186,36 @@ export async function getDestinationsPage(fallbackDescription: string): Promise<
 
   const doc = await sanityFetch({ query: DESTINATIONS_PAGE_QUERY, tags })
   return mapDestinationsPage(doc, fallbackDescription)
+}
+
+/** Hero and SEO copy for /experience with every experience; renders with fallbacks if unpublished. */
+export async function getExperiencesPage(fallbackDescription: string): Promise<ExperiencesPage> {
+  "use cache"
+  const tags = ["experiencesPage", "experience", "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: EXPERIENCES_PAGE_QUERY, tags })
+  return mapExperiencesPage(doc, fallbackDescription)
+}
+
+/** Every experience slug, read from the API (not the CDN) for static params. */
+export async function getExperienceSlugs(): Promise<string[]> {
+  "use cache"
+  cacheTag("experience")
+  cacheLife("days")
+  return client.withConfig({ useCdn: false }).fetch(EXPERIENCE_SLUGS_QUERY)
+}
+
+/** One experience with where it is offered and related experiences; null if unknown. */
+export async function getExperiencePage(slug: string): Promise<ExperiencePage | null> {
+  "use cache"
+  const tags = ["experience", `experience:${slug}`, "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: EXPERIENCE_PAGE_QUERY, params: { slug }, tags })
+  return doc ? mapExperiencePage(doc) : null
 }
 
 /** Revalidate at the next start or end. Next requires expire > revalidate. */

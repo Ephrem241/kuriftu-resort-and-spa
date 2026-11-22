@@ -242,6 +242,39 @@ export type ResortType ="resortAndSpa" | "adventurePark" | "waterPark" | "daySpa
 
 export type ExperienceCategory = "water" | "adventure" | "nature" | "culture" | "family" | "dining"
 
+/** A resort an experience is offered at, as shown on cards and used by the filters. */
+export type ExperienceResort = { name: string; heading: string; slug: string }
+
+export type ExperienceSummary = {
+  title: string
+  slug: string
+  category: ExperienceCategory
+  summary: string
+  /** Editor's duration, e.g. "2 hours"; empty when not set. */
+  duration: string
+  image: ContentImage
+  resorts: ExperienceResort[]
+}
+
+/** Copy and photography for /experience, with every experience. */
+export type ExperiencesPage = {
+  hero: { eyebrow: string; title: string; intro: string; image: ContentImage | null }
+  experiences: ExperienceSummary[]
+  seo: PageSeo
+}
+
+export type ExperiencePage = Omit<ExperienceSummary, "image" | "resorts"> & {
+  /** At least one; the first is the hero. */
+  images: ContentImage[]
+  /** Falls back to the summary as one paragraph when empty. */
+  description: RichText
+  /** "book" hands off to the booking engine; "enquire" shows contact actions. */
+  action: "book" | "enquire"
+  seo: PageSeo
+  resorts: OfferResort[]
+  related: ExperienceSummary[]
+}
+
 /** Portable Text blocks, rendered by components/ui/portable-text.tsx. */
 export type RichText = Array<{ _type: string; _key: string; [key: string]: unknown }>
 
