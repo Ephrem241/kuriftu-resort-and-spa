@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
+const sanityProjectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    // Only this project's Sanity image CDN.
+    remotePatterns: sanityProjectId
+      ? [new URL(`https://cdn.sanity.io/images/${sanityProjectId}/**`)]
+      : [],
+  },
   experimental: {
     agentFeedback: true,
   },

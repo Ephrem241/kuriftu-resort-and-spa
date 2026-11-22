@@ -28,6 +28,7 @@ export function MediaImage({ image, sizes, priority, className }: MediaImageProp
         placeholder={image.lqip ? "blur" : "empty"}
         blurDataURL={image.lqip}
         className={cn("object-cover", className)}
+        style={image.objectPosition ? { objectPosition: image.objectPosition } : undefined}
       />
     )
   }

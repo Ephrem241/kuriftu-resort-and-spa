@@ -49,30 +49,36 @@ export async function SiteFooter() {
         <div className="lg:border-l lg:border-ivory/15 lg:px-8">
           <h2 className={headingClass}>Contact Us</h2>
           <ul className="mt-4 space-y-3 text-small">
-            <li>
-              <ContactLink
-                method="phone"
-                href={`tel:${settings.reservationPhone.tel}`}
-                className={`${linkClass} inline-flex items-center gap-3`}
-              >
-                <Phone aria-hidden="true" strokeWidth={1.5} className="size-4 text-ivory" />
-                {settings.reservationPhone.display}
-              </ContactLink>
-            </li>
-            <li>
-              <ContactLink
-                method="email"
-                href={`mailto:${settings.reservationEmail}`}
-                className={`${linkClass} inline-flex items-center gap-3`}
-              >
-                <Mail aria-hidden="true" strokeWidth={1.5} className="size-4 text-ivory" />
-                {settings.reservationEmail}
-              </ContactLink>
-            </li>
-            <li className="flex items-center gap-3 text-ivory/85">
-              <MapPin aria-hidden="true" strokeWidth={1.5} className="size-4 text-ivory" />
-              {settings.address}
-            </li>
+            {settings.reservationPhone && (
+              <li>
+                <ContactLink
+                  method="phone"
+                  href={`tel:${settings.reservationPhone.tel}`}
+                  className={`${linkClass} inline-flex items-center gap-3`}
+                >
+                  <Phone aria-hidden="true" strokeWidth={1.5} className="size-4 text-ivory" />
+                  {settings.reservationPhone.display}
+                </ContactLink>
+              </li>
+            )}
+            {settings.reservationEmail && (
+              <li>
+                <ContactLink
+                  method="email"
+                  href={`mailto:${settings.reservationEmail}`}
+                  className={`${linkClass} inline-flex items-center gap-3`}
+                >
+                  <Mail aria-hidden="true" strokeWidth={1.5} className="size-4 text-ivory" />
+                  {settings.reservationEmail}
+                </ContactLink>
+              </li>
+            )}
+            {settings.address && (
+              <li className="flex items-center gap-3 text-ivory/85">
+                <MapPin aria-hidden="true" strokeWidth={1.5} className="size-4 text-ivory" />
+                {settings.address}
+              </li>
+            )}
           </ul>
         </div>
 

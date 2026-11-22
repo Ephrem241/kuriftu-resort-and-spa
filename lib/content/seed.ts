@@ -128,15 +128,15 @@ export const seedHomePage: HomePage = {
   experience: {
     title: "The Kuriftu Experience",
     pillars: [
-      { icon: "stay", title: "Stay & Relax", subtitle: "Unwind in luxury", href: "/destinations" },
+      { icon: "bed", title: "Stay & Relax", subtitle: "Unwind in luxury", href: "/destinations" },
       { icon: "spa", title: "Spa & Wellness", subtitle: "Rejuvenate your mind", href: "/wellness" },
       {
-        icon: "adventure",
+        icon: "mountain",
         title: "Adventure & Nature",
         subtitle: "Explore the beauty",
         href: "/experience",
       },
-      { icon: "dining", title: "Dining & Culture", subtitle: "Savor authentic flavors", href: "/dining" },
+      { icon: "utensils", title: "Dining & Culture", subtitle: "Savor authentic flavors", href: "/dining" },
     ],
     image: { alt: "Guest relaxing during a massage at the Kuriftu spa" },
   },

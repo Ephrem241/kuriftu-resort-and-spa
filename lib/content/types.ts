@@ -1,3 +1,5 @@
+import type { IconName } from "./icons"
+
 /**
  * Content shapes, mirroring the GROQ projections Sanity will return.
  * Components depend on these types only, never on where content comes from.
@@ -9,9 +11,11 @@ export type ContentImage = {
   alt: string
   /** Base64 low-quality placeholder from Sanity's asset metadata. */
   lqip?: string
+  /** CSS object-position from the Sanity hotspot, e.g. "40% 60%". */
+  objectPosition?: string
 }
 
-export type SocialPlatform = "facebook" | "instagram" | "youtube" | "x" | "linkedin"
+export type SocialPlatform = "facebook" | "instagram" | "youtube" | "x" | "linkedin" | "tiktok"
 
 export type SocialLink = { platform: SocialPlatform; url: string }
 
@@ -32,9 +36,9 @@ export type ResortSummary = {
 export type SiteSettings = {
   brandName: string
   footerTagline: string
-  reservationPhone: { display: string; tel: string }
-  reservationEmail: string
-  address: string
+  reservationPhone: { display: string; tel: string } | null
+  reservationEmail: string | null
+  address: string | null
   social: SocialLink[]
   /** Resorts listed in the Destinations nav and footer. */
   navResorts: Pick<ResortSummary, "name" | "slug">[]
@@ -56,7 +60,7 @@ export type HeroSlide = {
 }
 
 export type ExperiencePillar = {
-  icon: "stay" | "spa" | "adventure" | "dining"
+  icon: IconName
   title: string
   subtitle: string
   href: string

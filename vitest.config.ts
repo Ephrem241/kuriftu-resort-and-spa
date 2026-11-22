@@ -7,6 +7,8 @@ export default defineConfig({
   },
   test: {
     include: ["lib/**/*.test.ts"],
+    // Public Sanity identifiers for modules that build image URLs.
+    env: { NEXT_PUBLIC_SANITY_PROJECT_ID: "test", NEXT_PUBLIC_SANITY_DATASET: "test" },
     environment: "node",
   },
 })

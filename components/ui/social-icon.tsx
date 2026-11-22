@@ -1,5 +1,5 @@
 import { Globe } from "lucide-react"
-import { siFacebook, siInstagram, siX, siYoutube } from "simple-icons"
+import { siFacebook, siInstagram, siTiktok, siX, siYoutube } from "simple-icons"
 
 import type { SocialPlatform } from "@/lib/content/types"
 
@@ -11,6 +11,7 @@ const PATHS: Partial<Record<SocialPlatform, string>> = {
   instagram: siInstagram.path,
   youtube: siYoutube.path,
   x: siX.path,
+  tiktok: siTiktok.path,
 }
 
 export const SOCIAL_LABELS: Record<SocialPlatform, string> = {
@@ -19,6 +20,7 @@ export const SOCIAL_LABELS: Record<SocialPlatform, string> = {
   youtube: "YouTube",
   x: "X",
   linkedin: "LinkedIn",
+  tiktok: "TikTok",
 }
 
 export function SocialIcon({

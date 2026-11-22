@@ -1,16 +1,9 @@
 import Link from "next/link"
-import { ConciergeBell, Flower2, Mountain, Sparkles, type LucideIcon } from "lucide-react"
 
+import { ContentIcon } from "@/components/ui/content-icon"
 import { MediaImage } from "@/components/ui/media-image"
 import { SectionHeading } from "@/components/ui/section-heading"
-import type { ExperiencePillar, HomePage } from "@/lib/content/types"
-
-const ICONS: Record<ExperiencePillar["icon"], LucideIcon> = {
-  stay: Flower2,
-  spa: Sparkles,
-  adventure: Mountain,
-  dining: ConciergeBell,
-}
+import type { HomePage } from "@/lib/content/types"
 
 export function Experience({ content }: { content: HomePage["experience"] }) {
   return (
@@ -22,7 +15,6 @@ export function Experience({ content }: { content: HomePage["experience"] }) {
         <SectionHeading id="experience-title" title={content.title} />
         <ul className="mt-10 grid grid-cols-2 gap-y-8 md:grid-cols-4">
           {content.pillars.map((pillar, i) => {
-            const Icon = ICONS[pillar.icon]
             return (
               <li
                 key={pillar.title}
@@ -32,8 +24,8 @@ export function Experience({ content }: { content: HomePage["experience"] }) {
                   href={pillar.href}
                   className="group/pillar flex flex-col items-center px-3 text-center"
                 >
-                  <Icon
-                    aria-hidden="true"
+                  <ContentIcon
+                    name={pillar.icon}
                     strokeWidth={1.25}
                     className="size-10 text-forest transition-transform duration-hover ease-soft group-hover/pillar:-translate-y-0.5"
                   />

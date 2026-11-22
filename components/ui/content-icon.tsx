@@ -1,0 +1,61 @@
+import {
+  Activity,
+  Baby,
+  Bath,
+  BedDouble,
+  Calendar,
+  Car,
+  Coffee,
+  Dumbbell,
+  Eye,
+  Flower2,
+  Landmark,
+  Leaf,
+  MapPin,
+  Mountain,
+  PartyPopper,
+  Presentation,
+  Snowflake,
+  Trees,
+  Tv,
+  User,
+  UtensilsCrossed,
+  Waves,
+  Wifi,
+  type LucideIcon,
+  type LucideProps,
+} from "lucide-react"
+
+import type { IconName } from "@/lib/content/icons"
+
+/** Sanity icon value → Lucide outline icon. Keep in sync with ICON_NAMES. */
+export const CONTENT_ICONS: Record<IconName, LucideIcon> = {
+  bed: BedDouble,
+  spa: Flower2,
+  utensils: UtensilsCrossed,
+  activity: Activity,
+  "map-pin": MapPin,
+  calendar: Calendar,
+  user: User,
+  wifi: Wifi,
+  waves: Waves,
+  car: Car,
+  coffee: Coffee,
+  dumbbell: Dumbbell,
+  trees: Trees,
+  mountain: Mountain,
+  eye: Eye,
+  snowflake: Snowflake,
+  tv: Tv,
+  bath: Bath,
+  baby: Baby,
+  "party-popper": PartyPopper,
+  presentation: Presentation,
+  landmark: Landmark,
+  leaf: Leaf,
+}
+
+export function ContentIcon({ name, ...props }: { name: IconName } & LucideProps) {
+  const Icon = CONTENT_ICONS[name]
+  return <Icon aria-hidden="true" {...props} />
+}
