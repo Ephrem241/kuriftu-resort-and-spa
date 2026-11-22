@@ -1,4 +1,5 @@
 import type {
+  DESTINATIONS_PAGE_QUERY_RESULT,
   HOME_PAGE_QUERY_RESULT,
   OFFER_PAGE_QUERY_RESULT,
   OFFERS_PAGE_QUERY_RESULT,
@@ -10,12 +11,14 @@ import type {
 } from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
 
+import { groupDestinations } from "./destinations"
 import { isIconName } from "./icons"
 import { isOfferCategory } from "./offers"
 import { hrefFor, pathForDocument, type ContentLink } from "./routes"
 import type {
   Amenity,
   ContentImage,
+  DestinationsPage,
   HomePage,
   NavLink,
   OfferCategory,
@@ -167,7 +170,11 @@ export function mapSiteSettings(
 }
 
 type HomeDoc = NonNullable<HOME_PAGE_QUERY_RESULT>
-type ResortCard = NonNullable<NonNullable<HomeDoc["destinations"]>["resorts"]>[number]
+/** The resort card fields both the home and destinations queries project. */
+type ResortCard = Pick<
+  NonNullable<NonNullable<HomeDoc["destinations"]>["resorts"]>[number],
+  "name" | "slug" | "tagline" | "locationLabel" | "bookable" | "bookingPropertyId" | "heroImage"
+>
 type RoomCard = NonNullable<NonNullable<HomeDoc["rooms"]>["items"]>[number]
 
 function mapResort(r: ResortCard): ResortSummary {
@@ -432,6 +439,27 @@ export function mapOfferPage(doc: OfferPageDoc): OfferPage {
     promoCode: doc.promoCode?.trim() ?? "",
     seo: mapSeo(doc.seo, { title: doc.title, description: shortLine }),
     resorts: mapOfferResorts(doc.resorts),
+  }
+}
+
+/** Destinations page copy and grouped resorts; null-safe so a missing singleton still renders. */
+export function mapDestinationsPage(doc: DESTINATIONS_PAGE_QUERY_RESULT, fallbackDescription: string): DestinationsPage {
+  const hero = doc.page?.hero
+  const title = hero?.title?.trim() || "Destinations"
+  const intro = hero?.intro?.trim() ?? ""
+  const resorts = doc.resorts.flatMap((r) => (r.slug ? [{ ...r, slug: r.slug, type: r.type ?? null }] : []))
+  return {
+    hero: {
+      eyebrow: hero?.eyebrow?.trim() || "Our Destinations",
+      title,
+      intro,
+      image: hero?.image?.asset ? toContentImage(hero.image) : null,
+    },
+    groups: groupDestinations(resorts).map((g) => ({
+      ...g,
+      resorts: g.resorts.map(mapResort),
+    })),
+    seo: mapSeo(doc.page?.seo, { title, description: intro || fallbackDescription }),
   }
 }
 

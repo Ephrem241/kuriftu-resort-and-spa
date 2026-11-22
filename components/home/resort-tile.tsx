@@ -4,18 +4,17 @@ import { ArrowRight, MapPin } from "lucide-react"
 import { MediaImage } from "@/components/ui/media-image"
 import type { ResortSummary } from "@/lib/content/types"
 
+const HOME_ROW_SIZES = "(min-width: 1025px) 18vw, (min-width: 768px) 40vw, 72vw"
+
 /** Destination tile: full-bleed image, forest gradient, name, tagline, action. */
-export function ResortTile({ resort }: { resort: ResortSummary }) {
+export function ResortTile({ resort, sizes = HOME_ROW_SIZES }: { resort: ResortSummary; sizes?: string }) {
   return (
     <Link
       href={`/resorts/${resort.slug}`}
       className="group/tile relative block aspect-[4/3.6] overflow-hidden rounded-lg bg-beige"
     >
       <div className="absolute inset-0 transition-transform duration-reveal ease-soft group-hover/tile:scale-105">
-        <MediaImage
-          image={resort.image}
-          sizes="(min-width: 1025px) 18vw, (min-width: 768px) 40vw, 72vw"
-        />
+        <MediaImage image={resort.image} sizes={sizes} />
       </div>
       <div
         aria-hidden="true"

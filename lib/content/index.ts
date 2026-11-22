@@ -5,6 +5,7 @@ import { cacheLife, cacheTag } from "next/cache"
 import { client } from "@/sanity/lib/client"
 import { sanityFetch } from "@/sanity/lib/fetch"
 import {
+  DESTINATIONS_PAGE_QUERY,
   HOME_PAGE_QUERY,
   OFFER_PAGE_QUERY,
   OFFERS_QUERY,
@@ -18,6 +19,7 @@ import {
 } from "@/sanity/queries"
 
 import {
+  mapDestinationsPage,
   mapHomePage,
   mapOffer,
   mapOfferPage,
@@ -29,6 +31,7 @@ import {
 } from "./map"
 import { cacheSeconds, isLive, type Dated } from "./offers"
 import type {
+  DestinationsPage,
   HomePage,
   OfferPage,
   OffersPage,
@@ -165,6 +168,17 @@ export async function getOffersPage(fallbackDescription: string): Promise<Offers
 
   const doc = await sanityFetch({ query: OFFERS_PAGE_QUERY, tags })
   return mapOffersPage(doc, fallbackDescription)
+}
+
+/** Hero and SEO copy for /destinations with every resort, grouped; renders with fallbacks if unpublished. */
+export async function getDestinationsPage(fallbackDescription: string): Promise<DestinationsPage> {
+  "use cache"
+  const tags = ["destinationsPage", "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: DESTINATIONS_PAGE_QUERY, tags })
+  return mapDestinationsPage(doc, fallbackDescription)
 }
 
 /** Revalidate at the next start or end. Next requires expire > revalidate. */

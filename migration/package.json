@@ -9,6 +9,7 @@
     "import": "tsx scripts/import.ts",
     "validate": "tsx scripts/validate.ts",
     "seed:offers-page": "tsx scripts/seed-offers-page.ts",
+    "seed:destinations-page": "tsx scripts/seed-destinations-page.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
