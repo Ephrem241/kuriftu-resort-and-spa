@@ -1,4 +1,8 @@
-import type { HOME_PAGE_QUERY_RESULT, SITE_SETTINGS_QUERY_RESULT } from "@/sanity.types"
+import type {
+  HOME_PAGE_QUERY_RESULT,
+  RESORT_PAGE_QUERY_RESULT,
+  SITE_SETTINGS_QUERY_RESULT,
+} from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
 
 import { isIconName } from "./icons"
@@ -7,7 +11,9 @@ import type {
   ContentImage,
   HomePage,
   NavLink,
+  ResortPage,
   ResortSummary,
+  RichText,
   RoomSummary,
   SiteSettings,
   SocialPlatform,
@@ -124,7 +130,7 @@ function mapRoom(r: RoomCard): RoomSummary | null {
     slug: r.slug,
     resortSlug: r.resortSlug,
     summary: r.summary,
-    maxGuests: r.maxGuests,
+    maxGuests: r.maxGuests ?? null,
     sizeSqm: r.sizeSqm ?? null,
     image: toContentImage(r.image, r.title),
   }
@@ -182,5 +188,56 @@ export function mapHomePage(doc: HomeDoc): HomePage {
       title: stayConnected?.title ?? "",
       subtitle: stayConnected?.subtitle ?? "",
     },
+  }
+}
+
+type ResortDoc = NonNullable<RESORT_PAGE_QUERY_RESULT>
+
+export function mapResortPage(doc: ResortDoc): ResortPage {
+  const heading = doc.fullName?.trim() || doc.name
+  const heroImage = toContentImage(doc.heroImage, heading)
+  const [first, second] = doc.gallery ?? []
+  const lat = doc.geo?.lat
+  const lng = doc.geo?.lng
+  const phone = doc.phone?.display && doc.phone.tel ? { display: doc.phone.display, tel: doc.phone.tel } : null
+
+  return {
+    name: doc.name,
+    heading,
+    slug: doc.slug,
+    type: doc.type,
+    locationLabel: doc.locationLabel,
+    country: doc.country ?? "",
+    summary: doc.summary?.trim() ?? "",
+    introTitle: doc.introTitle?.trim() || doc.tagline?.trim() || "",
+    intro: (doc.intro ?? []) as RichText,
+    amenities: (doc.amenities ?? []).map((a) => ({
+      key: a._key,
+      icon: isIconName(a.icon) ? a.icon : null,
+      label: a.label,
+    })),
+    geo: typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null,
+    gettingHere: doc.gettingHere?.trim() ?? "",
+    heroImage,
+    aboutImage: first?.asset ? toContentImage(first, heading) : heroImage,
+    ctaImage: second?.asset ? toContentImage(second, heading) : heroImage,
+    heroVideoUrl: doc.heroVideoUrl ?? null,
+    bookable: doc.bookable ?? true,
+    bookingPropertyId: doc.bookingPropertyId ?? null,
+    phone,
+    email: doc.email ?? null,
+    seo: {
+      title: doc.seo?.title?.trim() || heading,
+      description: doc.seo?.description?.trim() || doc.summary?.trim() || "",
+    },
+    rooms: (doc.rooms ?? []).flatMap((r) => {
+      const room = mapRoom(r)
+      return room ? [room] : []
+    }),
+    experiences: (doc.experiences ?? []).flatMap((e) =>
+      e.category && e.image?.asset ? [{ category: e.category, image: toContentImage(e.image) }] : []
+    ),
+    spaImage: doc.spaImage?.asset ? toContentImage(doc.spaImage) : null,
+    diningImage: doc.diningImage?.asset ? toContentImage(doc.diningImage) : null,
   }
 }

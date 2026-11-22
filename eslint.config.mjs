@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Sanity Studio is its own workspace with its own tooling.
     "studio/**",
+    // Content migration scripts are their own workspace.
+    "migration/**",
   ]),
 ]);
 

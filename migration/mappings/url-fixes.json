@@ -1,0 +1,9 @@
+{
+  "$comment": "Typos in the old site's image paths (broken on the live site too). Each fix was checked to return the real image. Applied as plain prefix/suffix replacements and listed in the quality report.",
+  "prefix": [
+    { "from": "/resorts/entoto/acc/", "to": "/assets/resorts/entoto/acc/", "reason": "missing /assets prefix" }
+  ],
+  "suffix": [
+    { "from": ".webpp", "to": ".webp", "reason": "doubled extension letter" }
+  ]
+}

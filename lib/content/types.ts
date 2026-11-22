@@ -71,7 +71,7 @@ export type RoomSummary = {
   slug: string
   resortSlug: string
   summary: string
-  maxGuests: number
+  maxGuests: number | null
   sizeSqm: number | null
   image: ContentImage
 }
@@ -113,4 +113,42 @@ export type HomePage = {
     backgroundImage: ContentImage
   }
   stayConnected: { title: string; subtitle: string }
+}
+
+export type ResortType = "resortAndSpa" | "adventurePark" | "waterPark" | "daySpa"
+
+export type ExperienceCategory = "water" | "adventure" | "nature" | "culture" | "family" | "dining"
+
+/** Portable Text blocks, rendered by components/ui/portable-text.tsx. */
+export type RichText = Array<{ _type: string; _key: string; [key: string]: unknown }>
+
+export type ResortPage = {
+  name: string
+  /** Page heading, e.g. "Kuriftu Resort & Spa Bishoftu". */
+  heading: string
+  slug: string
+  type: ResortType
+  locationLabel: string
+  country: string
+  summary: string
+  introTitle: string
+  intro: RichText
+  amenities: { key: string; icon: IconName | null; label: string }[]
+  geo: { lat: number; lng: number } | null
+  gettingHere: string
+  heroImage: ContentImage
+  /** Image for the about card. */
+  aboutImage: ContentImage
+  /** Image for the booking panel. */
+  ctaImage: ContentImage
+  heroVideoUrl: string | null
+  bookable: boolean
+  bookingPropertyId: string | null
+  phone: { display: string; tel: string } | null
+  email: string | null
+  seo: { title: string; description: string }
+  rooms: RoomSummary[]
+  experiences: { category: ExperienceCategory; image: ContentImage }[]
+  spaImage: ContentImage | null
+  diningImage: ContentImage | null
 }

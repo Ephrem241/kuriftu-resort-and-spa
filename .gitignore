@@ -53,3 +53,8 @@ next-env.d.ts
 
 # playwright mcp screenshots
 /.playwright-mcp/
+
+# content migration: regenerable snapshots and outputs
+/migration/node_modules/
+/migration/extracted/
+/migration/transformed/

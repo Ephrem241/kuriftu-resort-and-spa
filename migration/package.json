@@ -1,0 +1,23 @@
+{
+  "name": "kuriftu-migration",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "extract": "tsx scripts/extract.ts",
+    "transform": "tsx scripts/transform.ts",
+    "import": "tsx scripts/import.ts",
+    "validate": "tsx scripts/validate.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sanity/client": "8.17.0",
+    "acorn": "8.19.0",
+    "acorn-walk": "8.3.5"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  }
+}

@@ -66,3 +66,40 @@ export const HOME_PAGE_QUERY = defineQuery(`*[_type == "homePage"][0]{
   testimonials { title, subtitle, items[]{ quote, name, location, avatar${IMAGE} }, backgroundImage${IMAGE} },
   stayConnected { title, subtitle }
 }`)
+
+export const RESORT_SLUGS_QUERY = defineQuery(
+  `*[_type == "resort" && defined(slug.current)].slug.current`
+)
+
+
+export const RESORT_PAGE_QUERY = defineQuery(`*[_type == "resort" && slug.current == $slug][0]{
+  _id,
+  name,
+  fullName,
+  "slug": slug.current,
+  type,
+  tagline,
+  summary,
+  introTitle,
+  locationLabel,
+  intro,
+  amenities[]{ _key, icon, label },
+  "country": address.country,
+  geo { lat, lng },
+  gettingHere,
+  heroImage${IMAGE},
+  heroVideoUrl,
+  "gallery": gallery[0...2]${IMAGE},
+  bookable,
+  bookingPropertyId,
+  "phone": reservationContact.phones[0]{ display, tel },
+  "email": reservationContact.emails[0].address,
+  seo { title, description },
+  "rooms": *[_type == "room" && resort._ref == ^._id && defined(slug.current)] | order(title asc)${ROOM_CARD},
+  "experiences": *[_type == "experience" && references(^._id) && defined(slug.current)] | order(title asc){
+    category,
+    "image": images[0]${IMAGE}
+  },
+  "spaImage": *[_type == "spaTreatment" && references(^._id) && defined(image.asset)] | order(title asc)[0].image${IMAGE},
+  "diningImage": *[_type == "diningVenue" && resort._ref == ^._id && defined(images[0].asset)] | order(name asc)[0].images[0]${IMAGE}
+}`)
