@@ -9,18 +9,21 @@ export function ContactLink({
   method,
   href,
   className,
+  source = "footer",
   children,
 }: {
   method: "phone" | "email"
   href: string
   className?: string
+  /** Where the tap came from, for analytics. */
+  source?: string
   children: ReactNode
 }) {
   return (
     <a
       href={href}
       className={className}
-      onClick={() => track("contact_tap", { method, source: "footer" })}
+      onClick={() => track("contact_tap", { method, source })}
     >
       {children}
     </a>

@@ -37,6 +37,13 @@ export const resort = defineType({
   ],
   fields: [
     defineField({name: 'name', type: 'string', group: 'overview', validation: (rule) => rule.required()}),
+    defineField({
+      name: 'fullName',
+      title: 'Full name',
+      type: 'string',
+      group: 'overview',
+      description: 'Page heading, for example "Kuriftu Resort & Spa Bishoftu". Falls back to the name.',
+    }),
     defineField({name: 'slug', type: 'slug', group: 'overview', options: {source: 'name'}, validation: slugRule}),
     defineField({
       name: 'type',
@@ -61,6 +68,21 @@ export const resort = defineType({
       description: 'Short line for tiles, for example "Lakeside Retreat".',
       validation: (rule) => rule.max(60),
     }),
+    defineField({
+      name: 'summary',
+      type: 'text',
+      rows: 2,
+      group: 'overview',
+      description: 'One sentence under the page heading. Hidden when empty.',
+      validation: (rule) => rule.max(180),
+    }),
+    defineField({
+      name: 'introTitle',
+      title: 'Intro heading',
+      type: 'string',
+      group: 'overview',
+      description: 'Heading of the "About this resort" section. Falls back to the tagline.',
+    }),
     defineField({name: 'intro', type: 'richText', group: 'overview'}),
     defineField({
       name: 'highlights',
@@ -71,6 +93,15 @@ export const resort = defineType({
     defineField({name: 'amenities', type: 'array', group: 'details', of: [defineArrayMember({type: 'amenity'})]}),
     defineField({name: 'address', type: 'address', group: 'details'}),
     defineField({name: 'geo', title: 'Map location', type: 'geopoint', group: 'details'}),
+    defineField({
+      name: 'gettingHere',
+      title: 'Getting here',
+      type: 'text',
+      rows: 2,
+      group: 'details',
+      description: 'Shown in the Location section, for example "53.8 km from Addis Ababa Bole International Airport".',
+      validation: (rule) => rule.max(240),
+    }),
     defineField({name: 'heroImage', type: 'accessibleImage', group: 'media', validation: (rule) => rule.required()}),
     defineField({
       name: 'heroVideoUrl',

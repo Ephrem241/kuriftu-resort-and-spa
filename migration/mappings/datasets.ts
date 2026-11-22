@@ -48,6 +48,11 @@ export function pickDatasets(literals: Literal[]) {
     (v) => isObj(v) && RESORT_SLUGS.every((s) => isArr(v[s])) && isArr(v.bishoftu) && typeof (v.bishoftu as Json[])[0] === "string",
   )
   const destinations = one<Obj[]>(literals, "destinations list", (v) => isArr(v) && v.length >= 8 && v.every((d) => isObj(d) && has(d, "isShow", "slug", "name", "coordinates")))
+  const featured = one<Obj>(
+    literals,
+    "featured destinations",
+    (v) => isObj(v) && isArr(v.featured) && v.featured.length >= 6 && v.featured.every((d) => isObj(d) && has(d, "slug", "distance")),
+  )
   const accommodation = perResort(literals, "accommodation", (v) => isArr(v.accomodations), 6)
   const rooms = perResort(literals, "rooms", (v) => Object.values(v).some((r) => isObj(r) && has(r, "title", "carouselImages", "amenities")), 6)
   const dining = perResort(literals, "dining", (v) => isArr(v.diningOptions), 7)
@@ -79,7 +84,7 @@ export function pickDatasets(literals: Literal[]) {
     "pan-african-roadshow": one<Json>(literals, "roadshow page", jsxContaining("Roadshow", "par-page")),
   }
 
-  return { resorts, locationLabels, galleries, destinations, accommodation, rooms, dining, wellness, celebrations, corporate, experiences, adventures, boston, packages, about, privacy, offerPopup, footer, instagram, pages }
+  return { resorts, locationLabels, galleries, destinations, featured, accommodation, rooms, dining, wellness, celebrations, corporate, experiences, adventures, boston, packages, about, privacy, offerPopup, footer, instagram, pages }
 }
 
 export type Datasets = ReturnType<typeof pickDatasets>

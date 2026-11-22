@@ -512,11 +512,14 @@ export type Resort = {
   _updatedAt: string;
   _rev: string;
   name: string;
+  fullName?: string;
   slug: Slug;
   type: "resortAndSpa" | "adventurePark" | "waterPark" | "daySpa";
   region?: DestinationRegionReference;
   locationLabel: string;
   tagline?: string;
+  summary?: string;
+  introTitle?: string;
   intro?: RichText;
   highlights?: Array<
     {
@@ -530,6 +533,7 @@ export type Resort = {
   >;
   address?: Address;
   geo?: Geopoint;
+  gettingHere?: string;
   heroImage: AccessibleImage;
   heroVideoUrl?: string;
   gallery?: Array<
@@ -1303,11 +1307,189 @@ export type HOME_PAGE_QUERY_RESULT = {
   } | null;
 } | null;
 
+// Source: ../sanity/queries.ts
+// Variable: RESORT_SLUGS_QUERY
+// Query: *[_type == "resort" && defined(slug.current)].slug.current
+export type RESORT_SLUGS_QUERY_RESULT = Array<string>;
+
+// Source: ../sanity/queries.ts
+// Variable: RESORT_PAGE_QUERY
+// Query: *[_type == "resort" && slug.current == $slug][0]{  _id,  name,  fullName,  "slug": slug.current,  type,  tagline,  summary,  introTitle,  locationLabel,  intro,  amenities[]{ _key, icon, label },  "country": address.country,  geo { lat, lng },  gettingHere,  heroImage{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }},  heroVideoUrl,  "gallery": gallery[0...2]{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }},  bookable,  bookingPropertyId,  "phone": reservationContact.phones[0]{ display, tel },  "email": reservationContact.emails[0].address,  seo { title, description },  "rooms": *[_type == "room" && resort._ref == ^._id && defined(slug.current)] | order(title asc){  title,  "slug": slug.current,  "resortSlug": resort->slug.current,  summary,  maxGuests,  sizeSqm,  "image": images[0]{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }}},  "experiences": *[_type == "experience" && references(^._id) && defined(slug.current)] | order(title asc){    category,    "image": images[0]{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }}  },  "spaImage": *[_type == "spaTreatment" && references(^._id) && defined(image.asset)] | order(title asc)[0].image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }},  "diningImage": *[_type == "diningVenue" && resort._ref == ^._id && defined(images[0].asset)] | order(name asc)[0].images[0]{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }}}
+export type RESORT_PAGE_QUERY_RESULT = {
+  _id: string;
+  name: string;
+  fullName: string | null;
+  slug: string;
+  type: "adventurePark" | "daySpa" | "resortAndSpa" | "waterPark";
+  tagline: string | null;
+  summary: string | null;
+  introTitle: string | null;
+  locationLabel: string;
+  intro: RichText | null;
+  amenities: Array<{
+    _key: string;
+    icon:
+      | "activity"
+      | "baby"
+      | "bath"
+      | "bed"
+      | "calendar"
+      | "car"
+      | "coffee"
+      | "dumbbell"
+      | "eye"
+      | "landmark"
+      | "leaf"
+      | "map-pin"
+      | "mountain"
+      | "party-popper"
+      | "presentation"
+      | "snowflake"
+      | "spa"
+      | "trees"
+      | "tv"
+      | "user"
+      | "utensils"
+      | "waves"
+      | "wifi"
+      | null;
+    label: string;
+  }> | null;
+  country: string | null;
+  geo: {
+    lat: number | null;
+    lng: number | null;
+  } | null;
+  gettingHere: string | null;
+  heroImage: {
+    alt: string;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
+    asset: {
+      _id: string;
+      url: string;
+      metadata: {
+        lqip: string | null;
+        dimensions: {
+          width: number;
+          height: number;
+        } | null;
+      } | null;
+    } | null;
+  };
+  heroVideoUrl: string | null;
+  gallery: Array<{
+    alt: string;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
+    asset: {
+      _id: string;
+      url: string;
+      metadata: {
+        lqip: string | null;
+        dimensions: {
+          width: number;
+          height: number;
+        } | null;
+      } | null;
+    } | null;
+  }> | null;
+  bookable: boolean | null;
+  bookingPropertyId: string | null;
+  phone: {
+    display: string;
+    tel: string;
+  } | null;
+  email: string | null;
+  seo: {
+    title: string | null;
+    description: string | null;
+  } | null;
+  rooms: Array<{
+    title: string;
+    slug: string;
+    resortSlug: string;
+    summary: string;
+    maxGuests: number;
+    sizeSqm: number | null;
+    image: {
+      alt: string;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      asset: {
+        _id: string;
+        url: string;
+        metadata: {
+          lqip: string | null;
+          dimensions: {
+            width: number;
+            height: number;
+          } | null;
+        } | null;
+      } | null;
+    } | null;
+  }>;
+  experiences: Array<{
+    category:
+      "adventure" | "culture" | "dining" | "family" | "nature" | "water";
+    image: {
+      alt: string;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      asset: {
+        _id: string;
+        url: string;
+        metadata: {
+          lqip: string | null;
+          dimensions: {
+            width: number;
+            height: number;
+          } | null;
+        } | null;
+      } | null;
+    } | null;
+  }>;
+  spaImage: {
+    alt: string;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
+    asset: {
+      _id: string;
+      url: string;
+      metadata: {
+        lqip: string | null;
+        dimensions: {
+          width: number;
+          height: number;
+        } | null;
+      } | null;
+    } | null;
+  } | null;
+  diningImage: {
+    alt: string;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
+    asset: {
+      _id: string;
+      url: string;
+      metadata: {
+        lqip: string | null;
+        dimensions: {
+          width: number;
+          height: number;
+        } | null;
+      } | null;
+    } | null;
+  } | null;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     '*[_type == "siteSettings"][0]{\n  brandName,\n  footerTagline,\n  storyVideoUrl,\n  "reservationPhone": reservations.phones[0]{ display, tel },\n  "reservationEmail": reservations.emails[0].address,\n  headOfficeAddress { locality, country },\n  social[]{ platform, url },\n  "navResorts": navResorts[]->{ name, "slug": slug.current },\n  experienceLinks[]{\n  label,\n  linkType,\n  path,\n  url,\n  "target": reference->{ _type, "slug": slug.current, "resortSlug": resort->slug.current }\n},\n  footerColumns[]{ title, links[]{\n  label,\n  linkType,\n  path,\n  url,\n  "target": reference->{ _type, "slug": slug.current, "resortSlug": resort->slug.current }\n} },\n  legalLinks[]{\n  label,\n  linkType,\n  path,\n  url,\n  "target": reference->{ _type, "slug": slug.current, "resortSlug": resort->slug.current }\n},\n  "bookableResorts": *[_type == "resort" && bookable == true && defined(slug.current)] | order(name asc){\n    name, "slug": slug.current, bookingPropertyId\n  }\n}': SITE_SETTINGS_QUERY_RESULT;
     '*[_type == "homePage"][0]{\n  heroSlides[]{ eyebrow, title, text, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  destinations { title, subtitle, "resorts": resorts[]->{\n  name,\n  "slug": slug.current,\n  tagline,\n  locationLabel,\n  bookable,\n  bookingPropertyId,\n  heroImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n} },\n  experience { title, pillars[]{ icon, title, subtitle, link{\n  label,\n  linkType,\n  path,\n  url,\n  "target": reference->{ _type, "slug": slug.current, "resortSlug": resort->slug.current }\n} }, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  rooms { title, subtitle, "items": items[]->{\n  title,\n  "slug": slug.current,\n  "resortSlug": resort->slug.current,\n  summary,\n  maxGuests,\n  sizeSqm,\n  "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n} },\n  offersPanel { title, text, ctaLabel, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  testimonials { title, subtitle, items[]{ quote, name, location, avatar{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} }, backgroundImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  stayConnected { title, subtitle }\n}': HOME_PAGE_QUERY_RESULT;
+    '*[_type == "resort" && defined(slug.current)].slug.current': RESORT_SLUGS_QUERY_RESULT;
+    '*[_type == "resort" && slug.current == $slug][0]{\n  _id,\n  name,\n  fullName,\n  "slug": slug.current,\n  type,\n  tagline,\n  summary,\n  introTitle,\n  locationLabel,\n  intro,\n  amenities[]{ _key, icon, label },\n  "country": address.country,\n  geo { lat, lng },\n  gettingHere,\n  heroImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  heroVideoUrl,\n  "gallery": gallery[0...2]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  bookable,\n  bookingPropertyId,\n  "phone": reservationContact.phones[0]{ display, tel },\n  "email": reservationContact.emails[0].address,\n  seo { title, description },\n  "rooms": *[_type == "room" && resort._ref == ^._id && defined(slug.current)] | order(title asc){\n  title,\n  "slug": slug.current,\n  "resortSlug": resort->slug.current,\n  summary,\n  maxGuests,\n  sizeSqm,\n  "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n},\n  "experiences": *[_type == "experience" && references(^._id) && defined(slug.current)] | order(title asc){\n    category,\n    "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n  },\n  "spaImage": *[_type == "spaTreatment" && references(^._id) && defined(image.asset)] | order(title asc)[0].image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  "diningImage": *[_type == "diningVenue" && resort._ref == ^._id && defined(images[0].asset)] | order(name asc)[0].images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n}': RESORT_PAGE_QUERY_RESULT;
   }
 }

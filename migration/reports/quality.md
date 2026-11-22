@@ -74,6 +74,10 @@ Source: https://www.kurifturesorts.com/static/js/main.c2aebc63.js (fetched 2026-
 - **Family Storytelling Evenings**: Guessed "family" from the title
 - **Spiral Slides**: Guessed "water" from the title
 
+### getting here (1)
+
+- **The Palm**: No distance or directions line in source
+
 ### home (1)
 
 - **Testimonials**: No real guest review in the source; the section stays empty until one is added
@@ -89,6 +93,13 @@ Source: https://www.kurifturesorts.com/static/js/main.c2aebc63.js (fetched 2026-
 - **/resorts/entoto/acc/2/Entoto Facility (3).jpg**: missing /assets prefix → https://www.kurifturesorts.com/assets/resorts/entoto/acc/2/Entoto%20Facility%20(3).jpg
 - **/resorts/entoto/acc/2/Entoto Facility (2).jpg**: missing /assets prefix → https://www.kurifturesorts.com/assets/resorts/entoto/acc/2/Entoto%20Facility%20(2).jpg
 - **https://kuriftu-media.s3.us-east-1.amazonaws.com/awash/12.webpp**: doubled extension letter → https://kuriftu-media.s3.us-east-1.amazonaws.com/awash/12.webp
+
+### map pin (4)
+
+- **Awash Falls**: Bundle lat/lng 8.779961, 39.003129 differ from its Google Maps place pin; used the place pin 8.8430524, 40.0122975
+- **African Village**: Bundle lat/lng 9.03, 38.74 differ from its Google Maps place pin; used the place pin 9.0350944, 38.6781741
+- **Water Park**: Bundle lat/lng 9.03, 38.74 differ from its Google Maps place pin; used the place pin 8.7802656, 39.0028643
+- **Boston Day Spa**: Bundle lat/lng 9.03, 38.74 differ from its Google Maps place pin; used the place pin 8.9894898, 38.7807288
 
 ### offer (1)
 

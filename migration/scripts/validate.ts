@@ -127,7 +127,7 @@ async function main() {
   const byId = new Map(docs.map((d) => [d._id, d]))
   const spot: string[] = []
   const bishoftu = byId.get("resort.bishoftu") as { geo?: { lat: number; lng: number } } | undefined
-  if (bishoftu?.geo?.lat !== 8.779961 || bishoftu?.geo?.lng !== 39.003129) spot.push(`Bishoftu geo is ${JSON.stringify(bishoftu?.geo)}`)
+  if (bishoftu?.geo?.lat !== 8.7802656 || bishoftu?.geo?.lng !== 39.0028643) spot.push(`Bishoftu geo is ${JSON.stringify(bishoftu?.geo)}`)
   const suite = byId.get("room.bishoftu.1") as { title?: string; amenities?: unknown[] } | undefined
   if (suite?.amenities?.length !== 12) spot.push(`Royal Presidential Suite has ${suite?.amenities?.length} amenities`)
   const offer = docs.find((d) => d._type === "offer") as { endDate?: string; showAsPopup?: boolean } | undefined

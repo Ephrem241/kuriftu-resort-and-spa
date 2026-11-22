@@ -157,11 +157,29 @@ export function build({ ds, hints, categories, home, meta }: BuildInput, images:
     const addressHint = hints.address[legacy] ?? {}
     const description = str(r.description)
 
+    // "Getting here": the destinations list's distance line, else the resort's
+    // own direction line when it states a distance.
+    const featuredEntry = arr(ds.featured.featured).find((d) => (d as Obj).slug === legacy) as Obj | undefined
+    const direction = str(r.direction)
+    const gettingHere = str(featuredEntry?.distance) || (/\bkm\b/.test(direction) ? direction : "")
+    if (!gettingHere) report.flag("getting here", name, "No distance or directions line in source")
+
+    // Map pin: the Google Maps place link's pin (!3d<lat>!4d<lng>) is the
+    // place itself; the bundle's latitude/longitude are copied between resorts.
+    const place = str(r.location).match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/)
+    let geo: { _type: "geopoint"; lat: number; lng: number } | undefined
+    if (place) geo = { _type: "geopoint", lat: Number(place[1]), lng: Number(place[2]) }
+    else if (typeof r.latitude === "number" && typeof r.longitude === "number") geo = { _type: "geopoint", lat: r.latitude, lng: r.longitude }
+    if (place && typeof r.latitude === "number" && (Math.abs(Number(place[1]) - r.latitude) > 0.01 || Math.abs(Number(place[2]) - (r.longitude as number)) > 0.01)) {
+      report.flag("map pin", name, `Bundle lat/lng ${r.latitude}, ${r.longitude} differ from its Google Maps place pin; used the place pin ${place[1]}, ${place[2]}`)
+    }
+
     docs.push(
       compact({
         _id: resortId(legacy),
         _type: "resort",
         name,
+        fullName: fullName !== name ? fullName : undefined,
         slug: { _type: "slug", current: slug },
         type: hints.types[legacy],
         locationLabel: ds.locationLabels[legacy],
@@ -170,7 +188,8 @@ export function build({ ds, hints, categories, home, meta }: BuildInput, images:
         highlights,
         amenities,
         address: { _type: "address", ...addressHint, locality: str(r.city), country: "Ethiopia" },
-        geo: typeof r.latitude === "number" && typeof r.longitude === "number" ? { _type: "geopoint", lat: r.latitude, lng: r.longitude } : undefined,
+        gettingHere: gettingHere || undefined,
+        geo,
         heroImage,
         heroVideoUrl,
         gallery,
