@@ -1,0 +1,40 @@
+{
+  "$comment": "Home page images and featured content. \"resort:<legacy slug>\" reuses that resort's hero image; anything else is an image URL from the extracted set. Copy comes from the approved design reference.",
+  "heroSlides": [
+    { "image": "resort:bishoftu", "eyebrow": "Ethiopia, Your Way", "title": "Discover a Different Side of Ethiopia.", "text": "Luxury resorts, breathtaking nature, and unforgettable experiences." },
+    { "image": "resort:laketana", "eyebrow": "Ethiopia, Your Way", "title": "Discover a Different Side of Ethiopia.", "text": "Luxury resorts, breathtaking nature, and unforgettable experiences." },
+    { "image": "resort:entoto", "eyebrow": "Ethiopia, Your Way", "title": "Discover a Different Side of Ethiopia.", "text": "Luxury resorts, breathtaking nature, and unforgettable experiences." }
+  ],
+  "destinations": {
+    "title": "Our Destinations",
+    "subtitle": "Explore our stunning resorts across Ethiopia",
+    "resorts": ["bishoftu", "awash", "entoto", "laketana", "arba-minch"]
+  },
+  "experience": {
+    "title": "The Kuriftu Experience",
+    "pillars": [
+      { "icon": "bed", "title": "Stay & Relax", "subtitle": "Unwind in luxury", "path": "/destinations" },
+      { "icon": "spa", "title": "Spa & Wellness", "subtitle": "Rejuvenate your mind", "path": "/wellness" },
+      { "icon": "mountain", "title": "Adventure & Nature", "subtitle": "Explore the beauty", "path": "/experience" },
+      { "icon": "utensils", "title": "Dining & Culture", "subtitle": "Savor authentic flavors", "path": "/dining" }
+    ],
+    "image": "https://kuriftu-media.s3.amazonaws.com/boston/pier5-2026/massage/massage-15.webp"
+  },
+  "rooms": {
+    "title": "Featured Accommodation",
+    "subtitle": "Elegant stays for every journey",
+    "items": [{ "resort": "bishoftu", "legacyId": "1" }]
+  },
+  "offersPanel": {
+    "title": "Special Offers",
+    "text": "Make your stay even more special",
+    "ctaLabel": "View Offers",
+    "image": "resort:awash"
+  },
+  "testimonials": {
+    "title": "What Our Guests Say",
+    "subtitle": "Real stories. Unforgettable experiences.",
+    "backgroundImage": "resort:arba-minch"
+  },
+  "stayConnected": { "title": "Stay Connected", "subtitle": "Follow our journey" }
+}

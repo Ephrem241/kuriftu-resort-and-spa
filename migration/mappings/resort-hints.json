@@ -1,0 +1,54 @@
+{
+  "$comment": "Reviewed decisions the bundle can't express. Keys are the old site's resort slugs.",
+  "types": {
+    "arba-minch": "resortAndSpa",
+    "entoto": "adventurePark",
+    "bishoftu": "resortAndSpa",
+    "laketana": "resortAndSpa",
+    "awash": "resortAndSpa",
+    "thepalm": "resortAndSpa",
+    "africanVillage": "resortAndSpa",
+    "waterpark": "waterPark",
+    "boston": "daySpa"
+  },
+  "notBookable": ["waterpark", "boston"],
+  "taglines": {
+    "$comment": "From the approved home page design reference.",
+    "bishoftu": "Lakeside Retreat",
+    "awash": "Gorge-Side Escape",
+    "entoto": "Highland Adventure",
+    "laketana": "Blue Nile Paradise",
+    "arba-minch": "Nature's Wonder"
+  },
+  "address": {
+    "$comment": "Street and region only where the source states a specific, consistent one. Entoto's source address (321 Lake View Avenue, Bishoftu) and the Water Park's (a distance line) are wrong, so they're left out.",
+    "arba-minch": { "streetAddress": "Lake Abaya, Nechisar" },
+    "awash": { "streetAddress": "Awash National Park" },
+    "thepalm": { "streetAddress": "Northern Awash National Park", "region": "Afar" },
+    "africanVillage": { "streetAddress": "Melka Nuno", "region": "Oromia" },
+    "boston": { "streetAddress": "Bole" }
+  },
+  "footerOrder": ["africanVillage", "bishoftu", "entoto", "laketana", "awash", "arba-minch", "thepalm"],
+  "notVenues": {
+    "$comment": "Entries in the old venue lists that are packages or event types, not places.",
+    "arba-minch": ["Executive Retreats", "Incentive Journeys", "Private Celebrations"],
+    "africanVillage": ["Birthday"]
+  },
+  "notDiningVenues": ["Reserve a Table"],
+  "wellnessFacilities": {
+    "$comment": "Wellness entries that are facilities (become resort amenities), not treatments.",
+    "africanVillage": ["Gym", "Swimming Pool"]
+  },
+  "packageResorts": {
+    "bishoftu-waterpark-birthday": ["waterpark"],
+    "bishoftu-waterpark-retreat": ["bishoftu"],
+    "african-village-birthday": ["africanVillage"],
+    "african-village-retreat": ["africanVillage"]
+  },
+  "offer": {
+    "resort": "arba-minch",
+    "startDate": "2026-11-01T00:00:00+03:00",
+    "endDate": "2026-11-30T23:59:00+03:00",
+    "$comment": "Dates read from \"your November stay\"; confirm with Kuriftu."
+  }
+}

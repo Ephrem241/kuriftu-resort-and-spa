@@ -1,0 +1,41 @@
+{
+  "$comment": "First matching keyword wins (case-insensitive, on the title). Anything unmatched uses the default and is flagged in the report.",
+  "experience": {
+    "default": "nature",
+    "rules": [
+      ["water park|waterpark|kayak|canoe|swim|pool|boat|slide|splash", "water"],
+      ["zipline|zip line|rope|climb|archery|paintball|kart|trampoline|horse|camel|hik|adventure|bike|safari", "adventure"],
+      ["cinema|table tennis|games|team building|storytelling|family", "family"],
+      ["dining|restaurant|coffee", "dining"],
+      ["village|monastery|culture|cultural|dance|music|artisan|dorze|africa", "culture"],
+      ["wildlife|bird|nature|trail|national park|springs|forest|scenic|yoga|serenity", "nature"]
+    ]
+  },
+  "spaTreatment": {
+    "default": "package",
+    "rules": [
+      ["massage", "massage"],
+      ["facial", "facial"],
+      ["moroccan|morocco|hammam|steam|sauna|jacuzzi|hydrotherapy|bath", "hammam"],
+      ["mani|pedi|nail", "handsFeet"],
+      ["hair|barber|head spa|salon", "hair"],
+      ["wax|body", "body"]
+    ]
+  },
+  "amenityIcon": {
+    "$comment": "Lucide icon values from the Studio ICON_OPTIONS list; unmatched amenities get no icon.",
+    "rules": [
+      ["wi-?fi|internet", "wifi"],
+      ["tv|hdtv|cinema|screen", "tv"],
+      ["coffee|tea", "coffee"],
+      ["bath|shower|jacuzzi", "bath"],
+      ["air condition|a/c", "snowflake"],
+      ["pool|swim|water ?park|kayak", "waves"],
+      ["fitness|gym", "dumbbell"],
+      ["massage|spa|steam|sauna", "spa"],
+      ["breakfast|dinner|lunch|meal|restaurant", "utensils"],
+      ["parking", "car"],
+      ["view", "eye"]
+    ]
+  }
+}

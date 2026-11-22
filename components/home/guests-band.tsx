@@ -4,7 +4,10 @@ import type { HomePage, SocialLink } from "@/lib/content/types"
 
 import { Testimonials } from "./testimonials"
 
-/** Forest band: "What Our Guests Say" (left) and "Stay Connected" (right). */
+/**
+ * Forest band: "What Our Guests Say" (left) and "Stay Connected" (right).
+ * Without any real guest review, only "Stay Connected" shows.
+ */
 export function GuestsBand({
   testimonials,
   stayConnected,
@@ -14,9 +17,10 @@ export function GuestsBand({
   stayConnected: HomePage["stayConnected"]
   social: SocialLink[]
 }) {
+  const hasReviews = testimonials.items.length > 0
   return (
     <section
-      aria-labelledby="guests-title"
+      aria-labelledby={hasReviews ? "guests-title" : "connected-title"}
       className="relative isolate mt-16 overflow-hidden rounded-tl-[3rem] bg-forest lg:mt-20 lg:rounded-tl-[5rem]"
     >
       <div className="absolute inset-0 -z-10 opacity-40">
@@ -24,17 +28,27 @@ export function GuestsBand({
       </div>
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-forest/75" />
 
-      <div className="container-site grid gap-12 py-14 lg:grid-cols-[1.6fr_1fr] lg:gap-0 lg:py-12">
-        <div className="lg:border-r lg:border-ivory/20 lg:pr-12">
-          <h2 id="guests-title" className="text-h3 text-ivory">
-            {testimonials.title}
-          </h2>
-          <p className="mt-1 text-small text-ivory/90">{testimonials.subtitle}</p>
-          <Testimonials items={testimonials.items} />
-        </div>
+      <div
+        className={
+          hasReviews
+            ? "container-site grid gap-12 py-14 lg:grid-cols-[1.6fr_1fr] lg:gap-0 lg:py-12"
+            : "container-site py-14 lg:py-12"
+        }
+      >
+        {hasReviews && (
+          <div className="lg:border-r lg:border-ivory/20 lg:pr-12">
+            <h2 id="guests-title" className="text-h3 text-ivory">
+              {testimonials.title}
+            </h2>
+            <p className="mt-1 text-small text-ivory/90">{testimonials.subtitle}</p>
+            <Testimonials items={testimonials.items} />
+          </div>
+        )}
 
-        <div className="flex flex-col items-center text-center lg:pl-12">
-          <h2 className="text-h3 text-ivory">{stayConnected.title}</h2>
+        <div className={hasReviews ? "flex flex-col items-center text-center lg:pl-12" : "flex flex-col items-center text-center"}>
+          <h2 id="connected-title" className="text-h3 text-ivory">
+            {stayConnected.title}
+          </h2>
           <p className="mt-1 text-small text-ivory/90">{stayConnected.subtitle}</p>
           <ul className="mt-6 flex items-center gap-6">
             {social.map((s) => (

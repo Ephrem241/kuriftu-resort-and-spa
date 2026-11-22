@@ -124,7 +124,7 @@ function mapRoom(r: RoomCard): RoomSummary | null {
     slug: r.slug,
     resortSlug: r.resortSlug,
     summary: r.summary,
-    maxGuests: r.maxGuests,
+    maxGuests: r.maxGuests ?? null,
     sizeSqm: r.sizeSqm ?? null,
     image: toContentImage(r.image, r.title),
   }

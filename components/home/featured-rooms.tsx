@@ -40,10 +40,12 @@ export function FeaturedRooms({ rooms }: { rooms: RoomSummary[] }) {
               <h3 className="font-heading text-h4">{room.title}</h3>
               <p className="mt-3 max-w-60 text-small text-charcoal">{room.summary}</p>
               <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-caption text-charcoal">
-                <li className="flex items-center gap-2">
-                  <User aria-hidden="true" strokeWidth={1.5} className="size-4 fill-forest text-forest" />
-                  {room.maxGuests} Guests
-                </li>
+                {room.maxGuests ? (
+                  <li className="flex items-center gap-2">
+                    <User aria-hidden="true" strokeWidth={1.5} className="size-4 fill-forest text-forest" />
+                    {room.maxGuests} Guests
+                  </li>
+                ) : null}
                 {room.sizeSqm ? (
                   <li className="flex items-center gap-2">
                     <Square aria-hidden="true" strokeWidth={1.5} className="size-3.5 text-forest" />

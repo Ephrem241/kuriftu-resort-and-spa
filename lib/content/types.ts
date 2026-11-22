@@ -71,7 +71,7 @@ export type RoomSummary = {
   slug: string
   resortSlug: string
   summary: string
-  maxGuests: number
+  maxGuests: number | null
   sizeSqm: number | null
   image: ContentImage
 }
