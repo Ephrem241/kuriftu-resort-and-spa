@@ -1,7 +1,9 @@
+import { SeverityNumber } from "@opentelemetry/api-logs"
 import { revalidateTag } from "next/cache"
 import type { NextRequest } from "next/server"
 import { parseBody } from "next-sanity/webhook"
 
+import { flushPostHogLogs, posthogLogger } from "@/instrumentation"
 import { tagsForPayload, type RevalidatePayload } from "@/lib/revalidate"
 
 /**
@@ -32,5 +34,13 @@ export async function POST(req: NextRequest) {
   }
 
   for (const tag of tags) revalidateTag(tag, "max")
+
+  posthogLogger?.emit({
+    body: "Sanity cache revalidation completed",
+    severityNumber: SeverityNumber.INFO,
+    attributes: { tag_count: tags.length },
+  })
+  await flushPostHogLogs()
+
   return Response.json({ revalidated: tags.length })
 }
