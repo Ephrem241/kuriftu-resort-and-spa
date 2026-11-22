@@ -33,6 +33,9 @@ export const ICON_OPTIONS = [
   {title: 'Meetings', value: 'presentation'},
   {title: 'Culture', value: 'landmark'},
   {title: 'Sustainability', value: 'leaf'},
+  {title: 'Care / heart', value: 'heart'},
+  {title: 'Wellbeing / smile', value: 'smile'},
+  {title: 'Premium / gem', value: 'gem'},
 ]
 
 export const iconField = defineField({

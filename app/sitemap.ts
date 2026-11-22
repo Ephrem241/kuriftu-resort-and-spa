@@ -5,7 +5,7 @@ import { offerSitemapEntries } from "@/lib/content/map"
 import { absoluteUrl } from "@/lib/seo/site-url"
 
 /**
- * Built pages only (home, destinations, resorts, rooms, experiences, offers). Each new page type adds
+ * Built pages only (home, destinations, resorts, rooms, experiences, wellness, offers). Each new page type adds
  * itself when it ships. Revalidated by the Sanity webhook tags; offers also
  * drop out on their own when they end (see getOffers).
  */

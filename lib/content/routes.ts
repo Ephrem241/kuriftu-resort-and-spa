@@ -32,7 +32,8 @@ export function pathForDocument(target: LinkTarget): string | null {
     case "experience":
       return `/experience/${slug}`
     case "spaTreatment":
-      return `/wellness/${slug}`
+      // No treatment detail pages: open the request form with it preselected.
+      return `/wellness?treatment=${slug}#spa-booking`
     case "eventPackage":
       return `/event/${slug}`
     case "offer":

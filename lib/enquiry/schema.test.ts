@@ -50,15 +50,52 @@ describe("enquiry schema", () => {
     )
   })
 
-  it("requires a resort for spa and checks the slug shape", () => {
-    const base = { type: "spa", name: "Abebe", email: "a@b.co" }
-    expect(errorsOf(base)).toHaveProperty("resort")
-    expect(errorsOf({ ...base, resort: "Boston Spa" })).toEqual({ resort: "Choose a resort" })
-    expect(errorsOf({ ...base, resort: "boston" })).toEqual({})
+  describe("spa requests", () => {
+    const spa = { type: "spa", name: "Abebe", phone: "+251 911 123 456", treatment: "massage-cave", startDate: today }
+
+    it("needs name, phone, treatment and date, but not email", () => {
+      expect(errorsOf(spa)).toEqual({})
+      expect(errorsOf({ type: "spa" })).toEqual({
+        name: "Enter your name",
+        phone: "Enter your phone number",
+        treatment: "Choose a treatment",
+        startDate: "Choose a date",
+      })
+    })
+
+    it("requires a phone and checks its shape", () => {
+      expect(errorsOf({ ...spa, phone: "" })).toEqual({ phone: "Enter your phone number" })
+      expect(errorsOf({ ...spa, phone: "call me" })).toEqual({ phone: "Enter a valid phone number" })
+    })
+
+    it("accepts an empty email and checks a given one", () => {
+      expect(errorsOf({ ...spa, email: "" })).toEqual({})
+      expect(errorsOf({ ...spa, email: "nope" })).toEqual({ email: "Enter a valid email address" })
+    })
+
+    it("checks the treatment and optional resort slugs", () => {
+      expect(errorsOf({ ...spa, treatment: "Massage Cave" })).toEqual({ treatment: "Choose a treatment" })
+      expect(errorsOf({ ...spa, resort: "Boston Spa" })).toEqual({ resort: "Choose a resort" })
+      expect(errorsOf({ ...spa, resort: "boston" })).toEqual({})
+    })
+
+    it("rejects a past date", () => {
+      expect(errorsOf({ ...spa, startDate: "2020-01-01" })).toEqual({ startDate: "Date can't be in the past" })
+    })
+
+    it("accepts an empty or HH:MM time only", () => {
+      expect(errorsOf({ ...spa, time: "" })).toEqual({})
+      expect(errorsOf({ ...spa, time: "09:30" })).toEqual({})
+      expect(errorsOf({ ...spa, time: "23:59" })).toEqual({})
+      expect(errorsOf({ ...spa, time: "24:00" })).toEqual({ time: "Choose a valid time" })
+      expect(errorsOf({ ...spa, time: "9am" })).toEqual({ time: "Choose a valid time" })
+    })
   })
 
   it("caps guests", () => {
-    expect(errorsOf({ type: "spa", name: "Abebe", email: "a@b.co", resort: "boston", guests: 21 })).toHaveProperty("guests")
+    expect(
+      errorsOf({ type: "spa", name: "Abebe", phone: "0911123456", treatment: "facial", startDate: today, guests: 21 })
+    ).toHaveProperty("guests")
     expect(errorsOf({ type: "event", name: "Abebe", email: "a@b.co", startDate: today, guests: 1.5 })).toHaveProperty("guests")
   })
 
@@ -75,7 +112,9 @@ describe("enquiry schema", () => {
 
   it("never puts input into error messages", () => {
     const evil = "<script>alert(1)</script>"
-    const messages = Object.values(errorsOf({ type: "spa", name: evil, email: evil, resort: evil, phone: evil }))
+    const messages = Object.values(
+      errorsOf({ type: "spa", name: evil, email: evil, resort: evil, phone: evil, treatment: evil, time: evil })
+    )
     for (const m of messages) expect(m).not.toContain("script")
   })
 })

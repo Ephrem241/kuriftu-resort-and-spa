@@ -9,6 +9,8 @@ import {
   Dumbbell,
   Eye,
   Flower2,
+  Gem,
+  Heart,
   Landmark,
   Leaf,
   MapPin,
@@ -17,6 +19,7 @@ import {
   Phone,
   Presentation,
   Refrigerator,
+  Smile,
   Snowflake,
   Trees,
   Tv,
@@ -61,6 +64,9 @@ export const CONTENT_ICONS: Record<IconName, LucideIcon> = {
   presentation: Presentation,
   landmark: Landmark,
   leaf: Leaf,
+  heart: Heart,
+  smile: Smile,
+  gem: Gem,
 }
 
 export function ContentIcon({ name, ...props }: { name: IconName } & LucideProps) {

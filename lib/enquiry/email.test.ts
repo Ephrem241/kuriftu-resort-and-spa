@@ -42,6 +42,29 @@ describe("buildEnquiryEmail", () => {
     expect(text).not.toContain("Studio")
   })
 
+  it("lists the treatment and time for spa requests and asks for a call without an email", () => {
+    const { subject, text } = buildEnquiryEmail({
+      enquiry: {
+        type: "spa",
+        name: "Abebe",
+        phone: "+251 911 123 456",
+        treatment: "massage-cave",
+        startDate: "2026-12-10",
+        time: "10:30",
+      },
+      enquiryId: "x",
+      resortName: "Boston Day Spa",
+      treatmentName: "Massage Cave",
+    })
+    expect(subject).toBe("New spa booking enquiry — Boston Day Spa")
+    expect(text).toContain("Treatment: Massage Cave")
+    expect(text).toContain("Preferred date: 2026-12-10")
+    expect(text).toContain("Preferred time: 10:30")
+    expect(text).not.toContain("Email:")
+    expect(text).toContain("No email given. Call the guest to confirm.")
+    expect(text).not.toContain("Reply to this email")
+  })
+
   it("keeps the subject on one line", () => {
     const { subject } = buildEnquiryEmail({ enquiry: event, enquiryId: "x", resortName: "A\r\nBcc: evil@x.y" })
     expect(subject).not.toMatch(/[\r\n]/)
@@ -69,6 +92,13 @@ describe("sendEmail", () => {
       subject: "S",
       text: "T",
     })
+  })
+
+  it("leaves out reply_to without a guest email", async () => {
+    const fetchImpl = vi.fn(async () => new Response("{}", { status: 200 }))
+    await sendEmail({ ...message, replyTo: undefined }, { apiKey: "key", from: "web@example.com", fetchImpl })
+    const [, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit]
+    expect(JSON.parse(init.body as string)).not.toHaveProperty("reply_to")
   })
 
   it("returns false on a provider error or network failure", async () => {

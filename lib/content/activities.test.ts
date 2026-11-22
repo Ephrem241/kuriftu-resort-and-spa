@@ -24,7 +24,7 @@ describe("activityTiles", () => {
     ])
     expect(tiles[0].image.alt).toBe("kayak")
     expect(tiles[0].href).toBe("/experience?resort=bishoftu&category=water")
-    expect(tiles[2].href).toBe("/wellness?resort=bishoftu")
+    expect(tiles[2].href).toBe("/wellness/treatments?resort=bishoftu")
     expect(tiles[3].href).toBe("/dining?resort=bishoftu")
   })
 

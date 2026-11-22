@@ -1,6 +1,6 @@
 "use client"
 
-import { useId, useState, useSyncExternalStore, type FormEvent } from "react"
+import { useId, useState, type FormEvent } from "react"
 import { CalendarDays, MapPin, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 
 import { FieldShell } from "./field-shell"
 import { GuestsPopover } from "./guests-popover"
+import { useResortToday } from "./use-resort-today"
 
 type Destination = SiteSettings["bookableResorts"][number]
 
@@ -25,13 +26,6 @@ type AvailabilityBarProps = {
 }
 
 type Errors = Partial<Record<"destination" | "checkIn" | "checkOut" | "adults" | "children", string>>
-
-const noopSubscribe = () => () => {}
-
-/** Today in Africa/Addis_Ababa, read on the client only (never at build time). */
-function useResortToday() {
-  return useSyncExternalStore(noopSubscribe, () => todayInResortZone(), () => "")
-}
 
 function formatDate(iso: string) {
   if (!iso) return "Add date"

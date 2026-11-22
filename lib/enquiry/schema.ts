@@ -71,7 +71,35 @@ const phone = line("Enter a valid phone number")
   )
   .optional()
 
+/** Spa requests: staff call back, so phone is required and email optional. */
+const requiredPhone = line("Enter your phone number").pipe(
+  z
+    .string()
+    .min(1, "Enter your phone number")
+    .min(ENQUIRY_LIMITS.phone.min, "Enter a valid phone number")
+    .max(ENQUIRY_LIMITS.phone.max, "Enter a valid phone number")
+    .regex(PHONE, "Enter a valid phone number")
+)
+
+const optionalEmail = line("Enter a valid email address")
+  .pipe(
+    z.union([
+      z.literal(""),
+      z.email("Enter a valid email address").max(ENQUIRY_LIMITS.email.max, "Email is too long"),
+    ])
+  )
+  .optional()
+
+const TIME = /^([01]\d|2[0-3]):[0-5]\d$/
+
+/** Preferred time of day, HH:MM (24h), or empty. */
+const optionalTime = line("Choose a valid time")
+  .pipe(z.union([z.literal(""), z.string().regex(TIME, "Choose a valid time")]))
+  .optional()
+
 const resortSlug = line("Choose a resort").pipe(z.string().regex(SLUG, "Choose a resort"))
+
+const treatmentSlug = line("Choose a treatment").pipe(z.string().regex(SLUG, "Choose a treatment"))
 
 const optionalMessage = multiline("Enter a message")
   .pipe(z.string().max(ENQUIRY_LIMITS.message.max, "Message is too long"))
@@ -124,9 +152,14 @@ export function createEnquirySchema({ today }: { today: string }) {
       z.object({
         type: z.literal("spa"),
         ...base,
-        resort: resortSlug,
+        email: optionalEmail,
+        phone: requiredPhone,
+        treatment: treatmentSlug,
+        // Derived from the treatment on the server when absent.
+        resort: resortSlug.optional(),
         message: optionalMessage,
-        startDate: date.optional(),
+        startDate: date,
+        time: optionalTime,
         guests: guests(ENQUIRY_LIMITS.spaGuests).optional(),
       }),
       z.object({
@@ -146,6 +179,9 @@ export function createEnquirySchema({ today }: { today: string }) {
 }
 
 export type EnquiryInput = z.infer<ReturnType<typeof createEnquirySchema>>
+
+/** The spa request form's fields (client and server share these rules). */
+export type SpaEnquiryInput = Extract<EnquiryInput, { type: "spa" }>
 
 /** First error message per top-level field. Messages are ours, never input. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {

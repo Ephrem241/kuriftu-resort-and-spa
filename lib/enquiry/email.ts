@@ -8,11 +8,14 @@ export function buildEnquiryEmail({
   enquiry,
   enquiryId,
   resortName,
+  treatmentName,
   studioUrl,
 }: {
   enquiry: EnquiryInput
   enquiryId: string
   resortName: string | null
+  /** Spa requests: the treatment's title from content (never the posted slug). */
+  treatmentName?: string | null
   studioUrl?: string
 }): { subject: string; text: string } {
   const label = ENQUIRY_TYPE_LABELS[enquiry.type]
@@ -28,7 +31,12 @@ export function buildEnquiryEmail({
   if (enquiry.type === "event" || enquiry.type === "meeting") {
     rows.push(["Date from", enquiry.startDate], ["Date to", enquiry.endDate], ["Guests", enquiry.guests])
   } else if (enquiry.type === "spa") {
-    rows.push(["Preferred date", enquiry.startDate], ["Guests", enquiry.guests])
+    rows.push(
+      ["Treatment", treatmentName ?? undefined],
+      ["Preferred date", enquiry.startDate],
+      ["Preferred time", enquiry.time || undefined],
+      ["Guests", enquiry.guests]
+    )
   }
 
   const lines = rows
@@ -41,7 +49,12 @@ export function buildEnquiryEmail({
   if (base) {
     lines.push("", `Open in Studio: ${base}/intent/edit/id=${encodeURIComponent(enquiryId)};type=enquiry`)
   }
-  lines.push("", "Reply to this email to answer the guest directly.")
+  lines.push(
+    "",
+    enquiry.email
+      ? "Reply to this email to answer the guest directly."
+      : "No email given. Call the guest to confirm."
+  )
 
   return { subject, text: lines.join("\n") }
 }
@@ -58,7 +71,7 @@ export async function sendEmail(
     replyTo,
     subject,
     text,
-  }: { to: string; replyTo: string; subject: string; text: string },
+  }: { to: string; replyTo?: string; subject: string; text: string },
   {
     apiKey = process.env.RESEND_API_KEY,
     from = process.env.ENQUIRY_FROM_EMAIL,
@@ -71,7 +84,7 @@ export async function sendEmail(
     const res = await fetchImpl(RESEND_ENDPOINT, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [to], reply_to: replyTo, subject, text }),
+      body: JSON.stringify({ from, to: [to], ...(replyTo ? { reply_to: replyTo } : {}), subject, text }),
       signal: AbortSignal.timeout(timeoutMs),
     })
     return res.ok

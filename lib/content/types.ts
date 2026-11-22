@@ -275,6 +275,62 @@ export type ExperiencePage = Omit<ExperienceSummary, "image" | "resorts"> & {
   related: ExperienceSummary[]
 }
 
+export type SpaCategory = "massage" | "facial" | "body" | "hammam" | "handsFeet" | "hair" | "package"
+
+/** The design's five treatment cards; each covers one or more spa categories. */
+export type TreatmentGroup = "massage" | "facial" | "body" | "packages" | "beauty"
+
+export type TreatmentSummary = {
+  title: string
+  slug: string
+  category: SpaCategory
+  /** Plain-text description, trimmed to a card-length excerpt; empty when none. */
+  excerpt: string
+  /** Editor's duration, e.g. "60 minutes"; empty when not set. */
+  duration: string
+  /** Display-only, entered by an editor. */
+  price: { amount: number; currency: string; unit: string } | null
+  image: ContentImage
+  resorts: ExperienceResort[]
+}
+
+export type IconFeature = { key: string; icon: IconName | null; title: string }
+
+/** Copy and photography for /wellness, with every treatment (cards and form options). */
+export type WellnessPage = {
+  hero: { eyebrow: string; title: string; intro: string; image: ContentImage | null }
+  /** Null when the editor left out its title or image. */
+  daySpa: {
+    eyebrow: string
+    title: string
+    text: string
+    image: ContentImage
+    features: IconFeature[]
+  } | null
+  treatments: {
+    title: string
+    subtitle: string
+    cards: { key: string; group: TreatmentGroup; title: string; subtitle: string; image: ContentImage }[]
+  }
+  /** Copy beside the booking form; the form shows even without it. */
+  booking: { eyebrow: string; title: string; text: string; tagline: string; image: ContentImage | null }
+  /** Null when the editor left out its title or image. */
+  whyChoose: { title: string; features: IconFeature[]; image: ContentImage } | null
+  treatmentList: TreatmentSummary[]
+  seo: PageSeo
+}
+
+/** Heading and SEO for /wellness/treatments, with every treatment. */
+export type TreatmentsPage = {
+  eyebrow: string
+  title: string
+  intro: string
+  treatments: TreatmentSummary[]
+  /** OG image fallback: the wellness hero. */
+  image: ContentImage | null
+  seo: PageSeo
+}
+
 /** Portable Text blocks, rendered by components/ui/portable-text.tsx. */
 export type RichText = Array<{ _type: string; _key: string; [key: string]: unknown }>
 

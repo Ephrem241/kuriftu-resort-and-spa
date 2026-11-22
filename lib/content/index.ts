@@ -19,6 +19,8 @@ import {
   ROOM_PARAMS_QUERY,
   SITE_SETTINGS_QUERY,
   SITEMAP_QUERY,
+  TREATMENTS_PAGE_QUERY,
+  WELLNESS_PAGE_QUERY,
 } from "@/sanity/queries"
 
 import {
@@ -33,6 +35,8 @@ import {
   mapRoomPage,
   mapSiteSettings,
   mapSitemap,
+  mapTreatmentsPage,
+  mapWellnessPage,
 } from "./map"
 import { cacheSeconds, isLive, type Dated } from "./offers"
 import type {
@@ -47,6 +51,8 @@ import type {
   RoomPage,
   SiteSettings,
   SitemapEntry,
+  TreatmentsPage,
+  WellnessPage,
 } from "./types"
 
 /**
@@ -125,7 +131,7 @@ export async function getRoomPage(resort: string, room: string): Promise<RoomPag
 /** Indexable home, resort and room paths with their last change, for sitemap.xml. */
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   "use cache"
-  const tags = ["homePage", "resort", "room", "experience"]
+  const tags = ["homePage", "resort", "room", "experience", "wellnessPage"]
   cacheTag(...tags)
   cacheLife("days")
 
@@ -216,6 +222,28 @@ export async function getExperiencePage(slug: string): Promise<ExperiencePage | 
 
   const doc = await sanityFetch({ query: EXPERIENCE_PAGE_QUERY, params: { slug }, tags })
   return doc ? mapExperiencePage(doc) : null
+}
+
+/** Copy for /wellness with every treatment (cards and form options); renders with fallbacks if unpublished. */
+export async function getWellnessPage(fallbackDescription: string): Promise<WellnessPage> {
+  "use cache"
+  const tags = ["wellnessPage", "spaTreatment", "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: WELLNESS_PAGE_QUERY, tags })
+  return mapWellnessPage(doc, fallbackDescription)
+}
+
+/** Heading and SEO for /wellness/treatments with every treatment; renders with fallbacks if unpublished. */
+export async function getTreatmentsPage(fallbackDescription: string): Promise<TreatmentsPage> {
+  "use cache"
+  const tags = ["wellnessPage", "spaTreatment", "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: TREATMENTS_PAGE_QUERY, tags })
+  return mapTreatmentsPage(doc, fallbackDescription)
 }
 
 /** Revalidate at the next start or end. Next requires expire > revalidate. */

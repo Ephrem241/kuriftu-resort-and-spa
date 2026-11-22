@@ -36,7 +36,7 @@ export function activityTiles(
   })
 
   if (resort.spaImage) {
-    tiles.push({ key: "spa", label: "Spa Treatments", image: resort.spaImage, href: `/wellness?resort=${slug}` })
+    tiles.push({ key: "spa", label: "Spa Treatments", image: resort.spaImage, href: `/wellness/treatments?resort=${slug}` })
   }
 
   const diningImage = resort.diningImage ?? firstImage("dining")

@@ -50,17 +50,28 @@ export async function POST(req: NextRequest) {
 
   let context: Awaited<ReturnType<typeof loadContext>>
   try {
-    context = await loadContext(enquiry.resort)
+    context = await loadContext(enquiry.resort, enquiry.type === "spa" ? enquiry.treatment : undefined)
   } catch {
     console.error("[enquiry] failed to load contacts")
     return fail(500, "We couldn't send your enquiry", { fallbackPhone: null })
   }
-  if (enquiry.resort && !context.resort) {
+
+  let resort: Resort = context.resort
+  let treatment: { _id: string; title: string } | null = null
+  if (enquiry.type === "spa") {
+    // The treatment decides the resort: the posted one if it offers it, else its first.
+    if (!context.treatment) {
+      return fail(400, "Check the highlighted fields", { errors: { treatment: "Choose a treatment" } })
+    }
+    treatment = context.treatment
+    const offeredAt = (context.treatment.resorts ?? []).filter((r) => r !== null)
+    resort = offeredAt.find((r) => r.slug === enquiry.resort) ?? offeredAt[0] ?? null
+  } else if (enquiry.resort && !resort) {
     return fail(400, "Check the highlighted fields", { errors: { resort: "Choose a resort" } })
   }
 
   const contacts: EnquiryContacts = {
-    resort: context.resort?.reservationContact ?? null,
+    resort: resort?.reservationContact ?? null,
     reservations: context.settings?.reservations ?? null,
     headOffice: context.settings?.headOffice ?? null,
   }
@@ -68,31 +79,36 @@ export async function POST(req: NextRequest) {
 
   let enquiryId: string
   try {
-    enquiryId = await storeEnquiry(enquiry, context.resort?._id ?? null)
+    enquiryId = await storeEnquiry(enquiry, resort?._id ?? null, treatment?._id ?? null)
   } catch {
     console.error(`[enquiry] failed to store ${enquiry.type} enquiry`)
     return fail(500, "We couldn't send your enquiry", { fallbackPhone })
   }
 
-  const emailSent = await notify(enquiry, enquiryId, context.resort?.name ?? null, contacts)
+  const emailSent = await notify(enquiry, enquiryId, resort?.name ?? null, treatment?.title ?? null, contacts)
   return Response.json({ ok: true, emailSent, fallbackPhone })
 }
 
-async function loadContext(slug: string | undefined) {
-  return freshClient.fetch(ENQUIRY_CONTEXT_QUERY, { slug: slug ?? "" })
+type Context = Awaited<ReturnType<typeof loadContext>>
+type Resort = Pick<NonNullable<Context["resort"]>, "_id" | "name" | "reservationContact"> | null
+
+async function loadContext(slug: string | undefined, treatment: string | undefined) {
+  return freshClient.fetch(ENQUIRY_CONTEXT_QUERY, { slug: slug ?? "", treatment: treatment ?? "" })
 }
 
-async function storeEnquiry(enquiry: EnquiryInput, resortId: string | null): Promise<string> {
+async function storeEnquiry(enquiry: EnquiryInput, resortId: string | null, treatmentId: string | null): Promise<string> {
   const doc = {
     _type: "enquiry" as const,
     status: "new",
     type: enquiry.type,
     name: enquiry.name,
-    email: enquiry.email,
+    ...(enquiry.email ? { email: enquiry.email } : {}),
     ...(enquiry.phone ? { phone: enquiry.phone } : {}),
     ...(resortId ? { resort: { _type: "reference" as const, _ref: resortId } } : {}),
+    ...(treatmentId ? { treatment: { _type: "reference" as const, _ref: treatmentId } } : {}),
     ...("startDate" in enquiry && enquiry.startDate ? { startDate: enquiry.startDate } : {}),
     ...("endDate" in enquiry && enquiry.endDate ? { endDate: enquiry.endDate } : {}),
+    ...("time" in enquiry && enquiry.time ? { preferredTime: enquiry.time } : {}),
     ...("guests" in enquiry && enquiry.guests !== undefined ? { guests: enquiry.guests } : {}),
     ...(enquiry.message ? { message: enquiry.message } : {}),
     emailSent: false,
@@ -106,6 +122,7 @@ async function notify(
   enquiry: EnquiryInput,
   enquiryId: string,
   resortName: string | null,
+  treatmentName: string | null,
   contacts: EnquiryContacts
 ): Promise<boolean> {
   const to = pickRecipient(enquiry.type, contacts)
@@ -118,9 +135,10 @@ async function notify(
     enquiry,
     enquiryId,
     resortName,
+    treatmentName,
     studioUrl: process.env.SANITY_STUDIO_URL,
   })
-  const sent = await sendEmail({ to, replyTo: enquiry.email, subject, text })
+  const sent = await sendEmail({ to, replyTo: enquiry.email || undefined, subject, text })
   if (!sent) {
     console.error(`[enquiry] notification email not sent for ${enquiryId}`)
     return false

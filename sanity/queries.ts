@@ -161,6 +161,11 @@ export const SITEMAP_QUERY = defineQuery(`{
   },
   "experiences": *[_type == "experience" && defined(slug.current) && seo.noIndex != true] | order(title asc){
     "slug": slug.current, _updatedAt
+  },
+  "wellness": *[_type == "wellnessPage"][0]{
+    _updatedAt,
+    "noIndex": seo.noIndex == true,
+    "treatmentsNoIndex": treatmentsSeo.noIndex == true
   }
 }`)
 
@@ -271,6 +276,50 @@ export const EXPERIENCE_PAGE_QUERY = defineQuery(`*[_type == "experience" && slu
   "related": *[_type == "experience" && _id != ^._id && defined(slug.current) && references(^.resorts[]._ref)] | order(title asc)[0...3]${EXPERIENCE_CARD}
 }`)
 
+/** A spa treatment on a card: enough for the grid, its filters, the meta row and the form's options. */
+const TREATMENT_CARD = /* groq */ `{
+  title,
+  "slug": slug.current,
+  category,
+  duration,
+  "excerpt": pt::text(description),
+  price{ amount, currency, unit },
+  image${IMAGE},
+  "resorts": resorts[]->{ name, fullName, "slug": slug.current }
+}`
+
+const ICON_FEATURE = /* groq */ `{ _key, icon, title }`
+
+/** Copy and photography for /wellness, with every treatment that has a slug (cards and form options). */
+export const WELLNESS_PAGE_QUERY = defineQuery(`{
+  "page": *[_type == "wellnessPage"][0]{
+    hero { eyebrow, title, intro, image${IMAGE} },
+    daySpa {
+      eyebrow, title, text, image${IMAGE},
+      features[]${ICON_FEATURE},
+      "resort": resort->{ name, "slug": slug.current }
+    },
+    treatments {
+      title, subtitle,
+      cards[]{ _key, group, title, subtitle, image${IMAGE} }
+    },
+    booking { eyebrow, title, text, tagline, image${IMAGE} },
+    whyChoose { title, features[]${ICON_FEATURE}, image${IMAGE} },
+    seo${SEO}
+  },
+  "treatments": *[_type == "spaTreatment" && defined(slug.current)] | order(title asc)${TREATMENT_CARD}
+}`)
+
+/** Heading and SEO for /wellness/treatments, with every treatment that has a slug. */
+export const TREATMENTS_PAGE_QUERY = defineQuery(`{
+  "page": *[_type == "wellnessPage"][0]{
+    treatmentsIndex { eyebrow, title, intro },
+    treatmentsSeo${SEO},
+    "fallbackImage": hero.image${IMAGE}
+  },
+  "treatments": *[_type == "spaTreatment" && defined(slug.current)] | order(title asc)${TREATMENT_CARD}
+}`)
+
 const ENQUIRY_CONTACT =/* groq */ `{ phones[]{ display, tel }, emails[]{ address } }`
 
 /**
@@ -282,6 +331,11 @@ export const ENQUIRY_CONTEXT_QUERY = defineQuery(`{
     _id,
     name,
     reservationContact${ENQUIRY_CONTACT}
+  },
+  "treatment": *[_type == "spaTreatment" && slug.current == $treatment][0]{
+    _id,
+    title,
+    "resorts": resorts[]->{ _id, name, "slug": slug.current, reservationContact${ENQUIRY_CONTACT} }
   },
   "settings": *[_type == "siteSettings"][0]{
     reservations${ENQUIRY_CONTACT},
