@@ -166,10 +166,23 @@ const OFFER_FIELDS = /* groq */ `
   title,
   "slug": slug.current,
   shortLine,
+  category,
+  badge,
   startDate,
   endDate,
   showAsPopup,
   image${IMAGE}`
+
+/** A resort an offer applies to: enough to book it or contact it. */
+const OFFER_RESORT = /* groq */ `{
+  name,
+  fullName,
+  "slug": slug.current,
+  bookable,
+  bookingPropertyId,
+  "phone": reservationContact.phones[0]{ display, tel },
+  "email": reservationContact.emails[0].address
+}`
 
 /**
  * Offers that haven't ended at $now (live or upcoming). Callers drop the
@@ -178,7 +191,7 @@ const OFFER_FIELDS = /* groq */ `
 export const OFFERS_QUERY = defineQuery(`*[_type == "offer" && defined(slug.current) && endDate > $now] | order(endDate asc){
   ${OFFER_FIELDS},
   seo { noIndex },
-  "resorts": resorts[]->{ name, "slug": slug.current }
+  "resorts": resorts[]->${OFFER_RESORT}
 }`)
 
 /** One offer by slug, whatever its dates; the caller checks it is live. */
@@ -188,15 +201,14 @@ export const OFFER_PAGE_QUERY = defineQuery(`*[_type == "offer" && slug.current 
   terms,
   promoCode,
   seo${SEO},
-  "resorts": resorts[]->{
-    name,
-    fullName,
-    "slug": slug.current,
-    bookable,
-    bookingPropertyId,
-    "phone": reservationContact.phones[0]{ display, tel },
-    "email": reservationContact.emails[0].address
-  }
+  "resorts": resorts[]->${OFFER_RESORT}
+}`)
+
+/** Copy and photography for /offers. */
+export const OFFERS_PAGE_QUERY = defineQuery(`*[_type == "offersPage"][0]{
+  hero { eyebrow, title, intro, image${IMAGE} },
+  banner { eyebrow, title, text, image${IMAGE}, link${LINK} },
+  seo${SEO}
 }`)
 
 const ENQUIRY_CONTACT = /* groq */ `{ phones[]{ display, tel }, emails[]{ address } }`

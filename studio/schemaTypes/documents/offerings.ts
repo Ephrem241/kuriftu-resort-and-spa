@@ -3,6 +3,15 @@ import {defineArrayMember, defineField, defineType} from 'sanity'
 
 import {slugRule} from '../../lib/validation'
 
+/** Offer filters on /offers, in tile order. Keep in sync with lib/content/offers.ts. */
+export const OFFER_CATEGORIES = [
+  {title: 'Special Deals', value: 'deals'},
+  {title: 'Stay Packages', value: 'stay'},
+  {title: 'Wellness Retreats', value: 'wellness'},
+  {title: 'Dining Offers', value: 'dining'},
+  {title: 'Family Packages', value: 'family'},
+] as const
+
 const offeredAt = defineField({
   name: 'resorts',
   title: 'Offered at',
@@ -197,6 +206,23 @@ export const offer = defineType({
       description: 'For example "Up to 25% off your November stay".',
       validation: (rule) => rule.required().max(80),
     }),
+    defineField({
+      name: 'category',
+      type: 'string',
+      description: 'Groups the offer under one of the filters on the offers page.',
+      initialValue: 'deals',
+      options: {
+        list: [...OFFER_CATEGORIES],
+        layout: 'radio',
+      },
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'badge',
+      type: 'string',
+      description: 'Short label on the card image, for example "20% OFF". Leave empty for no badge. Never state a discount the offer does not give.',
+      validation: (rule) => rule.max(16),
+    }),
     defineField({name: 'description', type: 'richText'}),
     defineField({name: 'image', type: 'accessibleImage', validation: (rule) => rule.required()}),
     defineField({
@@ -231,10 +257,12 @@ export const offer = defineType({
   ],
   orderings: [{title: 'Ends soonest', name: 'endDateAsc', by: [{field: 'endDate', direction: 'asc'}]}],
   preview: {
-    select: {title: 'title', end: 'endDate', media: 'image'},
-    prepare({title, end, media}) {
+    select: {title: 'title', end: 'endDate', category: 'category', media: 'image'},
+    prepare({title, end, category, media}) {
       const expired = end && new Date(end) < new Date()
-      return {title, subtitle: end ? `${expired ? 'Expired' : 'Ends'} ${new Date(end).toLocaleDateString()}` : undefined, media}
+      const label = OFFER_CATEGORIES.find((c) => c.value === category)?.title
+      const when = end ? `${expired ? 'Expired' : 'Ends'} ${new Date(end).toLocaleDateString()}` : undefined
+      return {title, subtitle: [label, when].filter(Boolean).join(' · ') || undefined, media}
     },
   },
 })

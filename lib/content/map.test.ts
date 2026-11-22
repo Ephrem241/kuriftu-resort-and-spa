@@ -4,6 +4,7 @@ import {
   mapHomePage,
   mapOffer,
   mapOfferPage,
+  mapOffersPage,
   mapResortPage,
   mapRoomPage,
   mapSiteSettings,
@@ -294,23 +295,42 @@ describe("offers", () => {
     title: "Up to 25% off your November stay",
     slug: "november-stay",
     shortLine: " Enjoy up to 25% off your November stay ",
+    category: "deals" as const,
+    badge: " UP TO 25% OFF ",
     startDate: "2026-11-01T00:00:00+03:00",
     endDate: "2026-11-30T23:59:00+03:00",
     showAsPopup: true,
     image: { alt: "Arba Minch at night", crop: null, hotspot: null, asset: { ...asset, metadata: { lqip: null, dimensions: null } } },
   }
+  const arbaMinch = {
+    name: "Arba Minch",
+    fullName: null,
+    slug: "arba-minch",
+    bookable: true,
+    bookingPropertyId: "AM1",
+    phone: null,
+    email: null,
+  }
 
-  it("maps a card with resorts, popup flag and sitemap fields", () => {
-    const offer = mapOffer({ ...doc, seo: null, resorts: [{ name: "Arba Minch", slug: "arba-minch" }] })
+  it("maps a card with category, badge, bookable resorts, popup flag and sitemap fields", () => {
+    const offer = mapOffer({ ...doc, seo: null, resorts: [arbaMinch] })
     expect(offer).toMatchObject({
       slug: "november-stay",
       shortLine: "Enjoy up to 25% off your November stay",
+      category: "deals",
+      badge: "UP TO 25% OFF",
       showAsPopup: true,
-      resorts: [{ name: "Arba Minch", slug: "arba-minch" }],
+      resorts: [{ name: "Arba Minch", heading: "Arba Minch", slug: "arba-minch", bookable: true, bookingPropertyId: "AM1" }],
       noIndex: false,
       lastModified: doc._updatedAt,
     })
     expect(offer.image.alt).toBe("Arba Minch at night")
+  })
+
+  it("falls back to Special Deals and no badge when the fields are empty", () => {
+    const offer = mapOffer({ ...doc, category: null as unknown as "deals", badge: null, seo: null, resorts: null })
+    expect(offer.category).toBe("deals")
+    expect(offer.badge).toBe("")
   })
 
   it("leaves no-index offers out of the sitemap", () => {
@@ -347,5 +367,36 @@ describe("offers", () => {
     expect(page.promoCode).toBe("NOV25")
     expect(page.description).toEqual([])
     expect(page.resorts[0]).toMatchObject({ heading: "Kuriftu Resort & Spa Arba Minch", bookable: true, email: null })
+  })
+})
+
+describe("mapOffersPage", () => {
+  const image = { alt: "Bishoftu pool", crop: null, hotspot: null, asset: { ...asset, metadata: { lqip: null, dimensions: null } } }
+
+  it("falls back to the design copy and no banner when the singleton is missing", () => {
+    const page = mapOffersPage(null, "Offers at Kuriftu.")
+    expect(page.hero).toEqual({ eyebrow: "Special Offers", title: "Offers & Packages", intro: "", image: null })
+    expect(page.banner).toBeNull()
+    expect(page.seo).toMatchObject({ title: "Offers & Packages", description: "Offers at Kuriftu." })
+  })
+
+  it("maps hero and banner, hiding a banner without an image", () => {
+    const doc = {
+      hero: { eyebrow: null, title: "Offers & Packages", intro: " Discover our offers. ", image },
+      banner: {
+        eyebrow: "Limited time offer",
+        title: "Experience More, Save More",
+        text: null,
+        image,
+        link: { label: "View All Offers", linkType: "path" as const, path: "/offers", url: null, target: null },
+      },
+      seo: null,
+    }
+    const page = mapOffersPage(doc, "")
+    expect(page.hero.intro).toBe("Discover our offers.")
+    expect(page.hero.image?.alt).toBe("Bishoftu pool")
+    expect(page.banner).toMatchObject({ title: "Experience More, Save More", text: "", link: { label: "View All Offers", href: "/offers" } })
+    expect(page.seo.description).toBe("Discover our offers.")
+    expect(mapOffersPage({ ...doc, banner: { ...doc.banner, image: null } }, "").banner).toBeNull()
   })
 })

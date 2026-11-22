@@ -182,19 +182,32 @@ export type RoomPage = {
 }
 
 /** A dated offer; shown only while live (see lib/content/offers.ts). */
+export type OfferCategory = "deals" | "stay" | "wellness" | "dining" | "family"
+
 export type OfferSummary = {
   title: string
   slug: string
   shortLine: string
+  category: OfferCategory
+  /** Editor's image label, e.g. "20% OFF"; empty for none. */
+  badge: string
   /** ISO datetimes; live from start (inclusive) to end (exclusive). */
   startDate: string
   endDate: string
   showAsPopup: boolean
   image: ContentImage
   /** Empty when the offer applies to every resort. */
-  resorts: { name: string; slug: string }[]
+  resorts: OfferResort[]
   noIndex: boolean
   lastModified: string
+}
+
+/** Copy and photography for /offers. */
+export type OffersPage = {
+  hero: { eyebrow: string; title: string; intro: string; image: ContentImage | null }
+  /** Null when the editor left out its title or image. */
+  banner: { eyebrow: string; title: string; text: string; image: ContentImage; link: NavLink | null } | null
+  seo: PageSeo
 }
 
 export type OfferResort = {
