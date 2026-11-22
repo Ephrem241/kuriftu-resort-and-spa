@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest"
 
-import { mapHomePage, mapResortPage, mapRoomPage, mapSiteSettings, toContentImage } from "./map"
+import {
+  mapHomePage,
+  mapOffer,
+  mapOfferPage,
+  mapResortPage,
+  mapRoomPage,
+  mapSiteSettings,
+  offerSitemapEntries,
+  toContentImage,
+} from "./map"
 
 const asset = {
   _id: "image-abc123-2000x1000-jpg",
@@ -276,5 +285,67 @@ describe("mapRoomPage", () => {
   it("shows a placeholder when no image has an asset", () => {
     const room = mapRoomPage({ ...base, images: [] } as unknown as typeof base)!
     expect(room.images).toEqual([{ alt: "Gateway Retreat" }])
+  })
+})
+
+describe("offers", () => {
+  const doc = {
+    _updatedAt: "2026-11-20T10:00:00Z",
+    title: "Up to 25% off your November stay",
+    slug: "november-stay",
+    shortLine: " Enjoy up to 25% off your November stay ",
+    startDate: "2026-11-01T00:00:00+03:00",
+    endDate: "2026-11-30T23:59:00+03:00",
+    showAsPopup: true,
+    image: { alt: "Arba Minch at night", crop: null, hotspot: null, asset: { ...asset, metadata: { lqip: null, dimensions: null } } },
+  }
+
+  it("maps a card with resorts, popup flag and sitemap fields", () => {
+    const offer = mapOffer({ ...doc, seo: null, resorts: [{ name: "Arba Minch", slug: "arba-minch" }] })
+    expect(offer).toMatchObject({
+      slug: "november-stay",
+      shortLine: "Enjoy up to 25% off your November stay",
+      showAsPopup: true,
+      resorts: [{ name: "Arba Minch", slug: "arba-minch" }],
+      noIndex: false,
+      lastModified: doc._updatedAt,
+    })
+    expect(offer.image.alt).toBe("Arba Minch at night")
+  })
+
+  it("leaves no-index offers out of the sitemap", () => {
+    const live = mapOffer({ ...doc, seo: null, resorts: null })
+    const hidden = mapOffer({ ...doc, slug: "hidden", seo: { noIndex: true }, resorts: null })
+    expect(offerSitemapEntries([live, hidden])).toEqual([
+      { path: "/offers/november-stay", lastModified: doc._updatedAt },
+    ])
+  })
+
+  it("maps a page with SEO fallbacks, contacts and empty rich text", () => {
+    const page = mapOfferPage({
+      ...doc,
+      showAsPopup: null,
+      description: null,
+      terms: null,
+      promoCode: " NOV25 ",
+      seo: null,
+      resorts: [
+        {
+          name: "Arba Minch",
+          fullName: "Kuriftu Resort & Spa Arba Minch",
+          slug: "arba-minch",
+          bookable: null,
+          bookingPropertyId: null,
+          phone: { display: "+251 999 222 211", tel: "+251999222211" },
+          email: null,
+        },
+      ],
+    })
+    expect(page.seo.title).toBe(doc.title)
+    expect(page.seo.description).toBe("Enjoy up to 25% off your November stay")
+    expect(page.showAsPopup).toBe(false)
+    expect(page.promoCode).toBe("NOV25")
+    expect(page.description).toEqual([])
+    expect(page.resorts[0]).toMatchObject({ heading: "Kuriftu Resort & Spa Arba Minch", bookable: true, email: null })
   })
 })

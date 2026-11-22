@@ -9,6 +9,9 @@ import { loadPostHog, optOut } from "@/lib/analytics/posthog"
 /** Window event the footer "Cookie settings" button dispatches. */
 export const OPEN_CONSENT_EVENT = "kuriftu:open-consent"
 
+/** Window event fired after the guest accepts or declines (the offer popup waits for it). */
+export const CONSENT_DECIDED_EVENT = "kuriftu:consent-decided"
+
 /**
  * Non-blocking consent panel. Nothing is tracked until Accept; a previous
  * grant loads PostHog on mount. Rendered only when a PostHog key is set.
@@ -47,6 +50,7 @@ export function ConsentBanner() {
     setOpen(false)
     if (reopened) returnFocusRef.current?.focus()
     setReopened(false)
+    window.dispatchEvent(new Event(CONSENT_DECIDED_EVENT))
   }
 
   if (!open) return null

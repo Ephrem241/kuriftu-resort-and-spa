@@ -6,6 +6,8 @@ import { client } from "@/sanity/lib/client"
 import { sanityFetch } from "@/sanity/lib/fetch"
 import {
   HOME_PAGE_QUERY,
+  OFFER_PAGE_QUERY,
+  OFFERS_QUERY,
   RESORT_PAGE_QUERY,
   RESORT_SLUGS_QUERY,
   ROOM_PAGE_QUERY,
@@ -14,8 +16,25 @@ import {
   SITEMAP_QUERY,
 } from "@/sanity/queries"
 
-import { mapHomePage, mapResortPage, mapRoomPage, mapSiteSettings, mapSitemap } from "./map"
-import type { HomePage, ResortPage, RoomPage, SiteSettings, SitemapEntry } from "./types"
+import {
+  mapHomePage,
+  mapOffer,
+  mapOfferPage,
+  mapResortPage,
+  mapRoomPage,
+  mapSiteSettings,
+  mapSitemap,
+} from "./map"
+import { cacheSeconds, isLive, type Dated } from "./offers"
+import type {
+  HomePage,
+  OfferPage,
+  OfferSummary,
+  ResortPage,
+  RoomPage,
+  SiteSettings,
+  SitemapEntry,
+} from "./types"
 
 /**
  * Server-only content access. Each getter is cached and tagged with the
@@ -99,6 +118,45 @@ export async function getSitemapEntries(): Promise<SitemapEntry[]> {
 
   const doc = await sanityFetch({ query: SITEMAP_QUERY, tags })
   return mapSitemap(doc)
+}
+
+/**
+ * Live offers, ending soonest first. Cached only until the next offer starts
+ * or ends, so offers appear and expire without a deploy; publishing in Sanity
+ * also expires the `offer` tag at once.
+ */
+export async function getOffers(): Promise<OfferSummary[]> {
+  "use cache"
+  cacheTag("offer", "resort")
+
+  const now = new Date()
+  // Direct fetch: $now is unique per call, so an inner cached fetch would never hit.
+  const docs = await client.fetch(OFFERS_QUERY, { now: now.toISOString() })
+  const offers = docs.map(mapOffer)
+  cacheLife(offerLifetime(offers, now))
+  return offers.filter((o) => isLive(o, now))
+}
+
+/** One live offer; null if unknown, not started or ended. */
+export async function getOfferPage(slug: string): Promise<OfferPage | null> {
+  "use cache"
+  const tags = ["offer", `offer:${slug}`, "resort"]
+  cacheTag(...tags)
+
+  const doc = await sanityFetch({ query: OFFER_PAGE_QUERY, params: { slug }, tags })
+  const now = new Date()
+  if (!doc) {
+    cacheLife("days")
+    return null
+  }
+  cacheLife(offerLifetime([doc], now))
+  return isLive(doc, now) ? mapOfferPage(doc) : null
+}
+
+/** Revalidate at the next start or end. Next requires expire > revalidate. */
+function offerLifetime(offers: Dated[], now: Date) {
+  const seconds = cacheSeconds(offers, now)
+  return { revalidate: seconds, expire: seconds + 1 }
 }
 
 function missing(type: string) {

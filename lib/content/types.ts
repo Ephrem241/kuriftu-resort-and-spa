@@ -181,6 +181,38 @@ export type RoomPage = {
   related: RoomSummary[]
 }
 
+/** A dated offer; shown only while live (see lib/content/offers.ts). */
+export type OfferSummary = {
+  title: string
+  slug: string
+  shortLine: string
+  /** ISO datetimes; live from start (inclusive) to end (exclusive). */
+  startDate: string
+  endDate: string
+  showAsPopup: boolean
+  image: ContentImage
+  /** Empty when the offer applies to every resort. */
+  resorts: { name: string; slug: string }[]
+  noIndex: boolean
+  lastModified: string
+}
+
+export type OfferResort = {
+  name: string
+  heading: string
+  slug: string
+  bookable: boolean
+  bookingPropertyId: string | null
+} & PropertyContact
+
+export type OfferPage = Omit<OfferSummary, "resorts" | "noIndex" | "lastModified"> & {
+  description: RichText
+  terms: RichText
+  promoCode: string
+  seo: PageSeo
+  resorts: OfferResort[]
+}
+
 export type ResortType ="resortAndSpa" | "adventurePark" | "waterPark" | "daySpa"
 
 export type ExperienceCategory = "water" | "adventure" | "nature" | "culture" | "family" | "dining"

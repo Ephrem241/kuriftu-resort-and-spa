@@ -1749,6 +1749,107 @@ export type SITEMAP_QUERY_RESULT = {
 };
 
 // Source: ../sanity/queries.ts
+// Variable: OFFERS_QUERY
+// Query: *[_type == "offer" && defined(slug.current) && endDate > $now] | order(endDate asc){    _updatedAt,  title,  "slug": slug.current,  shortLine,  startDate,  endDate,  showAsPopup,  image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }},  seo { noIndex },  "resorts": resorts[]->{ name, "slug": slug.current }}
+export type OFFERS_QUERY_RESULT = Array<{
+  _updatedAt: string;
+  title: string;
+  slug: string;
+  shortLine: string;
+  startDate: string;
+  endDate: string;
+  showAsPopup: boolean | null;
+  image: {
+    alt: string;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
+    asset: {
+      _id: string;
+      url: string;
+      metadata: {
+        lqip: string | null;
+        dimensions: {
+          width: number;
+          height: number;
+        } | null;
+      } | null;
+    } | null;
+  };
+  seo: {
+    noIndex: boolean | null;
+  } | null;
+  resorts: Array<{
+    name: string;
+    slug: string;
+  }> | null;
+}>;
+
+// Source: ../sanity/queries.ts
+// Variable: OFFER_PAGE_QUERY
+// Query: *[_type == "offer" && slug.current == $slug][0]{    _updatedAt,  title,  "slug": slug.current,  shortLine,  startDate,  endDate,  showAsPopup,  image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }},  description,  terms,  promoCode,  seo{ title, description, noIndex, ogImage{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} },  "resorts": resorts[]->{    name,    fullName,    "slug": slug.current,    bookable,    bookingPropertyId,    "phone": reservationContact.phones[0]{ display, tel },    "email": reservationContact.emails[0].address  }}
+export type OFFER_PAGE_QUERY_RESULT = {
+  _updatedAt: string;
+  title: string;
+  slug: string;
+  shortLine: string;
+  startDate: string;
+  endDate: string;
+  showAsPopup: boolean | null;
+  image: {
+    alt: string;
+    crop: SanityImageCrop | null;
+    hotspot: SanityImageHotspot | null;
+    asset: {
+      _id: string;
+      url: string;
+      metadata: {
+        lqip: string | null;
+        dimensions: {
+          width: number;
+          height: number;
+        } | null;
+      } | null;
+    } | null;
+  };
+  description: RichText | null;
+  terms: RichText | null;
+  promoCode: string | null;
+  seo: {
+    title: string | null;
+    description: string | null;
+    noIndex: boolean | null;
+    ogImage: {
+      alt: string;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      asset: {
+        _id: string;
+        url: string;
+        metadata: {
+          lqip: string | null;
+          dimensions: {
+            width: number;
+            height: number;
+          } | null;
+        } | null;
+      } | null;
+    } | null;
+  } | null;
+  resorts: Array<{
+    name: string;
+    fullName: string | null;
+    slug: string;
+    bookable: boolean | null;
+    bookingPropertyId: string | null;
+    phone: {
+      display: string;
+      tel: string;
+    } | null;
+    email: string | null;
+  }> | null;
+} | null;
+
+// Source: ../sanity/queries.ts
 // Variable: ENQUIRY_CONTEXT_QUERY
 // Query: {  "resort": *[_type == "resort" && slug.current == $slug][0]{    _id,    name,    reservationContact{ phones[]{ display, tel }, emails[]{ address } }  },  "settings": *[_type == "siteSettings"][0]{    reservations{ phones[]{ display, tel }, emails[]{ address } },    headOffice{ phones[]{ display, tel }, emails[]{ address } }  }}
 export type ENQUIRY_CONTEXT_QUERY_RESULT = {
@@ -1798,6 +1899,8 @@ declare module "@sanity/client" {
     '*[_type == "resort" && defined(slug.current)].slug.current': RESORT_SLUGS_QUERY_RESULT;
     '*[_type == "resort" && slug.current == $slug][0]{\n  _id,\n  name,\n  fullName,\n  "slug": slug.current,\n  type,\n  tagline,\n  summary,\n  introTitle,\n  locationLabel,\n  intro,\n  amenities[]{ _key, icon, label },\n  "country": address.country,\n  address{ streetAddress, locality, region, postalCode, country },\n  geo { lat, lng },\n  gettingHere,\n  heroImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  heroVideoUrl,\n  "gallery": gallery[0...2]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  bookable,\n  bookingPropertyId,\n  "phone": reservationContact.phones[0]{ display, tel },\n  "email": reservationContact.emails[0].address,\n  seo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  "rooms": *[_type == "room" && resort._ref == ^._id && defined(slug.current)] | order(title asc){\n  title,\n  "slug": slug.current,\n  "resortSlug": resort->slug.current,\n  summary,\n  maxGuests,\n  sizeSqm,\n  "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n},\n  "experiences": *[_type == "experience" && references(^._id) && defined(slug.current)] | order(title asc){\n    category,\n    "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n  },\n  "spaImage": *[_type == "spaTreatment" && references(^._id) && defined(image.asset)] | order(title asc)[0].image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  "diningImage": *[_type == "diningVenue" && resort._ref == ^._id && defined(images[0].asset)] | order(name asc)[0].images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n}': RESORT_PAGE_QUERY_RESULT;
     '{\n  "home": *[_type == "homePage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },\n  "resorts": *[_type == "resort" && defined(slug.current) && seo.noIndex != true] | order(name asc){\n    "slug": slug.current, _updatedAt\n  },\n  "rooms": *[_type == "room" && defined(slug.current) && defined(resort->slug.current) && seo.noIndex != true && resort->seo.noIndex != true] | order(title asc){\n    "slug": slug.current, "resortSlug": resort->slug.current, _updatedAt\n  }\n}': SITEMAP_QUERY_RESULT;
+    '*[_type == "offer" && defined(slug.current) && endDate > $now] | order(endDate asc){\n  \n  _updatedAt,\n  title,\n  "slug": slug.current,\n  shortLine,\n  startDate,\n  endDate,\n  showAsPopup,\n  image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  seo { noIndex },\n  "resorts": resorts[]->{ name, "slug": slug.current }\n}': OFFERS_QUERY_RESULT;
+    '*[_type == "offer" && slug.current == $slug][0]{\n  \n  _updatedAt,\n  title,\n  "slug": slug.current,\n  shortLine,\n  startDate,\n  endDate,\n  showAsPopup,\n  image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  description,\n  terms,\n  promoCode,\n  seo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  "resorts": resorts[]->{\n    name,\n    fullName,\n    "slug": slug.current,\n    bookable,\n    bookingPropertyId,\n    "phone": reservationContact.phones[0]{ display, tel },\n    "email": reservationContact.emails[0].address\n  }\n}': OFFER_PAGE_QUERY_RESULT;
     '{\n  "resort": *[_type == "resort" && slug.current == $slug][0]{\n    _id,\n    name,\n    reservationContact{ phones[]{ display, tel }, emails[]{ address } }\n  },\n  "settings": *[_type == "siteSettings"][0]{\n    reservations{ phones[]{ display, tel }, emails[]{ address } },\n    headOffice{ phones[]{ display, tel }, emails[]{ address } }\n  }\n}': ENQUIRY_CONTEXT_QUERY_RESULT;
   }
 }
