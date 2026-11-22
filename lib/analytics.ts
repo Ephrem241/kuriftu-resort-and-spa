@@ -8,7 +8,7 @@ type AnalyticsEvents = {
     nights: number
     guests: number
   }
-  booking_handoff_clicked: { source: string; resort?: string }
+  booking_handoff_clicked: { source: string; resort?: string; room?: string }
   video_played: { source: string }
   contact_tap: { method: "phone" | "email"; source: string }
 }

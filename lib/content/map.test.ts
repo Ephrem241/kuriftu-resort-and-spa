@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { mapHomePage, mapResortPage, mapSiteSettings, toContentImage } from "./map"
+import { mapHomePage, mapResortPage, mapRoomPage, mapSiteSettings, toContentImage } from "./map"
 
 const asset = {
   _id: "image-abc123-2000x1000-jpg",
@@ -38,6 +38,8 @@ describe("mapSiteSettings", () => {
     reservationPhone: null,
     reservationEmail: null,
     headOfficeAddress: null,
+    logo: null,
+    seo: null,
     social: null,
     navResorts: null,
     experienceLinks: null,
@@ -53,6 +55,9 @@ describe("mapSiteSettings", () => {
     expect(s.address).toBeNull()
     expect(s.footerColumns).toEqual([])
     expect(s.copyrightYear).toBe(2026)
+    expect(s.headOfficeAddress).toBeNull()
+    expect(s.logo).toBeNull()
+    expect(s.seo).toEqual({ title: "Kuriftu", description: "", image: null, noIndex: false })
   })
 
   it("maps contact, address and links", () => {
@@ -61,13 +66,16 @@ describe("mapSiteSettings", () => {
         ...base,
         reservationPhone: { display: "+251 999 222 211", tel: "+251999222211" },
         reservationEmail: "booking@example.com",
-        headOfficeAddress: { locality: "Addis Ababa", country: "Ethiopia" },
+        headOfficeAddress: { streetAddress: null, locality: "Addis Ababa", region: null, postalCode: null, country: "Ethiopia" },
+        seo: { title: " Kuriftu Resorts & Spa ", description: "Luxury across Ethiopia.", noIndex: null, ogImage: null },
         legalLinks: [{ label: "Privacy", linkType: "path", path: "/privacy-policy", url: null, target: null }],
       },
       2026
     )
     expect(s.reservationPhone?.tel).toBe("+251999222211")
     expect(s.address).toBe("Addis Ababa, Ethiopia")
+    expect(s.headOfficeAddress).toEqual({ street: "", locality: "Addis Ababa", region: "", postalCode: "", country: "Ethiopia" })
+    expect(s.seo).toMatchObject({ title: "Kuriftu Resorts & Spa", description: "Luxury across Ethiopia." })
     expect(s.legalLinks).toEqual([{ label: "Privacy", href: "/privacy-policy" }])
   })
 })
@@ -96,6 +104,7 @@ describe("mapHomePage", () => {
       offersPanel: null,
       testimonials: null,
       stayConnected: null,
+      seo: null,
     })
     expect(home.heroSlides).toEqual([])
     expect(home.experience.pillars).toEqual([{ icon: "bed", title: "Stay", subtitle: "", href: "#" }])
@@ -122,6 +131,7 @@ describe("mapResortPage", () => {
       { _key: "b", icon: null, label: "Pedicure" },
     ],
     country: "Ethiopia",
+    address: { streetAddress: " Lake Hora ", locality: "Bishoftu", region: "Oromia", postalCode: null, country: "Ethiopia" },
     geo: { lat: 8.78, lng: 39.0 },
     gettingHere: "53.8 km from Addis Ababa Bole International Airport",
     heroImage: image("Lakeside pool at dusk"),
@@ -154,7 +164,8 @@ describe("mapResortPage", () => {
       { key: "a", icon: "wifi", label: "Free Wi-Fi" },
       { key: "b", icon: null, label: "Pedicure" },
     ])
-    expect(page.seo).toEqual({ title: "Kuriftu Resort & Spa Bishoftu", description: "Set against the tranquil shores." })
+    expect(page.seo).toEqual({ title: "Kuriftu Resort & Spa Bishoftu", description: "Set against the tranquil shores.", image: null, noIndex: false })
+    expect(page.address).toEqual({ street: "Lake Hora", locality: "Bishoftu", region: "Oromia", postalCode: "", country: "Ethiopia" })
     expect(page.aboutImage.alt).toBe("Gallery one")
     expect(page.ctaImage.alt).toBe("Lakeside pool at dusk")
     expect(page.rooms.map((r) => r.slug)).toEqual(["lake-side"])
@@ -169,5 +180,101 @@ describe("mapResortPage", () => {
     expect(page.heading).toBe("Bishoftu")
     expect(page.geo).toBeNull()
     expect(page.phone).toBeNull()
+  })
+
+  it("uses the editor's share image and noIndex, and drops an address without a town", () => {
+    const page = mapResortPage({
+      ...base,
+      address: { streetAddress: "Somewhere", locality: " ", region: null, postalCode: null, country: "Ethiopia" },
+      seo: { title: "Custom", description: null, noIndex: true, ogImage: image("Share card") },
+    } as unknown as Parameters<typeof mapResortPage>[0])
+    expect(page.seo.title).toBe("Custom")
+    expect(page.seo.noIndex).toBe(true)
+    expect(page.seo.image?.alt).toBe("Share card")
+    expect(page.address).toBeNull()
+  })
+})
+
+describe("mapRoomPage", () => {
+  const image = (alt: string) => ({ alt, crop: null, hotspot: null, asset: { ...asset, metadata: { lqip: null, dimensions: null } } })
+  const base = {
+    _id: "room.bishoftu.2",
+    title: "Gateway Retreat",
+    slug: "gateway-retreat",
+    summary: " Awaken to birdsong. ",
+    overviewTitle: null,
+    description: null,
+    videoUrl: null,
+    images: [image("Garden room"), { alt: "No asset", crop: null, hotspot: null, asset: null }],
+    maxGuests: null,
+    bedConfiguration: null,
+    sizeSqm: null,
+    view: null,
+    amenities: [
+      { _key: "a", icon: "wifi", label: "Wifi" },
+      { _key: "b", icon: "rocket", label: "Slippers" },
+    ],
+    features: [" Private balcony ", ""],
+    fromPrice: null,
+    seo: null,
+    resort: {
+      name: "Bishoftu",
+      fullName: "Kuriftu Resort & Spa Bishoftu",
+      slug: "bishoftu",
+      bookable: true,
+      bookingPropertyId: null,
+      phone: { display: "+251 11 123 4567", tel: "+251111234567" },
+      email: "bishoftu@example.com",
+    },
+    related: [
+      { title: "Lake Side", slug: "lake-side", resortSlug: "bishoftu", summary: "Lakefront.", maxGuests: null, sizeSqm: null, image: image("Lake") },
+      { title: "Orphan", slug: "orphan", resortSlug: null, summary: "", maxGuests: null, sizeSqm: null, image: null },
+    ],
+  } as unknown as Parameters<typeof mapRoomPage>[0]
+
+  it("maps fallbacks without inventing content", () => {
+    const room = mapRoomPage(base)!
+    expect(room.summary).toBe("Awaken to birdsong.")
+    expect(room.overviewTitle).toBe("")
+    // Empty description falls back to the summary as one paragraph.
+    expect(room.description).toHaveLength(1)
+    expect(JSON.stringify(room.description)).toContain("Awaken to birdsong.")
+    expect(room.images).toHaveLength(1)
+    expect(room.images[0].alt).toBe("Garden room")
+    expect(room.amenities).toEqual([
+      { key: "a", icon: "wifi", label: "Wifi" },
+      { key: "b", icon: null, label: "Slippers" },
+    ])
+    expect(room.features).toEqual(["Private balcony"])
+    expect(room.fromPrice).toBeNull()
+    expect(room.maxGuests).toBeNull()
+    expect(room.seo).toEqual({ title: "Gateway Retreat | Kuriftu Resort & Spa Bishoftu", description: "Awaken to birdsong.", image: null, noIndex: false })
+    expect(room.resort).toMatchObject({
+      heading: "Kuriftu Resort & Spa Bishoftu",
+      slug: "bishoftu",
+      bookable: true,
+      phone: { display: "+251 11 123 4567", tel: "+251111234567" },
+      email: "bishoftu@example.com",
+    })
+    expect(room.related.map((r) => r.slug)).toEqual(["lake-side"])
+  })
+
+  it("keeps editor-entered price and facts, and needs a resort", () => {
+    const room = mapRoomPage({
+      ...base,
+      maxGuests: 2,
+      sizeSqm: 35,
+      view: "Lake View",
+      bedConfiguration: "King bed",
+      fromPrice: { amount: 120, currency: "USD", unit: null },
+    } as typeof base)!
+    expect(room.fromPrice).toEqual({ amount: 120, currency: "USD", unit: "" })
+    expect(room).toMatchObject({ maxGuests: 2, sizeSqm: 35, view: "Lake View", bedConfiguration: "King bed" })
+    expect(mapRoomPage({ ...base, resort: null } as unknown as typeof base)).toBeNull()
+  })
+
+  it("shows a placeholder when no image has an asset", () => {
+    const room = mapRoomPage({ ...base, images: [] } as unknown as typeof base)!
+    expect(room.images).toEqual([{ alt: "Gateway Retreat" }])
   })
 })

@@ -27,12 +27,16 @@
     "rules": [
       ["wi-?fi|internet", "wifi"],
       ["tv|hdtv|cinema|screen", "tv"],
-      ["coffee|tea", "coffee"],
+      ["massage|spa|steam|sauna", "spa"],
+      ["coffee|\\btea\\b", "coffee"],
       ["bath|shower|jacuzzi", "bath"],
       ["air condition|a/c", "snowflake"],
       ["pool|swim|water ?park|kayak", "waves"],
       ["fitness|gym", "dumbbell"],
-      ["massage|spa|steam|sauna", "spa"],
+      ["hair|dryer", "wind"],
+      ["\\bsafe\\b|deposit", "vault"],
+      ["fridge|mini ?bar", "refrigerator"],
+      ["phone", "phone"],
       ["breakfast|dinner|lunch|meal|restaurant", "utensils"],
       ["parking", "car"],
       ["view", "eye"]

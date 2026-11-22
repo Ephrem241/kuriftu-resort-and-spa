@@ -1,21 +1,29 @@
 import type {
   HOME_PAGE_QUERY_RESULT,
   RESORT_PAGE_QUERY_RESULT,
+  ROOM_PAGE_QUERY_RESULT,
+  SITEMAP_QUERY_RESULT,
   SITE_SETTINGS_QUERY_RESULT,
 } from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
 
 import { isIconName } from "./icons"
-import { hrefFor, type ContentLink } from "./routes"
+import { hrefFor, pathForDocument, type ContentLink } from "./routes"
 import type {
+  Amenity,
   ContentImage,
   HomePage,
   NavLink,
+  PageSeo,
+  PostalAddress,
+  PropertyContact,
   ResortPage,
+  RoomPage,
   ResortSummary,
   RichText,
   RoomSummary,
   SiteSettings,
+  SitemapEntry,
   SocialPlatform,
 } from "./types"
 
@@ -72,6 +80,44 @@ function toNavLinks(links: Array<ContentLink & { label: string }> | null | undef
   return (links ?? []).map((link) => ({ label: link.label, href: hrefFor(link) }))
 }
 
+type SeoDoc = {
+  title?: string | null
+  description?: string | null
+  noIndex?: boolean | null
+  ogImage?: SanityImage
+} | null | undefined
+
+/** SEO fields with fallbacks for an empty title or description. */
+export function mapSeo(seo: SeoDoc, fallback: { title: string; description: string }): PageSeo {
+  return {
+    title: seo?.title?.trim() || fallback.title,
+    description: seo?.description?.trim() || fallback.description,
+    image: seo?.ogImage?.asset ? toContentImage(seo.ogImage) : null,
+    noIndex: seo?.noIndex === true,
+  }
+}
+
+type AddressDoc = {
+  streetAddress?: string | null
+  locality?: string | null
+  region?: string | null
+  postalCode?: string | null
+  country?: string | null
+} | null | undefined
+
+/** A postal address, or null without a town or city. */
+export function mapAddress(doc: AddressDoc): PostalAddress | null {
+  const locality = doc?.locality?.trim()
+  if (!locality) return null
+  return {
+    street: doc?.streetAddress?.trim() ?? "",
+    locality,
+    region: doc?.region?.trim() ?? "",
+    postalCode: doc?.postalCode?.trim() ?? "",
+    country: doc?.country?.trim() ?? "",
+  }
+}
+
 const PLATFORMS: SocialPlatform[] = ["facebook", "instagram", "youtube", "x", "linkedin", "tiktok"]
 
 type SettingsDoc = NonNullable<SITE_SETTINGS_QUERY_RESULT>
@@ -90,6 +136,9 @@ export function mapSiteSettings(
     reservationPhone: doc.reservationPhone ?? null,
     reservationEmail: doc.reservationEmail ?? null,
     address: address || null,
+    headOfficeAddress: mapAddress(doc.headOfficeAddress),
+    logo: doc.logo?.asset ? toContentImage(doc.logo, doc.brandName) : null,
+    seo: mapSeo(doc.seo, { title: doc.brandName, description: "" }),
     social: (doc.social ?? []).filter((s) => PLATFORMS.includes(s.platform)),
     navResorts: (doc.navResorts ?? []).filter((r) => r.slug),
     bookableResorts: doc.bookableResorts.map((r) => ({
@@ -188,6 +237,89 @@ export function mapHomePage(doc: HomeDoc): HomePage {
       title: stayConnected?.title ?? "",
       subtitle: stayConnected?.subtitle ?? "",
     },
+    seo: mapSeo(doc.seo, { title: "", description: "" }),
+  }
+}
+
+type AmenityDoc = { _key: string; icon?: string | null; label: string }
+
+function mapAmenities(amenities: AmenityDoc[] | null | undefined): Amenity[] {
+  return (amenities ?? []).map((a) => ({
+    key: a._key,
+    icon: isIconName(a.icon) ? a.icon : null,
+    label: a.label,
+  }))
+}
+
+function mapContact(
+  phone: { display?: string | null; tel?: string | null } | null | undefined,
+  email: string | null | undefined
+): PropertyContact {
+  return {
+    phone: phone?.display && phone.tel ? { display: phone.display, tel: phone.tel } : null,
+    email: email ?? null,
+  }
+}
+
+/** A text paragraph as Portable Text, for fallbacks. */
+function paragraph(text: string, key: string): RichText {
+  return [
+    {
+      _type: "block",
+      _key: key,
+      style: "normal",
+      markDefs: [],
+      children: [{ _type: "span", _key: `${key}-span`, text, marks: [] }],
+    },
+  ]
+}
+
+type RoomDoc = NonNullable<ROOM_PAGE_QUERY_RESULT>
+
+export function mapRoomPage(doc: RoomDoc): RoomPage | null {
+  const resort = doc.resort
+  if (!resort?.slug) return null
+
+  const resortHeading = resort.fullName?.trim() || resort.name
+  const summary = doc.summary?.trim() ?? ""
+  const images = (doc.images ?? [])
+    .filter((img) => img.asset)
+    .map((img, i) => toContentImage(img, `${doc.title}, photo ${i + 1}`))
+  const description = (doc.description ?? []) as RichText
+  const price = doc.fromPrice
+
+  return {
+    title: doc.title,
+    slug: doc.slug,
+    summary,
+    overviewTitle: doc.overviewTitle?.trim() ?? "",
+    description: description.length > 0 ? description : summary ? paragraph(summary, "summary") : [],
+    videoUrl: doc.videoUrl ?? null,
+    // Images are required in Studio; an alt-only placeholder covers a missing asset.
+    images: images.length > 0 ? images : [toContentImage(null, doc.title)],
+    maxGuests: doc.maxGuests ?? null,
+    bedConfiguration: doc.bedConfiguration?.trim() ?? "",
+    sizeSqm: doc.sizeSqm ?? null,
+    view: doc.view?.trim() ?? "",
+    amenities: mapAmenities(doc.amenities),
+    features: (doc.features ?? []).map((f) => f.trim()).filter(Boolean),
+    fromPrice:
+      price?.amount && price.currency
+        ? { amount: price.amount, currency: price.currency, unit: price.unit?.trim() ?? "" }
+        : null,
+    seo: mapSeo(doc.seo, { title: `${doc.title} | ${resortHeading}`, description: summary }),
+    resort: {
+      name: resort.name,
+      heading: resortHeading,
+      slug: resort.slug,
+      bookable: resort.bookable ?? true,
+      bookingPropertyId: resort.bookingPropertyId ?? null,
+      ...mapContact(resort.phone, resort.email),
+    },
+    related: (doc.related ?? []).flatMap((r) => {
+      const room = mapRoom(r)
+      return room ? [room] : []
+    }),
   }
 }
 
@@ -199,7 +331,6 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
   const [first, second] = doc.gallery ?? []
   const lat = doc.geo?.lat
   const lng = doc.geo?.lng
-  const phone = doc.phone?.display && doc.phone.tel ? { display: doc.phone.display, tel: doc.phone.tel } : null
 
   return {
     name: doc.name,
@@ -208,14 +339,11 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
     type: doc.type,
     locationLabel: doc.locationLabel,
     country: doc.country ?? "",
+    address: mapAddress(doc.address),
     summary: doc.summary?.trim() ?? "",
     introTitle: doc.introTitle?.trim() || doc.tagline?.trim() || "",
     intro: (doc.intro ?? []) as RichText,
-    amenities: (doc.amenities ?? []).map((a) => ({
-      key: a._key,
-      icon: isIconName(a.icon) ? a.icon : null,
-      label: a.label,
-    })),
+    amenities: mapAmenities(doc.amenities),
     geo: typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null,
     gettingHere: doc.gettingHere?.trim() ?? "",
     heroImage,
@@ -224,12 +352,8 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
     heroVideoUrl: doc.heroVideoUrl ?? null,
     bookable: doc.bookable ?? true,
     bookingPropertyId: doc.bookingPropertyId ?? null,
-    phone,
-    email: doc.email ?? null,
-    seo: {
-      title: doc.seo?.title?.trim() || heading,
-      description: doc.seo?.description?.trim() || doc.summary?.trim() || "",
-    },
+    ...mapContact(doc.phone, doc.email),
+    seo: mapSeo(doc.seo, { title: heading, description: doc.summary?.trim() || "" }),
     rooms: (doc.rooms ?? []).flatMap((r) => {
       const room = mapRoom(r)
       return room ? [room] : []
@@ -240,4 +364,19 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
     spaImage: doc.spaImage?.asset ? toContentImage(doc.spaImage) : null,
     diningImage: doc.diningImage?.asset ? toContentImage(doc.diningImage) : null,
   }
+}
+
+/** Indexable pages for sitemap.xml, home first; rows without a path are dropped. */
+export function mapSitemap(doc: SITEMAP_QUERY_RESULT): SitemapEntry[] {
+  const entries: SitemapEntry[] = []
+  if (doc.home && !doc.home.noIndex) entries.push({ path: "/", lastModified: doc.home._updatedAt })
+  for (const r of doc.resorts) {
+    const path = pathForDocument({ _type: "resort", slug: r.slug })
+    if (path) entries.push({ path, lastModified: r._updatedAt })
+  }
+  for (const r of doc.rooms) {
+    const path = pathForDocument({ _type: "room", slug: r.slug, resortSlug: r.resortSlug })
+    if (path) entries.push({ path, lastModified: r._updatedAt })
+  }
+  return entries
 }

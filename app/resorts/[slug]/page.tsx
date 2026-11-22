@@ -9,39 +9,37 @@ import { ResortCta } from "@/components/resort/resort-cta"
 import { ResortHero } from "@/components/resort/resort-hero"
 import { ResortLocation } from "@/components/resort/resort-location"
 import { ResortRooms } from "@/components/resort/resort-rooms"
-import { getResortPage, getResortSlugs } from "@/lib/content"
+import { JsonLd } from "@/components/seo/json-ld"
+import { getResortPage, getResortSlugs, getSiteSettings } from "@/lib/content"
 import { activityTiles } from "@/lib/content/activities"
-import type { ContentImage } from "@/lib/content/types"
+import { pathForDocument } from "@/lib/content/routes"
+import { resortJsonLd } from "@/lib/seo/json-ld"
+import { pageMetadata } from "@/lib/seo/metadata"
+import { absoluteUrl, siteUrl } from "@/lib/seo/site-url"
 
 export async function generateStaticParams() {
   const slugs = await getResortSlugs()
   return slugs.map((slug) => ({ slug }))
 }
 
-/** Open Graph crop (1200×630) of a Sanity CDN image. */
-function ogImage(image: ContentImage) {
-  if (!image.src) return undefined
-  const url = new URL(image.src)
-  url.searchParams.set("w", "1200")
-  url.searchParams.set("h", "630")
-  url.searchParams.set("fit", "crop")
-  return [{ url: url.toString(), width: 1200, height: 630, alt: image.alt }]
-}
-
 export async function generateMetadata({ params }: PageProps<"/resorts/[slug]">): Promise<Metadata> {
   const { slug } = await params
-  const resort = await getResortPage(slug)
+  const [resort, settings] = await Promise.all([getResortPage(slug), getSiteSettings()])
   if (!resort) notFound()
 
-  return {
-    title: { absolute: resort.seo.title },
-    description: resort.seo.description || undefined,
-    openGraph: {
-      title: resort.seo.title,
-      description: resort.seo.description || undefined,
-      images: ogImage(resort.heroImage),
-    },
-  }
+  return pageMetadata({
+    title: resort.seo.title,
+    description: resort.seo.description,
+    path: resortPath(resort.slug),
+    siteName: settings.brandName,
+    image: resort.seo.image ?? resort.heroImage,
+    noIndex: resort.seo.noIndex,
+    titleAbsolute: true,
+  })
+}
+
+function resortPath(slug: string) {
+  return pathForDocument({ _type: "resort", slug }) ?? `/resorts/${encodeURIComponent(slug)}`
 }
 
 export default function Page({ params }: PageProps<"/resorts/[slug]">) {
@@ -62,6 +60,7 @@ async function ResortContent({ params }: Pick<PageProps<"/resorts/[slug]">, "par
 
   return (
     <>
+      <JsonLd data={resortJsonLd(resort, absoluteUrl(resortPath(resort.slug)), siteUrl())} />
       <ResortHero resort={resort} />
       <ResortAbout resort={resort} />
       <ResortAmenities amenities={resort.amenities} />
