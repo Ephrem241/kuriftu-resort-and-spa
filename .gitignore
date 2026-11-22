@@ -58,3 +58,4 @@ next-env.d.ts
 /migration/node_modules/
 /migration/extracted/
 /migration/transformed/
+.env.local

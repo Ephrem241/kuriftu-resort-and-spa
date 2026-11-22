@@ -1,7 +1,6 @@
-/**
- * Typed analytics events. A no-op until PostHog is wired up (with consent)
- * in its own step; then this forwards to posthog.capture.
- */
+import posthog from "posthog-js"
+
+/** Typed analytics events sent from client-side interaction handlers. */
 type AnalyticsEvents = {
   availability_search_submitted: {
     destination: string
@@ -13,15 +12,9 @@ type AnalyticsEvents = {
   contact_tap: { method: "phone" | "email"; source: string }
 }
 
-type PostHogLike = {
-  capture: (event: string, props?: Record<string, unknown>) => void
-}
-
 export function track<E extends keyof AnalyticsEvents>(
   event: E,
   props: AnalyticsEvents[E]
 ): void {
-  if (typeof window === "undefined") return
-  const ph = (window as unknown as { posthog?: PostHogLike }).posthog
-  ph?.capture(event, props)
+  posthog.capture(event, props)
 }
