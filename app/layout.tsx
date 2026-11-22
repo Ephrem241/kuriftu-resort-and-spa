@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { Lato, Playfair_Display } from "next/font/google";
+import { JsonLd } from "@/components/seo/json-ld";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
+import { getSiteSettings } from "@/lib/content";
+import { ogImage } from "@/lib/content/og";
+import { organizationJsonLd } from "@/lib/seo/json-ld";
+import { OG_LOCALE } from "@/lib/seo/metadata";
+import { siteUrl } from "@/lib/seo/site-url";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -18,13 +24,27 @@ const lato = Lato({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Kuriftu Resorts & Spa",
-    template: "%s | Kuriftu Resorts & Spa",
-  },
-  description: "Discover the extraordinary.",
-};
+/** Site-wide defaults from Site settings → Default SEO; pages override them. */
+export async function generateMetadata(): Promise<Metadata> {
+  const { seo, brandName } = await getSiteSettings();
+  const description = seo.description || undefined;
+  const images = seo.image ? ogImage(seo.image) : undefined;
+
+  return {
+    // A string, not a URL: metadata values must be serialisable.
+    metadataBase: siteUrl(),
+    title: { default: seo.title, template: `%s | ${brandName}` },
+    description,
+    openGraph: { type: "website", locale: OG_LOCALE, siteName: brandName, title: seo.title, description, images },
+    twitter: { card: "summary_large_image" },
+  };
+}
+
+/** Organization structured data, on every page. */
+async function OrganizationJsonLd() {
+  const settings = await getSiteSettings();
+  return <JsonLd data={organizationJsonLd(settings, siteUrl())} />;
+}
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -36,6 +56,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+        <OrganizationJsonLd />
         <SiteHeader />
         {children}
         <SiteFooter />

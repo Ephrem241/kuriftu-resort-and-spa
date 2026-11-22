@@ -20,13 +20,19 @@ const LINK = /* groq */ `{
   "target": reference->{ _type, "slug": slug.current, "resortSlug": resort->slug.current }
 }`
 
+const SEO = /* groq */ `{ title, description, noIndex, ogImage${IMAGE} }`
+
+const ADDRESS = /* groq */ `{ streetAddress, locality, region, postalCode, country }`
+
 export const SITE_SETTINGS_QUERY = defineQuery(`*[_type == "siteSettings"][0]{
   brandName,
   footerTagline,
   storyVideoUrl,
   "reservationPhone": reservations.phones[0]{ display, tel },
   "reservationEmail": reservations.emails[0].address,
-  headOfficeAddress { locality, country },
+  headOfficeAddress${ADDRESS},
+  "logo": logos.primary${IMAGE},
+  seo${SEO},
   social[]{ platform, url },
   "navResorts": navResorts[]->{ name, "slug": slug.current },
   experienceLinks[]${LINK},
@@ -64,7 +70,8 @@ export const HOME_PAGE_QUERY = defineQuery(`*[_type == "homePage"][0]{
   rooms { title, subtitle, "items": items[]->${ROOM_CARD} },
   offersPanel { title, text, ctaLabel, image${IMAGE} },
   testimonials { title, subtitle, items[]{ quote, name, location, avatar${IMAGE} }, backgroundImage${IMAGE} },
-  stayConnected { title, subtitle }
+  stayConnected { title, subtitle },
+  seo${SEO}
 }`)
 
 /** Every resort and room slug pair, for the room page's static params. */
@@ -89,7 +96,7 @@ export const ROOM_PAGE_QUERY = defineQuery(`*[_type == "room" && slug.current ==
   amenities[]{ _key, icon, label },
   features,
   fromPrice { amount, currency, unit },
-  seo { title, description },
+  seo${SEO},
   "resort": resort->{
     name,
     fullName,
@@ -120,6 +127,7 @@ export const RESORT_PAGE_QUERY = defineQuery(`*[_type == "resort" && slug.curren
   intro,
   amenities[]{ _key, icon, label },
   "country": address.country,
+  address${ADDRESS},
   geo { lat, lng },
   gettingHere,
   heroImage${IMAGE},
@@ -129,7 +137,7 @@ export const RESORT_PAGE_QUERY = defineQuery(`*[_type == "resort" && slug.curren
   bookingPropertyId,
   "phone": reservationContact.phones[0]{ display, tel },
   "email": reservationContact.emails[0].address,
-  seo { title, description },
+  seo${SEO},
   "rooms": *[_type == "room" && resort._ref == ^._id && defined(slug.current)] | order(title asc)${ROOM_CARD},
   "experiences": *[_type == "experience" && references(^._id) && defined(slug.current)] | order(title asc){
     category,
@@ -137,4 +145,18 @@ export const RESORT_PAGE_QUERY = defineQuery(`*[_type == "resort" && slug.curren
   },
   "spaImage": *[_type == "spaTreatment" && references(^._id) && defined(image.asset)] | order(title asc)[0].image${IMAGE},
   "diningImage": *[_type == "diningVenue" && resort._ref == ^._id && defined(images[0].asset)] | order(name asc)[0].images[0]${IMAGE}
+}`)
+
+/**
+ * Indexable home, resorts and rooms for sitemap.xml. A room is left out when
+ * it, or its resort, is hidden from search engines.
+ */
+export const SITEMAP_QUERY = defineQuery(`{
+  "home": *[_type == "homePage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },
+  "resorts": *[_type == "resort" && defined(slug.current) && seo.noIndex != true] | order(name asc){
+    "slug": slug.current, _updatedAt
+  },
+  "rooms": *[_type == "room" && defined(slug.current) && defined(resort->slug.current) && seo.noIndex != true && resort->seo.noIndex != true] | order(title asc){
+    "slug": slug.current, "resortSlug": resort->slug.current, _updatedAt
+  }
 }`)

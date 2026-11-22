@@ -38,6 +38,8 @@ describe("mapSiteSettings", () => {
     reservationPhone: null,
     reservationEmail: null,
     headOfficeAddress: null,
+    logo: null,
+    seo: null,
     social: null,
     navResorts: null,
     experienceLinks: null,
@@ -53,6 +55,9 @@ describe("mapSiteSettings", () => {
     expect(s.address).toBeNull()
     expect(s.footerColumns).toEqual([])
     expect(s.copyrightYear).toBe(2026)
+    expect(s.headOfficeAddress).toBeNull()
+    expect(s.logo).toBeNull()
+    expect(s.seo).toEqual({ title: "Kuriftu", description: "", image: null, noIndex: false })
   })
 
   it("maps contact, address and links", () => {
@@ -61,13 +66,16 @@ describe("mapSiteSettings", () => {
         ...base,
         reservationPhone: { display: "+251 999 222 211", tel: "+251999222211" },
         reservationEmail: "booking@example.com",
-        headOfficeAddress: { locality: "Addis Ababa", country: "Ethiopia" },
+        headOfficeAddress: { streetAddress: null, locality: "Addis Ababa", region: null, postalCode: null, country: "Ethiopia" },
+        seo: { title: " Kuriftu Resorts & Spa ", description: "Luxury across Ethiopia.", noIndex: null, ogImage: null },
         legalLinks: [{ label: "Privacy", linkType: "path", path: "/privacy-policy", url: null, target: null }],
       },
       2026
     )
     expect(s.reservationPhone?.tel).toBe("+251999222211")
     expect(s.address).toBe("Addis Ababa, Ethiopia")
+    expect(s.headOfficeAddress).toEqual({ street: "", locality: "Addis Ababa", region: "", postalCode: "", country: "Ethiopia" })
+    expect(s.seo).toMatchObject({ title: "Kuriftu Resorts & Spa", description: "Luxury across Ethiopia." })
     expect(s.legalLinks).toEqual([{ label: "Privacy", href: "/privacy-policy" }])
   })
 })
@@ -96,6 +104,7 @@ describe("mapHomePage", () => {
       offersPanel: null,
       testimonials: null,
       stayConnected: null,
+      seo: null,
     })
     expect(home.heroSlides).toEqual([])
     expect(home.experience.pillars).toEqual([{ icon: "bed", title: "Stay", subtitle: "", href: "#" }])
@@ -122,6 +131,7 @@ describe("mapResortPage", () => {
       { _key: "b", icon: null, label: "Pedicure" },
     ],
     country: "Ethiopia",
+    address: { streetAddress: " Lake Hora ", locality: "Bishoftu", region: "Oromia", postalCode: null, country: "Ethiopia" },
     geo: { lat: 8.78, lng: 39.0 },
     gettingHere: "53.8 km from Addis Ababa Bole International Airport",
     heroImage: image("Lakeside pool at dusk"),
@@ -154,7 +164,8 @@ describe("mapResortPage", () => {
       { key: "a", icon: "wifi", label: "Free Wi-Fi" },
       { key: "b", icon: null, label: "Pedicure" },
     ])
-    expect(page.seo).toEqual({ title: "Kuriftu Resort & Spa Bishoftu", description: "Set against the tranquil shores." })
+    expect(page.seo).toEqual({ title: "Kuriftu Resort & Spa Bishoftu", description: "Set against the tranquil shores.", image: null, noIndex: false })
+    expect(page.address).toEqual({ street: "Lake Hora", locality: "Bishoftu", region: "Oromia", postalCode: "", country: "Ethiopia" })
     expect(page.aboutImage.alt).toBe("Gallery one")
     expect(page.ctaImage.alt).toBe("Lakeside pool at dusk")
     expect(page.rooms.map((r) => r.slug)).toEqual(["lake-side"])
@@ -169,6 +180,18 @@ describe("mapResortPage", () => {
     expect(page.heading).toBe("Bishoftu")
     expect(page.geo).toBeNull()
     expect(page.phone).toBeNull()
+  })
+
+  it("uses the editor's share image and noIndex, and drops an address without a town", () => {
+    const page = mapResortPage({
+      ...base,
+      address: { streetAddress: "Somewhere", locality: " ", region: null, postalCode: null, country: "Ethiopia" },
+      seo: { title: "Custom", description: null, noIndex: true, ogImage: image("Share card") },
+    } as unknown as Parameters<typeof mapResortPage>[0])
+    expect(page.seo.title).toBe("Custom")
+    expect(page.seo.noIndex).toBe(true)
+    expect(page.seo.image?.alt).toBe("Share card")
+    expect(page.address).toBeNull()
   })
 })
 
@@ -225,7 +248,7 @@ describe("mapRoomPage", () => {
     expect(room.features).toEqual(["Private balcony"])
     expect(room.fromPrice).toBeNull()
     expect(room.maxGuests).toBeNull()
-    expect(room.seo).toEqual({ title: "Gateway Retreat | Kuriftu Resort & Spa Bishoftu", description: "Awaken to birdsong." })
+    expect(room.seo).toEqual({ title: "Gateway Retreat | Kuriftu Resort & Spa Bishoftu", description: "Awaken to birdsong.", image: null, noIndex: false })
     expect(room.resort).toMatchObject({
       heading: "Kuriftu Resort & Spa Bishoftu",
       slug: "bishoftu",

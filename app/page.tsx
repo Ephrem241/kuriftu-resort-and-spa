@@ -9,12 +9,21 @@ import { HeroCarousel } from "@/components/home/hero-carousel"
 import { OffersPanel } from "@/components/home/offers-panel"
 import { SectionHeading } from "@/components/ui/section-heading"
 import { getHomePage, getSiteSettings } from "@/lib/content"
+import { pageMetadata } from "@/lib/seo/metadata"
 import { toEmbedUrl } from "@/lib/video"
 
-export const metadata: Metadata = {
-  title: { absolute: "Kuriftu Resorts & Spa | Ethiopia, Your Way" },
-  description:
-    "Luxury resorts, spas, and adventure parks across Ethiopia. Discover Bishoftu, Awash Falls, Entoto, Lake Tana, and Arba Minch, and book your stay.",
+/** Home page SEO, falling back field by field to the site's Default SEO. */
+export async function generateMetadata(): Promise<Metadata> {
+  const [home, settings] = await Promise.all([getHomePage(), getSiteSettings()])
+  return pageMetadata({
+    title: home.seo.title || settings.seo.title,
+    description: home.seo.description || settings.seo.description,
+    path: "/",
+    siteName: settings.brandName,
+    image: home.seo.image ?? settings.seo.image ?? home.heroSlides[0]?.image,
+    noIndex: home.seo.noIndex,
+    titleAbsolute: true,
+  })
 }
 
 export default async function Home() {

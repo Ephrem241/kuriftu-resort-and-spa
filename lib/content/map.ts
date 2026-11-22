@@ -2,17 +2,20 @@ import type {
   HOME_PAGE_QUERY_RESULT,
   RESORT_PAGE_QUERY_RESULT,
   ROOM_PAGE_QUERY_RESULT,
+  SITEMAP_QUERY_RESULT,
   SITE_SETTINGS_QUERY_RESULT,
 } from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
 
 import { isIconName } from "./icons"
-import { hrefFor, type ContentLink } from "./routes"
+import { hrefFor, pathForDocument, type ContentLink } from "./routes"
 import type {
   Amenity,
   ContentImage,
   HomePage,
   NavLink,
+  PageSeo,
+  PostalAddress,
   PropertyContact,
   ResortPage,
   RoomPage,
@@ -20,6 +23,7 @@ import type {
   RichText,
   RoomSummary,
   SiteSettings,
+  SitemapEntry,
   SocialPlatform,
 } from "./types"
 
@@ -76,6 +80,44 @@ function toNavLinks(links: Array<ContentLink & { label: string }> | null | undef
   return (links ?? []).map((link) => ({ label: link.label, href: hrefFor(link) }))
 }
 
+type SeoDoc = {
+  title?: string | null
+  description?: string | null
+  noIndex?: boolean | null
+  ogImage?: SanityImage
+} | null | undefined
+
+/** SEO fields with fallbacks for an empty title or description. */
+export function mapSeo(seo: SeoDoc, fallback: { title: string; description: string }): PageSeo {
+  return {
+    title: seo?.title?.trim() || fallback.title,
+    description: seo?.description?.trim() || fallback.description,
+    image: seo?.ogImage?.asset ? toContentImage(seo.ogImage) : null,
+    noIndex: seo?.noIndex === true,
+  }
+}
+
+type AddressDoc = {
+  streetAddress?: string | null
+  locality?: string | null
+  region?: string | null
+  postalCode?: string | null
+  country?: string | null
+} | null | undefined
+
+/** A postal address, or null without a town or city. */
+export function mapAddress(doc: AddressDoc): PostalAddress | null {
+  const locality = doc?.locality?.trim()
+  if (!locality) return null
+  return {
+    street: doc?.streetAddress?.trim() ?? "",
+    locality,
+    region: doc?.region?.trim() ?? "",
+    postalCode: doc?.postalCode?.trim() ?? "",
+    country: doc?.country?.trim() ?? "",
+  }
+}
+
 const PLATFORMS: SocialPlatform[] = ["facebook", "instagram", "youtube", "x", "linkedin", "tiktok"]
 
 type SettingsDoc = NonNullable<SITE_SETTINGS_QUERY_RESULT>
@@ -94,6 +136,9 @@ export function mapSiteSettings(
     reservationPhone: doc.reservationPhone ?? null,
     reservationEmail: doc.reservationEmail ?? null,
     address: address || null,
+    headOfficeAddress: mapAddress(doc.headOfficeAddress),
+    logo: doc.logo?.asset ? toContentImage(doc.logo, doc.brandName) : null,
+    seo: mapSeo(doc.seo, { title: doc.brandName, description: "" }),
     social: (doc.social ?? []).filter((s) => PLATFORMS.includes(s.platform)),
     navResorts: (doc.navResorts ?? []).filter((r) => r.slug),
     bookableResorts: doc.bookableResorts.map((r) => ({
@@ -192,6 +237,7 @@ export function mapHomePage(doc: HomeDoc): HomePage {
       title: stayConnected?.title ?? "",
       subtitle: stayConnected?.subtitle ?? "",
     },
+    seo: mapSeo(doc.seo, { title: "", description: "" }),
   }
 }
 
@@ -261,10 +307,7 @@ export function mapRoomPage(doc: RoomDoc): RoomPage | null {
       price?.amount && price.currency
         ? { amount: price.amount, currency: price.currency, unit: price.unit?.trim() ?? "" }
         : null,
-    seo: {
-      title: doc.seo?.title?.trim() || `${doc.title} | ${resortHeading}`,
-      description: doc.seo?.description?.trim() || summary,
-    },
+    seo: mapSeo(doc.seo, { title: `${doc.title} | ${resortHeading}`, description: summary }),
     resort: {
       name: resort.name,
       heading: resortHeading,
@@ -296,6 +339,7 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
     type: doc.type,
     locationLabel: doc.locationLabel,
     country: doc.country ?? "",
+    address: mapAddress(doc.address),
     summary: doc.summary?.trim() ?? "",
     introTitle: doc.introTitle?.trim() || doc.tagline?.trim() || "",
     intro: (doc.intro ?? []) as RichText,
@@ -309,10 +353,7 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
     bookable: doc.bookable ?? true,
     bookingPropertyId: doc.bookingPropertyId ?? null,
     ...mapContact(doc.phone, doc.email),
-    seo: {
-      title: doc.seo?.title?.trim() || heading,
-      description: doc.seo?.description?.trim() || doc.summary?.trim() || "",
-    },
+    seo: mapSeo(doc.seo, { title: heading, description: doc.summary?.trim() || "" }),
     rooms: (doc.rooms ?? []).flatMap((r) => {
       const room = mapRoom(r)
       return room ? [room] : []
@@ -323,4 +364,19 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
     spaImage: doc.spaImage?.asset ? toContentImage(doc.spaImage) : null,
     diningImage: doc.diningImage?.asset ? toContentImage(doc.diningImage) : null,
   }
+}
+
+/** Indexable pages for sitemap.xml, home first; rows without a path are dropped. */
+export function mapSitemap(doc: SITEMAP_QUERY_RESULT): SitemapEntry[] {
+  const entries: SitemapEntry[] = []
+  if (doc.home && !doc.home.noIndex) entries.push({ path: "/", lastModified: doc.home._updatedAt })
+  for (const r of doc.resorts) {
+    const path = pathForDocument({ _type: "resort", slug: r.slug })
+    if (path) entries.push({ path, lastModified: r._updatedAt })
+  }
+  for (const r of doc.rooms) {
+    const path = pathForDocument({ _type: "room", slug: r.slug, resortSlug: r.resortSlug })
+    if (path) entries.push({ path, lastModified: r._updatedAt })
+  }
+  return entries
 }

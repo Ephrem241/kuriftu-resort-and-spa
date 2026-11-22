@@ -11,10 +11,11 @@ import {
   ROOM_PAGE_QUERY,
   ROOM_PARAMS_QUERY,
   SITE_SETTINGS_QUERY,
+  SITEMAP_QUERY,
 } from "@/sanity/queries"
 
-import { mapHomePage, mapResortPage, mapRoomPage, mapSiteSettings } from "./map"
-import type { HomePage, ResortPage, RoomPage, SiteSettings } from "./types"
+import { mapHomePage, mapResortPage, mapRoomPage, mapSiteSettings, mapSitemap } from "./map"
+import type { HomePage, ResortPage, RoomPage, SiteSettings, SitemapEntry } from "./types"
 
 /**
  * Server-only content access. Each getter is cached and tagged with the
@@ -87,6 +88,17 @@ export async function getRoomPage(resort: string, room: string): Promise<RoomPag
 
   const doc = await sanityFetch({ query: ROOM_PAGE_QUERY, params: { resort, room }, tags })
   return doc ? mapRoomPage(doc) : null
+}
+
+/** Indexable home, resort and room paths with their last change, for sitemap.xml. */
+export async function getSitemapEntries(): Promise<SitemapEntry[]> {
+  "use cache"
+  const tags = ["homePage", "resort", "room"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: SITEMAP_QUERY, tags })
+  return mapSitemap(doc)
 }
 
 function missing(type: string) {

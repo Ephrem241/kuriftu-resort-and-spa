@@ -33,12 +33,38 @@ export type ResortSummary = {
   bookingPropertyId: string | null
 }
 
+/** One sitemap row: a site path and when its content last changed. */
+export type SitemapEntry = { path: string; lastModified: string }
+
+/** Title, description, share image and indexing for one page. */
+export type PageSeo = {
+  title: string
+  description: string
+  /** Editor's Open Graph override; pages fall back to their hero. */
+  image: ContentImage | null
+  noIndex: boolean
+}
+
+/** A postal address; empty strings for parts an editor left blank. */
+export type PostalAddress = {
+  street: string
+  locality: string
+  region: string
+  postalCode: string
+  country: string
+}
+
 export type SiteSettings = {
   brandName: string
   footerTagline: string
   reservationPhone: { display: string; tel: string } | null
   reservationEmail: string | null
   address: string | null
+  headOfficeAddress: PostalAddress | null
+  /** Primary logo, when one is uploaded. */
+  logo: ContentImage | null
+  /** Default SEO for the site. */
+  seo: PageSeo
   social: SocialLink[]
   /** Resorts listed in the Destinations nav and footer. */
   navResorts: Pick<ResortSummary, "name" | "slug">[]
@@ -113,6 +139,8 @@ export type HomePage = {
     backgroundImage: ContentImage
   }
   stayConnected: { title: string; subtitle: string }
+  /** Empty fields fall back to the site's Default SEO. */
+  seo: PageSeo
 }
 
 export type Amenity = { key: string; icon: IconName | null; label: string }
@@ -141,7 +169,7 @@ export type RoomPage = {
   features: string[]
   /** Display-only "from" price, entered by an editor. */
   fromPrice: { amount: number; currency: string; unit: string } | null
-  seo: { title: string; description: string }
+  seo: PageSeo
   resort: {
     name: string
     /** "Kuriftu Resort & Spa Bishoftu", or the name. */
@@ -168,6 +196,7 @@ export type ResortPage = {
   type: ResortType
   locationLabel: string
   country: string
+  address: PostalAddress | null
   summary: string
   introTitle: string
   intro: RichText
@@ -184,7 +213,7 @@ export type ResortPage = {
   bookingPropertyId: string | null
   phone: { display: string; tel: string } | null
   email: string | null
-  seo: { title: string; description: string }
+  seo: PageSeo
   rooms: RoomSummary[]
   experiences: { category: ExperienceCategory; image: ContentImage }[]
   spaImage: ContentImage | null

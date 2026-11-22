@@ -8,8 +8,9 @@ import { RoomFeatures } from "@/components/room/room-features"
 import { RoomHero } from "@/components/room/room-hero"
 import { RoomOverview } from "@/components/room/room-overview"
 import { AmenityGrid } from "@/components/ui/amenity-grid"
-import { getRoomPage, getRoomParams } from "@/lib/content"
-import { ogImage } from "@/lib/content/og"
+import { getRoomPage, getRoomParams, getSiteSettings } from "@/lib/content"
+import { pathForDocument } from "@/lib/content/routes"
+import { pageMetadata } from "@/lib/seo/metadata"
 import { cn } from "@/lib/utils"
 
 /**
@@ -24,18 +25,22 @@ export async function generateMetadata({
   params,
 }: PageProps<"/resorts/[slug]/rooms/[room]">): Promise<Metadata> {
   const { slug, room: roomSlug } = await params
-  const room = await getRoomPage(slug, roomSlug)
+  const [room, settings] = await Promise.all([getRoomPage(slug, roomSlug), getSiteSettings()])
   if (!room) notFound()
 
-  return {
-    title: { absolute: room.seo.title },
-    description: room.seo.description || undefined,
-    openGraph: {
-      title: room.seo.title,
-      description: room.seo.description || undefined,
-      images: ogImage(room.images[0]),
-    },
-  }
+  const path =
+    pathForDocument({ _type: "room", slug: room.slug, resortSlug: room.resort.slug }) ??
+    `/resorts/${encodeURIComponent(room.resort.slug)}/rooms/${encodeURIComponent(room.slug)}`
+
+  return pageMetadata({
+    title: room.seo.title,
+    description: room.seo.description,
+    path,
+    siteName: settings.brandName,
+    image: room.seo.image ?? room.images[0],
+    noIndex: room.seo.noIndex,
+    titleAbsolute: true,
+  })
 }
 
 export default function Page({ params }: PageProps<"/resorts/[slug]/rooms/[room]">) {
