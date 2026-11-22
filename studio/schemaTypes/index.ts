@@ -5,6 +5,7 @@ import {destinationRegion, resort, room} from './documents/destinations'
 import {enquiry} from './documents/enquiry'
 import {homePage} from './documents/homePage'
 import {destinationsPage} from './documents/destinationsPage'
+import {experiencesPage} from './documents/experiencesPage'
 import {offersPage} from './documents/offersPage'
 import {diningVenue, eventPackage, eventVenue, experience, offer, spaTreatment} from './documents/offerings'
 import {page} from './documents/page'
@@ -18,7 +19,7 @@ import {richText} from './objects/richText'
 import {seo} from './objects/seo'
 
 /** Fixed-id documents, edited in place from the Structure. */
-export const SINGLETON_TYPES = ['siteSettings', 'homePage', 'offersPage', 'destinationsPage']
+export const SINGLETON_TYPES = ['siteSettings', 'homePage', 'offersPage', 'destinationsPage', 'experiencesPage']
 
 /** Documents only the web server writes. Never created in Studio. */
 export const SERVER_WRITTEN_TYPES = ['enquiry']
@@ -40,6 +41,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   homePage,
   offersPage,
   destinationsPage,
+  experiencesPage,
   destinationRegion,
   resort,
   room,

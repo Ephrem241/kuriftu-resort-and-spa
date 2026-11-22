@@ -158,6 +158,9 @@ export const SITEMAP_QUERY = defineQuery(`{
   },
   "rooms": *[_type == "room" && defined(slug.current) && defined(resort->slug.current) && seo.noIndex != true && resort->seo.noIndex != true] | order(title asc){
     "slug": slug.current, "resortSlug": resort->slug.current, _updatedAt
+  },
+  "experiences": *[_type == "experience" && defined(slug.current) && seo.noIndex != true] | order(title asc){
+    "slug": slug.current, _updatedAt
   }
 }`)
 
@@ -229,7 +232,46 @@ export const DESTINATIONS_PAGE_QUERY = defineQuery(`{
   }
 }`)
 
-const ENQUIRY_CONTACT = /* groq */ `{ phones[]{ display, tel }, emails[]{ address } }`
+/** An experience on a card: enough for the grid, its filters and the meta row. */
+const EXPERIENCE_CARD = /* groq */ `{
+  title,
+  "slug": slug.current,
+  category,
+  summary,
+  duration,
+  "image": images[0]${IMAGE},
+  "resorts": resorts[]->{ name, fullName, "slug": slug.current }
+}`
+
+/** Copy and photography for /experience, with every experience that has a slug. */
+export const EXPERIENCES_PAGE_QUERY = defineQuery(`{
+  "page": *[_type == "experiencesPage"][0]{
+    hero { eyebrow, title, intro, image${IMAGE} },
+    seo${SEO}
+  },
+  "experiences": *[_type == "experience" && defined(slug.current)] | order(title asc)${EXPERIENCE_CARD}
+}`)
+
+export const EXPERIENCE_SLUGS_QUERY = defineQuery(
+  `*[_type == "experience" && defined(slug.current)].slug.current`
+)
+
+/** One experience, with where it is offered and up to 3 others at the same resorts. */
+export const EXPERIENCE_PAGE_QUERY = defineQuery(`*[_type == "experience" && slug.current == $slug][0]{
+  title,
+  "slug": slug.current,
+  category,
+  summary,
+  description,
+  duration,
+  action,
+  images[]${IMAGE},
+  seo${SEO},
+  "resorts": resorts[]->${OFFER_RESORT},
+  "related": *[_type == "experience" && _id != ^._id && defined(slug.current) && references(^.resorts[]._ref)] | order(title asc)[0...3]${EXPERIENCE_CARD}
+}`)
+
+const ENQUIRY_CONTACT =/* groq */ `{ phones[]{ display, tel }, emails[]{ address } }`
 
 /**
  * Enquiry route only (never page rendering): the chosen resort and the
