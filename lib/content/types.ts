@@ -210,6 +210,18 @@ export type OffersPage = {
   seo: PageSeo
 }
 
+export type DestinationsPage = {
+  hero: { eyebrow: string; title: string; intro: string; image: ContentImage | null }
+  /** Resorts in page order, split into the page's groups. Empty groups are left out. */
+  groups: {
+    id: string
+    title: string
+    subtitle: string
+    resorts: ResortSummary[]
+  }[]
+  seo: PageSeo
+}
+
 export type OfferResort = {
   name: string
   heading: string

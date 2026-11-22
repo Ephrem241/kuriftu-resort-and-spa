@@ -211,6 +211,24 @@ export const OFFERS_PAGE_QUERY = defineQuery(`*[_type == "offersPage"][0]{
   seo${SEO}
 }`)
 
+/** Copy and photography for /destinations, with every resort that has a slug. */
+export const DESTINATIONS_PAGE_QUERY = defineQuery(`{
+  "page": *[_type == "destinationsPage"][0]{
+    hero { eyebrow, title, intro, image${IMAGE} },
+    seo${SEO}
+  },
+  "resorts": *[_type == "resort" && defined(slug.current)] | order(name asc){
+    name,
+    "slug": slug.current,
+    type,
+    tagline,
+    locationLabel,
+    bookable,
+    bookingPropertyId,
+    heroImage${IMAGE}
+  }
+}`)
+
 const ENQUIRY_CONTACT = /* groq */ `{ phones[]{ display, tel }, emails[]{ address } }`
 
 /**
