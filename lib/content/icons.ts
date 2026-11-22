@@ -30,6 +30,9 @@ export const ICON_NAMES = [
   "presentation",
   "landmark",
   "leaf",
+  "heart",
+  "smile",
+  "gem",
 ] as const
 
 export type IconName = (typeof ICON_NAMES)[number]

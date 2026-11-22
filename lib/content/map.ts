@@ -9,6 +9,8 @@ import type {
   RESORT_PAGE_QUERY_RESULT,
   ROOM_PAGE_QUERY_RESULT,
   SITEMAP_QUERY_RESULT,
+  TREATMENTS_PAGE_QUERY_RESULT,
+  WELLNESS_PAGE_QUERY_RESULT,
   SITE_SETTINGS_QUERY_RESULT,
 } from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
@@ -17,6 +19,7 @@ import { groupDestinations } from "./destinations"
 import { isIconName } from "./icons"
 import { isOfferCategory } from "./offers"
 import { hrefFor, pathForDocument, type ContentLink } from "./routes"
+import { excerpt, isTreatmentGroup } from "./wellness"
 import type {
   Amenity,
   ContentImage,
@@ -43,6 +46,10 @@ import type {
   SiteSettings,
   SitemapEntry,
   SocialPlatform,
+  IconFeature,
+  TreatmentsPage,
+  TreatmentSummary,
+  WellnessPage,
 } from "./types"
 
 /**
@@ -584,5 +591,111 @@ export function mapSitemap(doc: SITEMAP_QUERY_RESULT): SitemapEntry[] {
     const path = pathForDocument({ _type: "experience", slug: e.slug })
     if (path) entries.push({ path, lastModified: e._updatedAt })
   }
+  if (doc.wellness) {
+    const lastModified = doc.wellness._updatedAt
+    if (!doc.wellness.noIndex) entries.push({ path: "/wellness", lastModified })
+    if (!doc.wellness.treatmentsNoIndex) entries.push({ path: "/wellness/treatments", lastModified })
+  }
   return entries
+}
+
+type TreatmentCardDoc = WELLNESS_PAGE_QUERY_RESULT["treatments"][number]
+
+export function mapTreatment(doc: TreatmentCardDoc): TreatmentSummary {
+  const price = doc.price
+  return {
+    title: doc.title,
+    slug: doc.slug,
+    category: doc.category,
+    excerpt: excerpt(doc.excerpt),
+    duration: doc.duration?.trim() ?? "",
+    price:
+      price?.amount && price.currency
+        ? { amount: price.amount, currency: price.currency, unit: price.unit?.trim() ?? "" }
+        : null,
+    image: toContentImage(doc.image, doc.title),
+    resorts: mapExperienceResorts(doc.resorts),
+  }
+}
+
+type FeatureDoc = { _key: string; icon?: string | null; title: string }
+
+function mapIconFeatures(features: FeatureDoc[] | null | undefined): IconFeature[] {
+  return (features ?? []).map((f) => ({ key: f._key, icon: isIconName(f.icon) ? f.icon : null, title: f.title }))
+}
+
+/** Wellness page copy and every treatment; null-safe so a missing singleton still renders. */
+export function mapWellnessPage(doc: WELLNESS_PAGE_QUERY_RESULT, fallbackDescription: string): WellnessPage {
+  const page = doc.page
+  const hero = page?.hero
+  const daySpa = page?.daySpa
+  const booking = page?.booking
+  const why = page?.whyChoose
+  const title = hero?.title?.trim() || "Wellness & Spa"
+  const intro = hero?.intro?.trim() ?? ""
+
+  return {
+    hero: {
+      eyebrow: hero?.eyebrow?.trim() || "Wellness & Spa",
+      title,
+      intro,
+      image: hero?.image?.asset ? toContentImage(hero.image) : null,
+    },
+    daySpa:
+      daySpa?.title?.trim() && daySpa.image?.asset
+        ? {
+            eyebrow: daySpa.eyebrow?.trim() || daySpa.resort?.name || "",
+            title: daySpa.title.trim(),
+            text: daySpa.text?.trim() ?? "",
+            image: toContentImage(daySpa.image),
+            features: mapIconFeatures(daySpa.features),
+          }
+        : null,
+    treatments: {
+      title: page?.treatments?.title?.trim() || "Our Spa Treatments",
+      subtitle: page?.treatments?.subtitle?.trim() ?? "",
+      cards: (page?.treatments?.cards ?? []).flatMap((c) =>
+        isTreatmentGroup(c.group) && c.image?.asset
+          ? [
+              {
+                key: c._key,
+                group: c.group,
+                title: c.title,
+                subtitle: c.subtitle?.trim() ?? "",
+                image: toContentImage(c.image, c.title),
+              },
+            ]
+          : []
+      ),
+    },
+    booking: {
+      eyebrow: booking?.eyebrow?.trim() || "Book a Spa Session",
+      title: booking?.title?.trim() || "Spa Booking Request",
+      text: booking?.text?.trim() ?? "",
+      tagline: booking?.tagline?.trim() ?? "",
+      image: booking?.image?.asset ? toContentImage(booking.image) : null,
+    },
+    whyChoose:
+      why?.title?.trim() && why.image?.asset
+        ? { title: why.title.trim(), features: mapIconFeatures(why.features), image: toContentImage(why.image) }
+        : null,
+    treatmentList: doc.treatments.map(mapTreatment),
+    seo: mapSeo(page?.seo, { title, description: intro || fallbackDescription }),
+  }
+}
+
+/** Treatments page heading and every treatment; null-safe so a missing singleton still renders. */
+export function mapTreatmentsPage(doc: TREATMENTS_PAGE_QUERY_RESULT, fallbackDescription: string): TreatmentsPage {
+  const index = doc.page?.treatmentsIndex
+  const title = index?.title?.trim() || "Spa Treatments"
+  const intro = index?.intro?.trim() ?? ""
+  const image = doc.page?.fallbackImage
+  return {
+    eyebrow: index?.eyebrow?.trim() || "Wellness & Spa",
+    title,
+    intro,
+    treatments: doc.treatments.map(mapTreatment),
+    image: image?.asset ? toContentImage(image) : null,
+    seo: mapSeo(doc.page?.treatmentsSeo, { title, description: intro || fallbackDescription }),
+  }
 }

@@ -80,15 +80,26 @@ describe("mapSitemap", () => {
       resorts: [{ slug: "bishoftu", _updatedAt: "2026-11-02T00:00:00Z" }],
       rooms: [{ slug: "lake-side", resortSlug: "bishoftu", _updatedAt: "2026-11-03T00:00:00Z" }],
       experiences: [{ slug: "zipline", _updatedAt: "2026-11-04T00:00:00Z" }],
+      wellness: { _updatedAt: "2026-11-05T00:00:00Z", noIndex: false, treatmentsNoIndex: false },
     }
     expect(mapSitemap(rows as Parameters<typeof mapSitemap>[0])).toEqual([
       { path: "/", lastModified: "2026-11-01T00:00:00Z" },
       { path: "/resorts/bishoftu", lastModified: "2026-11-02T00:00:00Z" },
       { path: "/resorts/bishoftu/rooms/lake-side", lastModified: "2026-11-03T00:00:00Z" },
       { path: "/experience/zipline", lastModified: "2026-11-04T00:00:00Z" },
+      { path: "/wellness", lastModified: "2026-11-05T00:00:00Z" },
+      { path: "/wellness/treatments", lastModified: "2026-11-05T00:00:00Z" },
     ])
-    const hidden = { ...rows, home: { ...rows.home, noIndex: true }, resorts: [], rooms: [], experiences: [] }
+    const hidden = {
+      ...rows,
+      home: { ...rows.home, noIndex: true },
+      resorts: [],
+      rooms: [],
+      experiences: [],
+      wellness: { ...rows.wellness, noIndex: true, treatmentsNoIndex: true },
+    }
     expect(mapSitemap(hidden as Parameters<typeof mapSitemap>[0])).toEqual([])
+    expect(mapSitemap({ ...hidden, wellness: null } as Parameters<typeof mapSitemap>[0])).toEqual([])
   })
 })
 

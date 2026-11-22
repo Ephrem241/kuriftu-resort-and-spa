@@ -7,7 +7,7 @@ describe("pathForDocument", () => {
     [{ _type: "resort", slug: "bishoftu" }, "/resorts/bishoftu"],
     [{ _type: "room", slug: "deluxe-room", resortSlug: "bishoftu" }, "/resorts/bishoftu/rooms/deluxe-room"],
     [{ _type: "experience", slug: "boat-ride" }, "/experience/boat-ride"],
-    [{ _type: "spaTreatment", slug: "hot-stone" }, "/wellness/hot-stone"],
+    [{ _type: "spaTreatment", slug: "hot-stone" }, "/wellness?treatment=hot-stone#spa-booking"],
     [{ _type: "eventPackage", slug: "weddings" }, "/event/weddings"],
     [{ _type: "offer", slug: "november" }, "/offers/november"],
     [{ _type: "page", slug: "about" }, "/about"],
