@@ -8,11 +8,13 @@ import {
   HOME_PAGE_QUERY,
   RESORT_PAGE_QUERY,
   RESORT_SLUGS_QUERY,
+  ROOM_PAGE_QUERY,
+  ROOM_PARAMS_QUERY,
   SITE_SETTINGS_QUERY,
 } from "@/sanity/queries"
 
-import { mapHomePage, mapResortPage, mapSiteSettings } from "./map"
-import type { HomePage, ResortPage, SiteSettings } from "./types"
+import { mapHomePage, mapResortPage, mapRoomPage, mapSiteSettings } from "./map"
+import type { HomePage, ResortPage, RoomPage, SiteSettings } from "./types"
 
 /**
  * Server-only content access. Each getter is cached and tagged with the
@@ -65,6 +67,26 @@ export async function getResortPage(slug: string): Promise<ResortPage | null> {
 
   const doc = await sanityFetch({ query: RESORT_PAGE_QUERY, params: { slug }, tags })
   return doc ? mapResortPage(doc) : null
+}
+
+/** Every { slug, room } pair, read from the API (not the CDN) for static params. */
+export async function getRoomParams(): Promise<{ slug: string; room: string }[]> {
+  "use cache"
+  cacheTag("room", "resort")
+  cacheLife("days")
+  const rows = await client.withConfig({ useCdn: false }).fetch(ROOM_PARAMS_QUERY)
+  return rows.flatMap((r) => (r.slug && r.room ? [{ slug: r.slug, room: r.room }] : []))
+}
+
+/** One room of one resort, with sibling rooms; null if unknown or at another resort. */
+export async function getRoomPage(resort: string, room: string): Promise<RoomPage | null> {
+  "use cache"
+  const tags = ["room", `room:${room}`, "resort", `resort:${resort}`]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: ROOM_PAGE_QUERY, params: { resort, room }, tags })
+  return doc ? mapRoomPage(doc) : null
 }
 
 function missing(type: string) {

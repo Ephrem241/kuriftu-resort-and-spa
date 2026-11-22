@@ -1,6 +1,7 @@
 import type {
   HOME_PAGE_QUERY_RESULT,
   RESORT_PAGE_QUERY_RESULT,
+  ROOM_PAGE_QUERY_RESULT,
   SITE_SETTINGS_QUERY_RESULT,
 } from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
@@ -8,10 +9,13 @@ import { urlFor } from "@/sanity/lib/image"
 import { isIconName } from "./icons"
 import { hrefFor, type ContentLink } from "./routes"
 import type {
+  Amenity,
   ContentImage,
   HomePage,
   NavLink,
+  PropertyContact,
   ResortPage,
+  RoomPage,
   ResortSummary,
   RichText,
   RoomSummary,
@@ -191,6 +195,91 @@ export function mapHomePage(doc: HomeDoc): HomePage {
   }
 }
 
+type AmenityDoc = { _key: string; icon?: string | null; label: string }
+
+function mapAmenities(amenities: AmenityDoc[] | null | undefined): Amenity[] {
+  return (amenities ?? []).map((a) => ({
+    key: a._key,
+    icon: isIconName(a.icon) ? a.icon : null,
+    label: a.label,
+  }))
+}
+
+function mapContact(
+  phone: { display?: string | null; tel?: string | null } | null | undefined,
+  email: string | null | undefined
+): PropertyContact {
+  return {
+    phone: phone?.display && phone.tel ? { display: phone.display, tel: phone.tel } : null,
+    email: email ?? null,
+  }
+}
+
+/** A text paragraph as Portable Text, for fallbacks. */
+function paragraph(text: string, key: string): RichText {
+  return [
+    {
+      _type: "block",
+      _key: key,
+      style: "normal",
+      markDefs: [],
+      children: [{ _type: "span", _key: `${key}-span`, text, marks: [] }],
+    },
+  ]
+}
+
+type RoomDoc = NonNullable<ROOM_PAGE_QUERY_RESULT>
+
+export function mapRoomPage(doc: RoomDoc): RoomPage | null {
+  const resort = doc.resort
+  if (!resort?.slug) return null
+
+  const resortHeading = resort.fullName?.trim() || resort.name
+  const summary = doc.summary?.trim() ?? ""
+  const images = (doc.images ?? [])
+    .filter((img) => img.asset)
+    .map((img, i) => toContentImage(img, `${doc.title}, photo ${i + 1}`))
+  const description = (doc.description ?? []) as RichText
+  const price = doc.fromPrice
+
+  return {
+    title: doc.title,
+    slug: doc.slug,
+    summary,
+    overviewTitle: doc.overviewTitle?.trim() ?? "",
+    description: description.length > 0 ? description : summary ? paragraph(summary, "summary") : [],
+    videoUrl: doc.videoUrl ?? null,
+    // Images are required in Studio; an alt-only placeholder covers a missing asset.
+    images: images.length > 0 ? images : [toContentImage(null, doc.title)],
+    maxGuests: doc.maxGuests ?? null,
+    bedConfiguration: doc.bedConfiguration?.trim() ?? "",
+    sizeSqm: doc.sizeSqm ?? null,
+    view: doc.view?.trim() ?? "",
+    amenities: mapAmenities(doc.amenities),
+    features: (doc.features ?? []).map((f) => f.trim()).filter(Boolean),
+    fromPrice:
+      price?.amount && price.currency
+        ? { amount: price.amount, currency: price.currency, unit: price.unit?.trim() ?? "" }
+        : null,
+    seo: {
+      title: doc.seo?.title?.trim() || `${doc.title} | ${resortHeading}`,
+      description: doc.seo?.description?.trim() || summary,
+    },
+    resort: {
+      name: resort.name,
+      heading: resortHeading,
+      slug: resort.slug,
+      bookable: resort.bookable ?? true,
+      bookingPropertyId: resort.bookingPropertyId ?? null,
+      ...mapContact(resort.phone, resort.email),
+    },
+    related: (doc.related ?? []).flatMap((r) => {
+      const room = mapRoom(r)
+      return room ? [room] : []
+    }),
+  }
+}
+
 type ResortDoc = NonNullable<RESORT_PAGE_QUERY_RESULT>
 
 export function mapResortPage(doc: ResortDoc): ResortPage {
@@ -199,7 +288,6 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
   const [first, second] = doc.gallery ?? []
   const lat = doc.geo?.lat
   const lng = doc.geo?.lng
-  const phone = doc.phone?.display && doc.phone.tel ? { display: doc.phone.display, tel: doc.phone.tel } : null
 
   return {
     name: doc.name,
@@ -211,11 +299,7 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
     summary: doc.summary?.trim() ?? "",
     introTitle: doc.introTitle?.trim() || doc.tagline?.trim() || "",
     intro: (doc.intro ?? []) as RichText,
-    amenities: (doc.amenities ?? []).map((a) => ({
-      key: a._key,
-      icon: isIconName(a.icon) ? a.icon : null,
-      label: a.label,
-    })),
+    amenities: mapAmenities(doc.amenities),
     geo: typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null,
     gettingHere: doc.gettingHere?.trim() ?? "",
     heroImage,
@@ -224,8 +308,7 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
     heroVideoUrl: doc.heroVideoUrl ?? null,
     bookable: doc.bookable ?? true,
     bookingPropertyId: doc.bookingPropertyId ?? null,
-    phone,
-    email: doc.email ?? null,
+    ...mapContact(doc.phone, doc.email),
     seo: {
       title: doc.seo?.title?.trim() || heading,
       description: doc.seo?.description?.trim() || doc.summary?.trim() || "",

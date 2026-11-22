@@ -1,9 +1,6 @@
-import { Mail, Phone } from "lucide-react"
-
 import { BookStayLink } from "@/components/booking/book-stay-link"
-import { buttonVariants } from "@/components/ui/button"
 import { MediaImage } from "@/components/ui/media-image"
-import { ContactLink } from "@/components/site/contact-link"
+import { ContactActions } from "@/components/site/contact-actions"
 import type { ResortPage } from "@/lib/content/types"
 import { cn } from "@/lib/utils"
 
@@ -14,8 +11,6 @@ const goldPill = "text-forest hover:text-ivory"
  * engine; the water park and day spa show their own phone and email.
  */
 export function ResortCta({ resort }: { resort: ResortPage }) {
-  const contactable = !resort.bookable && (resort.phone || resort.email)
-
   return (
     <aside
       aria-labelledby="cta-title"
@@ -44,35 +39,9 @@ export function ResortCta({ resort }: { resort: ResortPage }) {
             variant="accent"
             className={cn("mt-6 self-start", goldPill)}
           />
-        ) : contactable ? (
-          <div className="mt-6 flex flex-wrap gap-3">
-            {resort.phone ? (
-              <ContactLink
-                method="phone"
-                source="resort-cta"
-                href={`tel:${resort.phone.tel}`}
-                className={cn(buttonVariants({ variant: "accent", size: "pill", shape: "pill" }), goldPill)}
-              >
-                <Phone aria-hidden="true" strokeWidth={1.5} />
-                Call {resort.phone.display}
-              </ContactLink>
-            ) : null}
-            {resort.email ? (
-              <ContactLink
-                method="email"
-                source="resort-cta"
-                href={`mailto:${resort.email}`}
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "pill", shape: "pill" }),
-                  "border-ivory text-ivory hover:bg-ivory hover:text-forest"
-                )}
-              >
-                <Mail aria-hidden="true" strokeWidth={1.5} />
-                Email Us
-              </ContactLink>
-            ) : null}
-          </div>
-        ) : null}
+        ) : (
+          <ContactActions phone={resort.phone} email={resort.email} source="resort-cta" className="mt-6" />
+        )}
       </div>
     </aside>
   )

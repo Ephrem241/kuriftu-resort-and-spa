@@ -16,6 +16,10 @@ type ContentCardProps = {
   /** Uppercase action label, e.g. "Explore" or "View details". */
   action: string
   className?: string
+  /** Extra classes for the subtitle, e.g. a line clamp. */
+  subtitleClassName?: string
+  /** Extra classes for the action link, e.g. title case where a page design uses it. */
+  actionClassName?: string
 }
 
 /**
@@ -30,6 +34,8 @@ export function ContentCard({
   href,
   action,
   className,
+  subtitleClassName,
+  actionClassName,
 }: ContentCardProps) {
   return (
     <article
@@ -47,7 +53,7 @@ export function ContentCard({
       <div className="flex flex-1 flex-col p-4 lg:p-6">
         <h3 className="text-h4">{title}</h3>
         {subtitle ? (
-          <p className="mt-1 text-small text-charcoal">{subtitle}</p>
+          <p className={cn("mt-1 text-small text-charcoal", subtitleClassName)}>{subtitle}</p>
         ) : null}
 
         {meta && meta.length > 0 ? (
@@ -70,7 +76,10 @@ export function ContentCard({
 
         <Link
           href={href}
-          className="group/action eyebrow mt-auto inline-flex items-center gap-2 self-start pt-6 text-forest after:absolute after:inset-0 hover:text-charcoal"
+          className={cn(
+            "group/action eyebrow mt-auto inline-flex items-center gap-2 self-start pt-6 text-forest after:absolute after:inset-0 hover:text-charcoal",
+            actionClassName
+          )}
         >
           {action}
           <span className="sr-only">: {title}</span>

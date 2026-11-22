@@ -82,6 +82,34 @@ export function compact<T>(value: T): T {
   return value
 }
 
+/** Words that stay upper case when an ALL CAPS label is sentence-cased. */
+const ACRONYMS = new Set(["TV", "HDTV", "PBX", "COVID", "USB", "AC", "A/C", "WIFI", "WI-FI"])
+/** Place names that keep a capital ("RIFT VALLEY VIEWS" → "Rift Valley views"). */
+const PROPER_NOUNS = new Set(["NECHISAR", "RIFT", "VALLEY", "ABAYA", "CHAMO", "TANA", "ENTOTO", "AWASH", "BISHOFTU", "ETHIOPIAN", "AFRICAN"])
+
+/** "PRIVATE POOL" → "Private pool". Labels with any lower case are kept as written. */
+export function sentenceCase(label: string): string {
+  if (label !== label.toUpperCase()) return label
+  const words = label.split(" ").map((w) => {
+    const bare = w.replace(/[^A-Z/-]/g, "")
+    if (ACRONYMS.has(bare)) return w
+    const lower = w.toLowerCase()
+    return PROPER_NOUNS.has(bare) ? lower.replace(/[a-z]/, (c) => c.toUpperCase()) : lower
+  })
+  const text = words.join(" ")
+  const first = text.search(/[a-zA-Z]/)
+  return first < 0 ? text : text.slice(0, first) + text.charAt(first).toUpperCase() + text.slice(first + 1)
+}
+
+/** Bed configuration from a room's own amenity line, e.g. "KING OR TWIN BED" → "King or twin bed". */
+export function bedFromAmenities(labels: string[]): string | undefined {
+  const line = labels.map(clean).find((l) => /\bbeds?\b/i.test(l))
+  if (!line) return undefined
+  // "KING SIZE BED / ELECTRIC BED WARMER" → keep only the part naming the bed.
+  const part = line.split("/").map((p) => p.trim()).find((p) => /\bbeds?\b/i.test(p) && !/warmer/i.test(p)) ?? line
+  return sentenceCase(part)
+}
+
 function categorize(rules: [string, string][], fallback: string, title: string): { value: string; matched: boolean } {
   for (const [pattern, value] of rules) if (new RegExp(pattern, "i").test(title)) return { value, matched: true }
   return { value: fallback, matched: false }
@@ -100,7 +128,7 @@ export function build({ ds, hints, categories, home, meta }: BuildInput, images:
 
   const amenity = (label: string, where: string) => {
     const icon = categorize(categories.amenityIcon.rules, "", label)
-    return compact({ _type: "amenity", _key: stableKey(where, label), icon: icon.matched ? icon.value : undefined, label: clean(label) })
+    return compact({ _type: "amenity", _key: stableKey(where, label), icon: icon.matched ? icon.value : undefined, label: sentenceCase(clean(label)) })
   }
 
   // ---------------------------------------------------------------- resorts
@@ -260,9 +288,16 @@ export function build({ ds, hints, categories, home, meta }: BuildInput, images:
           summary: summary(sourceSummary, 200),
           description: textToBlocks(`${where} description`, str(booking.description)),
           amenities: arr(room.amenities).map((a) => amenity(str(a), where)),
+          bedConfiguration: bedFromAmenities(arr(room.amenities).map(str)),
         }),
       )
-      report.flag("room details", `${name} / ${title}`, "Max guests (required), bed configuration and size aren't in the source")
+      report.flag(
+        "room details",
+        `${name} / ${title}`,
+        bedFromAmenities(arr(room.amenities).map(str))
+          ? "Max guests (required), size, view and special features aren't in the source"
+          : "Max guests (required), bed configuration, size, view and special features aren't in the source",
+      )
       if (typeof room.video === "string") report.skip("room video", `${name} / ${title}`, `Self-hosted video not allowed (${room.video})`)
       redirects.push({ source: `/resorts/${legacy}/acc/${legacyId}`, destination: `/resorts/${slugOf(legacy)}/rooms/${slug}` })
     }

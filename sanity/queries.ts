@@ -67,6 +67,41 @@ export const HOME_PAGE_QUERY = defineQuery(`*[_type == "homePage"][0]{
   stayConnected { title, subtitle }
 }`)
 
+/** Every resort and room slug pair, for the room page's static params. */
+export const ROOM_PARAMS_QUERY = defineQuery(
+  `*[_type == "room" && defined(slug.current) && defined(resort->slug.current)]{ "slug": resort->slug.current, "room": slug.current }`
+)
+
+/** One room, only when it belongs to the given resort, with up to 3 sibling rooms. */
+export const ROOM_PAGE_QUERY = defineQuery(`*[_type == "room" && slug.current == $room && resort->slug.current == $resort][0]{
+  _id,
+  title,
+  "slug": slug.current,
+  summary,
+  overviewTitle,
+  description,
+  videoUrl,
+  images[]${IMAGE},
+  maxGuests,
+  bedConfiguration,
+  sizeSqm,
+  view,
+  amenities[]{ _key, icon, label },
+  features,
+  fromPrice { amount, currency, unit },
+  seo { title, description },
+  "resort": resort->{
+    name,
+    fullName,
+    "slug": slug.current,
+    bookable,
+    bookingPropertyId,
+    "phone": reservationContact.phones[0]{ display, tel },
+    "email": reservationContact.emails[0].address
+  },
+  "related": *[_type == "room" && resort._ref == ^.resort._ref && _id != ^._id && defined(slug.current)] | order(title asc)[0...3]${ROOM_CARD}
+}`)
+
 export const RESORT_SLUGS_QUERY = defineQuery(
   `*[_type == "resort" && defined(slug.current)].slug.current`
 )

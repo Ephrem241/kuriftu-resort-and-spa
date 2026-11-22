@@ -20,8 +20,9 @@ export function ResortRooms({ rooms }: { rooms: RoomSummary[] }) {
 
   return (
     <section
+      id="rooms"
       aria-labelledby="rooms-title"
-      className="container-site grid gap-8 pt-16 lg:grid-cols-[minmax(0,17rem)_1fr] lg:items-center lg:gap-10 lg:pt-14"
+      className="container-site grid scroll-mt-8 gap-8 pt-16 lg:grid-cols-[minmax(0,17rem)_1fr] lg:items-center lg:gap-10 lg:pt-14"
     >
       <div>
         <h2 id="rooms-title" className="text-h3 lg:text-[2.125rem]">

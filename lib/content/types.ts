@@ -115,7 +115,45 @@ export type HomePage = {
   stayConnected: { title: string; subtitle: string }
 }
 
-export type ResortType = "resortAndSpa" | "adventurePark" | "waterPark" | "daySpa"
+export type Amenity = { key: string; icon: IconName | null; label: string }
+
+/** Contact for one property, from its reservation contact in Sanity. */
+export type PropertyContact = {
+  phone: { display: string; tel: string } | null
+  email: string | null
+}
+
+export type RoomPage = {
+  title: string
+  slug: string
+  summary: string
+  overviewTitle: string
+  /** Falls back to the summary as one paragraph when empty. */
+  description: RichText
+  videoUrl: string | null
+  /** At least one; the first is the hero. */
+  images: ContentImage[]
+  maxGuests: number | null
+  bedConfiguration: string
+  sizeSqm: number | null
+  view: string
+  amenities: Amenity[]
+  features: string[]
+  /** Display-only "from" price, entered by an editor. */
+  fromPrice: { amount: number; currency: string; unit: string } | null
+  seo: { title: string; description: string }
+  resort: {
+    name: string
+    /** "Kuriftu Resort & Spa Bishoftu", or the name. */
+    heading: string
+    slug: string
+    bookable: boolean
+    bookingPropertyId: string | null
+  } & PropertyContact
+  related: RoomSummary[]
+}
+
+export type ResortType ="resortAndSpa" | "adventurePark" | "waterPark" | "daySpa"
 
 export type ExperienceCategory = "water" | "adventure" | "nature" | "culture" | "family" | "dining"
 
@@ -133,8 +171,8 @@ export type ResortPage = {
   summary: string
   introTitle: string
   intro: RichText
-  amenities: { key: string; icon: IconName | null; label: string }[]
-  geo: { lat: number; lng: number } | null
+  amenities: Amenity[]
+  geo:{ lat: number; lng: number } | null
   gettingHere: string
   heroImage: ContentImage
   /** Image for the about card. */

@@ -107,23 +107,23 @@ Source: https://www.kurifturesorts.com/static/js/main.c2aebc63.js (fetched 2026-
 
 ### room details (17)
 
-- **Arba Minch / Private Pool Retreat**: Max guests (required), bed configuration and size aren't in the source
-- **Arba Minch / Presidential Suite**: Max guests (required), bed configuration and size aren't in the source
-- **Entoto / Glamping Tents**: Max guests (required), bed configuration and size aren't in the source
-- **Entoto / Presidential Cabin**: Max guests (required), bed configuration and size aren't in the source
-- **Bishoftu / The Royal Presidential Suite**: Max guests (required), bed configuration and size aren't in the source
-- **Bishoftu / Gateway Retreat**: Max guests (required), bed configuration and size aren't in the source
-- **Bishoftu / Lake Side**: Max guests (required), bed configuration and size aren't in the source
-- **Bishoftu / Splash View Suite**: Max guests (required), bed configuration and size aren't in the source
-- **Lake Tana / Lake View**: Max guests (required), bed configuration and size aren't in the source
-- **Lake Tana / Garden View**: Max guests (required), bed configuration and size aren't in the source
-- **Lake Tana / Presidential Suite**: Max guests (required), bed configuration and size aren't in the source
-- **Awash Falls / Premium Suite**: Max guests (required), bed configuration and size aren't in the source
-- **Awash Falls / Junior Suite**: Max guests (required), bed configuration and size aren't in the source
-- **Awash Falls / Executive**: Max guests (required), bed configuration and size aren't in the source
-- **Awash Falls / Presidential Suite**: Max guests (required), bed configuration and size aren't in the source
-- **African Village / Kuriftu Deluxe Suite**: Max guests (required), bed configuration and size aren't in the source
-- **African Village / Kuriftu Deluxe Family Suite**: Max guests (required), bed configuration and size aren't in the source
+- **Arba Minch / Private Pool Retreat**: Max guests (required), size, view and special features aren't in the source
+- **Arba Minch / Presidential Suite**: Max guests (required), size, view and special features aren't in the source
+- **Entoto / Glamping Tents**: Max guests (required), size, view and special features aren't in the source
+- **Entoto / Presidential Cabin**: Max guests (required), size, view and special features aren't in the source
+- **Bishoftu / The Royal Presidential Suite**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **Bishoftu / Gateway Retreat**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **Bishoftu / Lake Side**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **Bishoftu / Splash View Suite**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **Lake Tana / Lake View**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **Lake Tana / Garden View**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **Lake Tana / Presidential Suite**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **Awash Falls / Premium Suite**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **Awash Falls / Junior Suite**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **Awash Falls / Executive**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **Awash Falls / Presidential Suite**: Max guests (required), bed configuration, size, view and special features aren't in the source
+- **African Village / Kuriftu Deluxe Suite**: Max guests (required), size, view and special features aren't in the source
+- **African Village / Kuriftu Deluxe Family Suite**: Max guests (required), size, view and special features aren't in the source
 
 ### spa category (31)
 

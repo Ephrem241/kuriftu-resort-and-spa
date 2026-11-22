@@ -12,6 +12,6 @@ Dataset: f3i47bov/production (published perspective)
 | Slugs are unique per type | Pass | 133 slugs |
 | Every room references a resort | Pass | 17 rooms |
 | Import contains no enquiries | Pass | none |
-| Spot checks (Bishoftu geo, suite amenities, offer dates, reservation phone) | Pass | all match the source |
+| Spot checks (Bishoftu geo, suite amenities, room bed and label case, offer dates, reservation phone) | Pass | all match the source |
 
 All checks passed.

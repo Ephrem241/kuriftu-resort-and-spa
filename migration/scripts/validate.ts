@@ -130,11 +130,14 @@ async function main() {
   if (bishoftu?.geo?.lat !== 8.7802656 || bishoftu?.geo?.lng !== 39.0028643) spot.push(`Bishoftu geo is ${JSON.stringify(bishoftu?.geo)}`)
   const suite = byId.get("room.bishoftu.1") as { title?: string; amenities?: unknown[] } | undefined
   if (suite?.amenities?.length !== 12) spot.push(`Royal Presidential Suite has ${suite?.amenities?.length} amenities`)
+  const pool = byId.get("room.arba-minch.1") as { bedConfiguration?: string; amenities?: { label: string }[] } | undefined
+  if (pool?.bedConfiguration !== "King or twin bed") spot.push(`Private Pool Retreat bed is ${pool?.bedConfiguration}`)
+  if (pool?.amenities?.[0]?.label !== "Private pool") spot.push(`Private Pool Retreat first amenity is ${pool?.amenities?.[0]?.label}`)
   const offer = docs.find((d) => d._type === "offer") as { endDate?: string; showAsPopup?: boolean } | undefined
   if (!offer?.endDate?.startsWith("2026-11-30") || offer.showAsPopup !== true) spot.push(`Offer end ${offer?.endDate}, popup ${offer?.showAsPopup}`)
   const settings = byId.get("siteSettings") as { reservations?: { phones?: { tel: string }[] } } | undefined
   if (settings?.reservations?.phones?.[0]?.tel !== "+251999222211") spot.push("Reservation phone isn't +251999222211")
-  check("Spot checks (Bishoftu geo, suite amenities, offer dates, reservation phone)", spot, "all match the source")
+  check("Spot checks (Bishoftu geo, suite amenities, room bed and label case, offer dates, reservation phone)", spot, "all match the source")
 
   const failed = checks.filter((c) => !c.ok)
   const lines = [

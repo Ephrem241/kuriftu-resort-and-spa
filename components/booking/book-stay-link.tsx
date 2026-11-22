@@ -13,6 +13,8 @@ type BookStayLinkProps = VariantProps<typeof buttonVariants> & {
   source: string
   /** Resort slug, for analytics. */
   resort?: string
+  /** Room slug, for analytics. */
+  room?: string
   /** TravelBook property id; sent only once its param is verified. */
   propertyId?: string | null
   label?: string
@@ -23,6 +25,7 @@ type BookStayLinkProps = VariantProps<typeof buttonVariants> & {
 export function BookStayLink({
   source,
   resort,
+  room,
   propertyId,
   label = "Book Your Stay",
   variant = "primary",
@@ -35,7 +38,9 @@ export function BookStayLink({
   return (
     <a
       href={href}
-      onClick={() => track("booking_handoff_clicked", { source, ...(resort && { resort }) })}
+      onClick={() =>
+        track("booking_handoff_clicked", { source, ...(resort && { resort }), ...(room && { room }) })
+      }
       className={cn(buttonVariants({ variant, size, shape }), "group/button", className)}
     >
       {label}
