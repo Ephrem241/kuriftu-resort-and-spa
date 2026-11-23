@@ -3,6 +3,7 @@ import {
   Baby,
   Bath,
   BedDouble,
+  Briefcase,
   Calendar,
   Car,
   Coffee,
@@ -24,11 +25,13 @@ import {
   Trees,
   Tv,
   User,
+  Users,
   UtensilsCrossed,
   Vault,
   Waves,
   Wifi,
   Wind,
+  Wine,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react"
@@ -67,6 +70,9 @@ export const CONTENT_ICONS: Record<IconName, LucideIcon> = {
   heart: Heart,
   smile: Smile,
   gem: Gem,
+  briefcase: Briefcase,
+  users: Users,
+  wine: Wine,
 }
 
 export function ContentIcon({ name, ...props }: { name: IconName } & LucideProps) {

@@ -6,6 +6,9 @@ import { client } from "@/sanity/lib/client"
 import { sanityFetch } from "@/sanity/lib/fetch"
 import {
   DESTINATIONS_PAGE_QUERY,
+  EVENT_PACKAGE_QUERY,
+  EVENT_PACKAGE_SLUGS_QUERY,
+  EVENTS_PAGE_QUERY,
   EXPERIENCE_PAGE_QUERY,
   EXPERIENCE_SLUGS_QUERY,
   EXPERIENCES_PAGE_QUERY,
@@ -20,11 +23,14 @@ import {
   SITE_SETTINGS_QUERY,
   SITEMAP_QUERY,
   TREATMENTS_PAGE_QUERY,
+  VENUES_PAGE_QUERY,
   WELLNESS_PAGE_QUERY,
 } from "@/sanity/queries"
 
 import {
   mapDestinationsPage,
+  mapEventPackagePage,
+  mapEventsPage,
   mapExperiencePage,
   mapExperiencesPage,
   mapHomePage,
@@ -36,11 +42,14 @@ import {
   mapSiteSettings,
   mapSitemap,
   mapTreatmentsPage,
+  mapVenuesPage,
   mapWellnessPage,
 } from "./map"
 import { cacheSeconds, isLive, type Dated } from "./offers"
 import type {
   DestinationsPage,
+  EventPackagePage,
+  EventsPage,
   ExperiencePage,
   ExperiencesPage,
   HomePage,
@@ -52,6 +61,7 @@ import type {
   SiteSettings,
   SitemapEntry,
   TreatmentsPage,
+  VenuesPage,
   WellnessPage,
 } from "./types"
 
@@ -244,6 +254,47 @@ export async function getTreatmentsPage(fallbackDescription: string): Promise<Tr
 
   const doc = await sanityFetch({ query: TREATMENTS_PAGE_QUERY, tags })
   return mapTreatmentsPage(doc, fallbackDescription)
+}
+
+/** Copy for /event with its package cards and the form presets; renders with fallbacks if unpublished. */
+export async function getEventsPage(fallbackDescription: string): Promise<EventsPage> {
+  "use cache"
+  const tags = ["eventsPage", "eventVenue", "eventPackage", "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: EVENTS_PAGE_QUERY, tags })
+  return mapEventsPage(doc, fallbackDescription)
+}
+
+/** Heading and SEO for /event/venues with every venue; renders with fallbacks if unpublished. */
+export async function getVenuesPage(fallbackDescription: string): Promise<VenuesPage> {
+  "use cache"
+  const tags = ["eventsPage", "eventVenue", "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: VENUES_PAGE_QUERY, tags })
+  return mapVenuesPage(doc, fallbackDescription)
+}
+
+/** Every event package slug, read from the API (not the CDN) for static params. */
+export async function getEventPackageSlugs(): Promise<string[]> {
+  "use cache"
+  cacheTag("eventPackage")
+  cacheLife("days")
+  return client.withConfig({ useCdn: false }).fetch(EVENT_PACKAGE_SLUGS_QUERY)
+}
+
+/** One event package with its venues and related packages; null if unknown. */
+export async function getEventPackagePage(slug: string): Promise<EventPackagePage | null> {
+  "use cache"
+  const tags = ["eventPackage", `eventPackage:${slug}`, "eventVenue", "eventsPage", "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: EVENT_PACKAGE_QUERY, params: { slug }, tags })
+  return doc ? mapEventPackagePage(doc) : null
 }
 
 /** Revalidate at the next start or end. Next requires expire > revalidate. */

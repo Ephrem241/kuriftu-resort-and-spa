@@ -11,6 +11,9 @@ import type {
   SITEMAP_QUERY_RESULT,
   TREATMENTS_PAGE_QUERY_RESULT,
   WELLNESS_PAGE_QUERY_RESULT,
+  EVENTS_PAGE_QUERY_RESULT,
+  VENUES_PAGE_QUERY_RESULT,
+  EVENT_PACKAGE_QUERY_RESULT,
   SITE_SETTINGS_QUERY_RESULT,
 } from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
@@ -19,6 +22,7 @@ import { groupDestinations } from "./destinations"
 import { isIconName } from "./icons"
 import { isOfferCategory } from "./offers"
 import { hrefFor, pathForDocument, type ContentLink } from "./routes"
+import { isEventType, isPackageKind } from "./events"
 import { excerpt, isTreatmentGroup } from "./wellness"
 import type {
   Amenity,
@@ -50,6 +54,12 @@ import type {
   TreatmentsPage,
   TreatmentSummary,
   WellnessPage,
+  DisplayPrice,
+  EventPackagePage,
+  EventsPage,
+  PackageSummary,
+  VenueSummary,
+  VenuesPage,
 } from "./types"
 
 /**
@@ -596,6 +606,15 @@ export function mapSitemap(doc: SITEMAP_QUERY_RESULT): SitemapEntry[] {
     if (!doc.wellness.noIndex) entries.push({ path: "/wellness", lastModified })
     if (!doc.wellness.treatmentsNoIndex) entries.push({ path: "/wellness/treatments", lastModified })
   }
+  if (doc.events) {
+    const lastModified = doc.events._updatedAt
+    if (!doc.events.noIndex) entries.push({ path: "/event", lastModified })
+    if (!doc.events.venuesNoIndex) entries.push({ path: "/event/venues", lastModified })
+  }
+  for (const p of doc.eventPackages) {
+    const path = pathForDocument({ _type: "eventPackage", slug: p.slug })
+    if (path) entries.push({ path, lastModified: p._updatedAt })
+  }
   return entries
 }
 
@@ -697,5 +716,177 @@ export function mapTreatmentsPage(doc: TREATMENTS_PAGE_QUERY_RESULT, fallbackDes
     treatments: doc.treatments.map(mapTreatment),
     image: image?.asset ? toContentImage(image) : null,
     seo: mapSeo(doc.page?.treatmentsSeo, { title, description: intro || fallbackDescription }),
+  }
+}
+
+type PriceDoc = { amount?: number | null; currency?: string | null; unit?: string | null } | null | undefined
+
+function mapPrice(price: PriceDoc): DisplayPrice {
+  return price?.amount && price.currency
+    ? { amount: price.amount, currency: price.currency, unit: price.unit?.trim() ?? "" }
+    : null
+}
+
+type VenueDoc = NonNullable<VENUES_PAGE_QUERY_RESULT["venues"][number]>
+
+/** A venue card; null when its resort has no slug (it can't be filtered or enquired about). */
+export function mapVenue(doc: VenueDoc | null | undefined): VenueSummary | null {
+  const resort = mapExperienceResorts(doc?.resort ? [doc.resort] : [])[0]
+  if (!doc || !resort) return null
+  return {
+    id: doc._id,
+    name: doc.name,
+    capacity: typeof doc.capacity === "number" && doc.capacity > 0 ? doc.capacity : null,
+    setups: (doc.setups ?? []).filter((s): s is NonNullable<typeof s> => !!s),
+    excerpt: excerpt(doc.excerpt),
+    image: toContentImage(doc.image, doc.name),
+    resort,
+  }
+}
+
+type PackageCardDoc = NonNullable<EVENT_PACKAGE_QUERY_RESULT>["related"][number]
+
+/** A package card; null for a package without a known kind. */
+export function mapPackage(doc: PackageCardDoc | null | undefined): PackageSummary | null {
+  if (!doc?.slug || !isPackageKind(doc.kind)) return null
+  return {
+    title: doc.title,
+    slug: doc.slug,
+    kind: doc.kind,
+    summary: doc.summary?.trim() ?? "",
+    price: mapPrice(doc.fromPrice),
+    image: toContentImage(doc.image, doc.title),
+    resorts: mapExperienceResorts(doc.resorts),
+  }
+}
+
+const notNull = <T,>(value: T | null): value is T => value !== null
+
+/** Events page copy; null-safe so a missing singleton still renders. */
+export function mapEventsPage(doc: EVENTS_PAGE_QUERY_RESULT, fallbackDescription: string): EventsPage {
+  const page = doc.page
+  const hero = page?.hero
+  const venues = page?.venues
+  const enquiry = page?.enquiry
+  const title = hero?.title?.trim() || "Celebrations & Events"
+  const intro = hero?.intro?.trim() ?? ""
+
+  return {
+    hero: {
+      eyebrow: hero?.eyebrow?.trim() || "Celebrations & Events",
+      title,
+      intro,
+      image: hero?.image?.asset ? toContentImage(hero.image) : null,
+    },
+    eventTypes: {
+      title: page?.eventTypes?.title?.trim() || "Event Types",
+      subtitle: page?.eventTypes?.subtitle?.trim() ?? "",
+      tiles: (page?.eventTypes?.tiles ?? []).flatMap((t) =>
+        isEventType(t.eventType) && t.image?.asset
+          ? [
+              {
+                key: t._key,
+                eventType: t.eventType,
+                title: t.title,
+                icon: isIconName(t.icon) ? t.icon : null,
+                image: toContentImage(t.image, t.title),
+              },
+            ]
+          : []
+      ),
+    },
+    venues: {
+      title: venues?.title?.trim() || "Our Venues",
+      subtitle: venues?.subtitle?.trim() ?? "",
+      text: venues?.text?.trim() ?? "",
+      featured: mapVenue(venues?.featured),
+      highlights: (venues?.highlights ?? []).flatMap((v) => (v?._id && v.name ? [{ id: v._id, name: v.name }] : [])),
+    },
+    packages: {
+      title: page?.packages?.title?.trim() || "Our Event Packages",
+      subtitle: page?.packages?.subtitle?.trim() ?? "",
+      cards: (page?.packages?.cards ?? []).flatMap((c) => {
+        const pkg = mapPackage(c.package)
+        return pkg && isPackageKind(c.kind) && c.image?.asset
+          ? [
+              {
+                key: c._key,
+                kind: c.kind,
+                title: c.title,
+                text: c.text?.trim() ?? "",
+                image: toContentImage(c.image, c.title),
+                package: pkg,
+              },
+            ]
+          : []
+      }),
+    },
+    enquiry: {
+      title: enquiry?.title?.trim() || "Event Enquiry",
+      text: enquiry?.text?.trim() ?? "",
+      image: enquiry?.image?.asset ? toContentImage(enquiry.image) : null,
+    },
+    packageOptions: doc.packageOptions.flatMap((p) =>
+      p.slug && isPackageKind(p.kind)
+        ? [{ title: p.title, slug: p.slug, kind: p.kind, resorts: mapExperienceResorts(p.resorts) }]
+        : []
+    ),
+    venueResorts: mapExperienceResorts(doc.venueResorts),
+    seo: mapSeo(page?.seo, { title, description: intro || fallbackDescription }),
+  }
+}
+
+/** Venues page heading and every venue; null-safe so a missing singleton still renders. */
+export function mapVenuesPage(doc: VENUES_PAGE_QUERY_RESULT, fallbackDescription: string): VenuesPage {
+  const index = doc.page?.venuesIndex
+  const title = index?.title?.trim() || "Event Venues"
+  const intro = index?.intro?.trim() ?? ""
+  const image = doc.page?.fallbackImage
+  return {
+    eyebrow: index?.eyebrow?.trim() || "Celebrations & Events",
+    title,
+    intro,
+    venues: doc.venues.map(mapVenue).filter(notNull),
+    image: image?.asset ? toContentImage(image) : null,
+    seo: mapSeo(doc.page?.venuesSeo, { title, description: intro || fallbackDescription }),
+  }
+}
+
+type PackagePageDoc = NonNullable<EVENT_PACKAGE_QUERY_RESULT>
+
+/** One package; null when its kind is unknown. */
+export function mapEventPackagePage(doc: PackagePageDoc): EventPackagePage | null {
+  if (!isPackageKind(doc.kind)) return null
+  const summary = doc.summary?.trim() ?? ""
+  const images = (doc.images ?? [])
+    .filter((img) => img.asset)
+    .map((img, i) => toContentImage(img, `${doc.title}, photo ${i + 1}`))
+  const fallback = doc.fallbackImage?.asset ? toContentImage(doc.fallbackImage) : toContentImage(null, doc.title)
+  const description = (doc.description ?? []) as RichText
+
+  return {
+    title: doc.title,
+    slug: doc.slug ?? "",
+    kind: doc.kind,
+    summary,
+    price: mapPrice(doc.fromPrice),
+    images: images.length > 0 ? images : [fallback],
+    description: description.length > 0 ? description : summary ? paragraph(summary, "summary") : [],
+    inclusions: (doc.inclusions ?? []).map((i) => i?.trim() ?? "").filter(Boolean),
+    resorts: mapOfferResorts(doc.resorts),
+    venues: (doc.venues ?? []).flatMap((v) =>
+      v?._id && v.name
+        ? [
+            {
+              id: v._id,
+              name: v.name,
+              capacity: typeof v.capacity === "number" && v.capacity > 0 ? v.capacity : null,
+              resort: mapExperienceResorts(v.resort ? [v.resort] : [])[0] ?? null,
+            },
+          ]
+        : []
+    ),
+    related: (doc.related ?? []).map(mapPackage).filter(notNull),
+    seo: mapSeo(doc.seo, { title: doc.title, description: summary }),
   }
 }

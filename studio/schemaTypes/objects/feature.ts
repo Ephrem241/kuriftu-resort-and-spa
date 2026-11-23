@@ -36,6 +36,9 @@ export const ICON_OPTIONS = [
   {title: 'Care / heart', value: 'heart'},
   {title: 'Wellbeing / smile', value: 'smile'},
   {title: 'Premium / gem', value: 'gem'},
+  {title: 'Business / briefcase', value: 'briefcase'},
+  {title: 'Group / people', value: 'users'},
+  {title: 'Toast / glasses', value: 'wine'},
 ]
 
 export const iconField = defineField({

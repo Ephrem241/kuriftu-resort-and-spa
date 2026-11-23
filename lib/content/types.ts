@@ -1,3 +1,5 @@
+import type { EventType } from "@/lib/enquiry/schema"
+
 import type { IconName } from "./icons"
 
 /**
@@ -328,6 +330,85 @@ export type TreatmentsPage = {
   treatments: TreatmentSummary[]
   /** OG image fallback: the wellness hero. */
   image: ContentImage | null
+  seo: PageSeo
+}
+
+export type PackageKind = "wedding" | "meeting" | "celebration"
+
+/** Display-only "from" price, entered by an editor. */
+export type DisplayPrice = { amount: number; currency: string; unit: string } | null
+
+export type VenueSummary = {
+  id: string
+  name: string
+  /** Editor's maximum capacity; null when not entered. */
+  capacity: number | null
+  /** Setup styles, e.g. "Theatre"; empty when none entered. */
+  setups: string[]
+  excerpt: string
+  image: ContentImage
+  resort: ExperienceResort
+}
+
+export type PackageSummary = {
+  title: string
+  slug: string
+  kind: PackageKind
+  summary: string
+  price: DisplayPrice
+  image: ContentImage
+  resorts: ExperienceResort[]
+}
+
+/** A package the enquiry form can be preset with (`?package=`). */
+export type PackageOption = Pick<PackageSummary, "title" | "slug" | "kind" | "resorts">
+
+/** Copy and photography for /event. */
+export type EventsPage = {
+  hero: { eyebrow: string; title: string; intro: string; image: ContentImage | null }
+  eventTypes: {
+    title: string
+    subtitle: string
+    tiles: { key: string; eventType: EventType; title: string; icon: IconName | null; image: ContentImage }[]
+  }
+  venues: {
+    title: string
+    subtitle: string
+    text: string
+    featured: VenueSummary | null
+    highlights: { id: string; name: string }[]
+  }
+  packages: {
+    title: string
+    subtitle: string
+    cards: { key: string; kind: PackageKind; title: string; text: string; image: ContentImage; package: PackageSummary }[]
+  }
+  enquiry: { title: string; text: string; image: ContentImage | null }
+  packageOptions: PackageOption[]
+  /** Resorts with at least one venue (the form's `?resort=`). */
+  venueResorts: ExperienceResort[]
+  seo: PageSeo
+}
+
+/** Heading and SEO for /event/venues, with every venue. */
+export type VenuesPage = {
+  eyebrow: string
+  title: string
+  intro: string
+  venues: VenueSummary[]
+  /** OG image fallback: the events hero. */
+  image: ContentImage | null
+  seo: PageSeo
+}
+
+export type EventPackagePage = Omit<PackageSummary, "image"> & {
+  /** At least one; the first is the hero (the events hero when the package has none). */
+  images: ContentImage[]
+  description: RichText
+  inclusions: string[]
+  resorts: OfferResort[]
+  venues: { id: string; name: string; capacity: number | null; resort: ExperienceResort | null }[]
+  related: PackageSummary[]
   seo: PageSeo
 }
 

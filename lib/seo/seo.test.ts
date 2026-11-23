@@ -81,6 +81,8 @@ describe("mapSitemap", () => {
       rooms: [{ slug: "lake-side", resortSlug: "bishoftu", _updatedAt: "2026-11-03T00:00:00Z" }],
       experiences: [{ slug: "zipline", _updatedAt: "2026-11-04T00:00:00Z" }],
       wellness: { _updatedAt: "2026-11-05T00:00:00Z", noIndex: false, treatmentsNoIndex: false },
+      events: { _updatedAt: "2026-11-06T00:00:00Z", noIndex: false, venuesNoIndex: false },
+      eventPackages: [{ slug: "weddings-bishoftu", _updatedAt: "2026-11-07T00:00:00Z" }],
     }
     expect(mapSitemap(rows as Parameters<typeof mapSitemap>[0])).toEqual([
       { path: "/", lastModified: "2026-11-01T00:00:00Z" },
@@ -89,6 +91,9 @@ describe("mapSitemap", () => {
       { path: "/experience/zipline", lastModified: "2026-11-04T00:00:00Z" },
       { path: "/wellness", lastModified: "2026-11-05T00:00:00Z" },
       { path: "/wellness/treatments", lastModified: "2026-11-05T00:00:00Z" },
+      { path: "/event", lastModified: "2026-11-06T00:00:00Z" },
+      { path: "/event/venues", lastModified: "2026-11-06T00:00:00Z" },
+      { path: "/event/weddings-bishoftu", lastModified: "2026-11-07T00:00:00Z" },
     ])
     const hidden = {
       ...rows,
@@ -97,9 +102,11 @@ describe("mapSitemap", () => {
       rooms: [],
       experiences: [],
       wellness: { ...rows.wellness, noIndex: true, treatmentsNoIndex: true },
+      events: { ...rows.events, noIndex: true, venuesNoIndex: true },
+      eventPackages: [],
     }
     expect(mapSitemap(hidden as Parameters<typeof mapSitemap>[0])).toEqual([])
-    expect(mapSitemap({ ...hidden, wellness: null } as Parameters<typeof mapSitemap>[0])).toEqual([])
+    expect(mapSitemap({ ...hidden, wellness: null, events: null } as Parameters<typeof mapSitemap>[0])).toEqual([])
   })
 })
 

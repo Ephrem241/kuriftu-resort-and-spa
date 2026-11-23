@@ -1,11 +1,23 @@
 "use client"
 
-import { useId, useRef, useState, type FormEvent, type ReactNode } from "react"
+import { useId, useRef, useState, type FormEvent } from "react"
 import { useSearchParams } from "next/navigation"
-import { ArrowRight, CalendarDays, ChevronDown, Clock, Phone } from "lucide-react"
+import { ArrowRight, CalendarDays, ChevronDown, Clock, Phone as PhoneIcon } from "lucide-react"
 
 import { useResortToday } from "@/components/booking/use-resort-today"
-import { ContactLink } from "@/components/site/contact-link"
+import {
+  FormField,
+  Honeypot,
+  OverlayInput,
+  PhoneLink,
+  formatDate,
+  iconClass,
+  inputClass,
+  openPicker,
+  overlayClass,
+  postEnquiry,
+  type Phone,
+} from "@/components/forms/form-parts"
 import { Button } from "@/components/ui/button"
 import { track } from "@/lib/analytics"
 import { todayInResortZone } from "@/lib/booking/dates"
@@ -14,8 +26,6 @@ import { createEnquirySchema, fieldErrors } from "@/lib/enquiry/schema"
 import { cn } from "@/lib/utils"
 
 export type TreatmentOptionGroup = { resort: ExperienceResort; treatments: { slug: string; title: string }[] }
-
-type Phone = { display: string; tel: string }
 
 type FormProps = {
   options: TreatmentOptionGroup[]
@@ -84,35 +94,18 @@ export function SpaBookingForm({ options, reservationPhone, defaultTreatment = "
 
     setErrors({})
     setSending(true)
-    try {
-      const res = await fetch("/api/enquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-      const body = (await res.json().catch(() => null)) as {
-        ok?: boolean
-        message?: string
-        emailSent?: boolean
-        errors?: Errors
-        fallbackPhone?: Phone | null
-      } | null
-      const phone = body?.fallbackPhone ?? reservationPhone
+    const outcome = await postEnquiry<Field>(payload, reservationPhone)
+    setSending(false)
 
-      if (res.ok && body?.ok) {
-        track("enquiry_submitted", { type: "spa" })
-        setResult({ status: "sent", emailSent: body.emailSent === true, phone })
-        requestAnimationFrame(() => doneRef.current?.focus())
-      } else if (res.status === 400 && body?.errors) {
-        setErrors(body.errors)
-        focusFirstError(body.errors)
-      } else {
-        setResult({ status: "failed", message: body?.message || "We couldn't send your request", phone })
-      }
-    } catch {
-      setResult({ status: "failed", message: "We couldn't send your request", phone: reservationPhone })
-    } finally {
-      setSending(false)
+    if (outcome.status === "sent") {
+      track("enquiry_submitted", { type: "spa" })
+      setResult(outcome)
+      requestAnimationFrame(() => doneRef.current?.focus())
+    } else if (outcome.status === "invalid") {
+      setErrors(outcome.errors)
+      focusFirstError(outcome.errors)
+    } else {
+      setResult(outcome)
     }
   }
 
@@ -126,7 +119,7 @@ export function SpaBookingForm({ options, reservationPhone, defaultTreatment = "
         {!result.emailSent && result.phone ? (
           <p className="text-small text-charcoal">
             If you don&apos;t hear from us, call{" "}
-            <PhoneLink phone={result.phone} />.
+            <PhoneLink phone={result.phone} source="wellness" />.
           </p>
         ) : null}
       </div>
@@ -154,7 +147,7 @@ export function SpaBookingForm({ options, reservationPhone, defaultTreatment = "
 
       <FormField label="Phone Number" required htmlFor={fieldId("phone")} error={errors.phone} errorId={errorId("phone")}>
         <div className="relative">
-          <Phone aria-hidden="true" strokeWidth={1.5} className={iconClass} />
+          <PhoneIcon aria-hidden="true" strokeWidth={1.5} className={iconClass} />
           <input
             id={fieldId("phone")}
             type="tel"
@@ -240,19 +233,7 @@ export function SpaBookingForm({ options, reservationPhone, defaultTreatment = "
         </OverlayInput>
       </FormField>
 
-      {/* Honeypot: hidden from people and assistive tech; bots fill it. */}
-      <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
-        <label htmlFor={`${id}-website`}>Website</label>
-        <input
-          id={`${id}-website`}
-          type="text"
-          name="website"
-          tabIndex={-1}
-          autoComplete="off"
-          value={values.website}
-          onChange={(e) => set("website")(e.target.value)}
-        />
-      </div>
+      <Honeypot id={`${id}-website`} value={values.website} onChange={set("website")} />
 
       <div className="flex items-end">
         <Button
@@ -279,7 +260,7 @@ export function SpaBookingForm({ options, reservationPhone, defaultTreatment = "
           {result.message}.{" "}
           {result.phone ? (
             <>
-              Please call <PhoneLink phone={result.phone} /> to book.
+              Please call <PhoneLink phone={result.phone} source="wellness" /> to book.
             </>
           ) : (
             "Please try again later."
@@ -290,107 +271,3 @@ export function SpaBookingForm({ options, reservationPhone, defaultTreatment = "
   )
 }
 
-const inputClass =
-  "h-11 w-full rounded-md border border-line bg-white px-3 text-small text-charcoal placeholder:text-muted transition-colors duration-hover ease-soft hover:border-sage focus-visible:border-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
-
-const iconClass = "pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-charcoal"
-
-const overlayClass =
-  "absolute inset-0 size-full cursor-pointer appearance-none opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-
-function openPicker(e: React.MouseEvent<HTMLInputElement>) {
-  try {
-    e.currentTarget.showPicker?.()
-  } catch {
-    // Some browsers disallow showPicker in certain contexts; native UI still works.
-  }
-}
-
-function formatDate(iso: string) {
-  return new Intl.DateTimeFormat("en-GB", {
-    timeZone: "UTC",
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(`${iso}T00:00:00Z`))
-}
-
-function FormField({
-  label,
-  required,
-  htmlFor,
-  error,
-  errorId,
-  children,
-}: {
-  label: string
-  required?: boolean
-  htmlFor: string
-  error?: string
-  errorId: string
-  children: ReactNode
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="text-small font-bold text-charcoal">
-        {label}
-        {required ? (
-          <>
-            <span aria-hidden="true" className="text-error"> *</span>
-            <span className="sr-only"> (required)</span>
-          </>
-        ) : null}
-      </label>
-      {children}
-      {error ? (
-        <p id={errorId} role="alert" className="text-caption text-error">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  )
-}
-
-/** A native date/time input stretched invisibly over a styled field showing its value. */
-function OverlayInput({
-  icon,
-  display,
-  empty,
-  invalid,
-  children,
-}: {
-  icon: ReactNode
-  display: string
-  empty: boolean
-  invalid: boolean
-  children: ReactNode
-}) {
-  return (
-    <div
-      className={cn(
-        "relative flex h-11 items-center rounded-md border border-line bg-white pr-3 pl-10 text-small transition-colors duration-hover ease-soft hover:border-sage focus-within:border-forest has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-gold",
-        invalid && "border-error"
-      )}
-    >
-      {icon}
-      <span aria-hidden="true" className={cn("truncate", empty ? "text-muted" : "text-charcoal")}>
-        {display}
-      </span>
-      {children}
-    </div>
-  )
-}
-
-function PhoneLink({ phone }: { phone: Phone }) {
-  return (
-    <ContactLink
-      method="phone"
-      href={`tel:${phone.tel}`}
-      source="wellness"
-      className="font-bold text-forest underline underline-offset-4 hover:text-charcoal"
-    >
-      {phone.display}
-    </ContactLink>
-  )
-}

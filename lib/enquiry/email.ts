@@ -1,4 +1,4 @@
-import { ENQUIRY_TYPE_LABELS, cleanLine, type EnquiryInput } from "./schema"
+import { ENQUIRY_TYPE_LABELS, EVENT_TYPE_LABELS, cleanLine, type EnquiryInput } from "./schema"
 
 /**
  * Notification email for a stored enquiry. Plain text only: guest input is
@@ -9,6 +9,7 @@ export function buildEnquiryEmail({
   enquiryId,
   resortName,
   treatmentName,
+  packageName,
   studioUrl,
 }: {
   enquiry: EnquiryInput
@@ -16,6 +17,8 @@ export function buildEnquiryEmail({
   resortName: string | null
   /** Spa requests: the treatment's title from content (never the posted slug). */
   treatmentName?: string | null
+  /** Event enquiries: the package's title from content (never the posted slug). */
+  packageName?: string | null
   studioUrl?: string
 }): { subject: string; text: string } {
   const label = ENQUIRY_TYPE_LABELS[enquiry.type]
@@ -29,7 +32,13 @@ export function buildEnquiryEmail({
     ["Phone", enquiry.phone || undefined],
   ]
   if (enquiry.type === "event" || enquiry.type === "meeting") {
-    rows.push(["Date from", enquiry.startDate], ["Date to", enquiry.endDate], ["Guests", enquiry.guests])
+    rows.push(
+      ["Event type", enquiry.eventType ? EVENT_TYPE_LABELS[enquiry.eventType] : undefined],
+      ["Package", packageName ?? undefined],
+      ["Date from", enquiry.startDate || undefined],
+      ["Date to", enquiry.endDate || undefined],
+      ["Guests", enquiry.guests]
+    )
   } else if (enquiry.type === "spa") {
     rows.push(
       ["Treatment", treatmentName ?? undefined],

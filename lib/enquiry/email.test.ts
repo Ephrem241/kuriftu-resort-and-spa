@@ -65,6 +65,28 @@ describe("buildEnquiryEmail", () => {
     expect(text).not.toContain("Reply to this email")
   })
 
+  it("lists the event type and package for event enquiries without an email", () => {
+    const { subject, text } = buildEnquiryEmail({
+      enquiry: {
+        type: "meeting",
+        name: "Abebe",
+        phone: "+251 911 123 456",
+        eventType: "conference",
+        package: "host-a-meeting-or-conference-bishoftu",
+        startDate: "",
+      },
+      enquiryId: "x",
+      resortName: "Kuriftu Resort & Spa Bishoftu",
+      packageName: "Host A Meeting Or Conference",
+    })
+    expect(subject).toBe("New meeting enquiry — Kuriftu Resort & Spa Bishoftu")
+    expect(text).toContain("Event type: Conference")
+    expect(text).toContain("Package: Host A Meeting Or Conference")
+    expect(text).not.toContain("Date from")
+    expect(text).not.toContain("host-a-meeting")
+    expect(text).toContain("No email given. Call the guest to confirm.")
+  })
+
   it("keeps the subject on one line", () => {
     const { subject } = buildEnquiryEmail({ enquiry: event, enquiryId: "x", resortName: "A\r\nBcc: evil@x.y" })
     expect(subject).not.toMatch(/[\r\n]/)
