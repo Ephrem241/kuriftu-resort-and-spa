@@ -174,6 +174,9 @@ export const SITEMAP_QUERY = defineQuery(`{
   },
   "eventPackages": *[_type == "eventPackage" && defined(slug.current) && seo.noIndex != true] | order(title asc){
     "slug": slug.current, _updatedAt
+  },
+  "pages": *[_type == "page" && defined(slug.current) && seo.noIndex != true] | order(title asc){
+    "slug": slug.current, _updatedAt
   }
 }`)
 
@@ -439,4 +442,24 @@ export const ENQUIRY_CONTEXT_QUERY = defineQuery(`{
     reservations${ENQUIRY_CONTACT},
     headOffice${ENQUIRY_CONTACT}
   }
+}`)
+
+export const PAGE_SLUGS_QUERY = defineQuery(`*[_type == "page" && defined(slug.current)].slug.current`)
+
+/** One flexible marketing page (About, Sustainability, …) with its section blocks. */
+export const PAGE_QUERY = defineQuery(`*[_type == "page" && slug.current == $slug][0]{
+  title,
+  "slug": slug.current,
+  hero { eyebrow, title, intro, image${IMAGE} },
+  sections[]{
+    _key,
+    _type,
+    _type == "textSection" => { eyebrow, heading, body },
+    _type == "mediaText" => { eyebrow, heading, body, image${IMAGE}, imagePosition, link${LINK} },
+    _type == "featureList" => { heading, intro, items[]{ _key, icon, title } },
+    _type == "imageGallery" => { heading, images[]${IMAGE} },
+    _type == "callToAction" => { heading, text, link${LINK}, backgroundImage${IMAGE} },
+    _type == "videoEmbed" => { title, url, poster${IMAGE} }
+  },
+  seo${SEO}
 }`)

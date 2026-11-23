@@ -446,3 +446,30 @@ export type ResortPage = {
   spaImage: ContentImage | null
   diningImage: ContentImage | null
 }
+
+/** One block of a flexible marketing page; incomplete blocks are dropped by the mapper. */
+export type PageSection =
+  | { type: "text"; key: string; eyebrow: string; heading: string; body: RichText }
+  | {
+      type: "mediaText"
+      key: string
+      eyebrow: string
+      heading: string
+      body: RichText
+      image: ContentImage
+      imagePosition: "start" | "end"
+      link: NavLink | null
+    }
+  | { type: "features"; key: string; heading: string; intro: string; items: IconFeature[] }
+  | { type: "gallery"; key: string; heading: string; images: ContentImage[] }
+  | { type: "cta"; key: string; heading: string; text: string; link: NavLink; image: ContentImage | null }
+  | { type: "video"; key: string; title: string; embedUrl: string; poster: ContentImage }
+
+/** About, Sustainability, Training, Privacy and the other `page` documents. */
+export type MarketingPage = {
+  title: string
+  slug: string
+  hero: { eyebrow: string; title: string; intro: string; image: ContentImage | null }
+  sections: PageSection[]
+  seo: PageSeo
+}

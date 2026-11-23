@@ -1,7 +1,7 @@
 import {DocumentIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
-import {slugRule} from '../../lib/validation'
+import {pageSlugRule} from '../../lib/validation'
 import {pageSectionTypes} from '../blocks'
 
 /** Flexible marketing pages: About, Sustainability, Roadshow, Training, Coming Soon, Privacy. */
@@ -15,7 +15,7 @@ export const page = defineType({
   ],
   fields: [
     defineField({name: 'title', type: 'string', group: 'content', validation: (rule) => rule.required()}),
-    defineField({name: 'slug', type: 'slug', group: 'content', options: {source: 'title'}, validation: slugRule}),
+    defineField({name: 'slug', type: 'slug', group: 'content', options: {source: 'title'}, validation: pageSlugRule}),
     defineField({
       name: 'hero',
       type: 'object',
