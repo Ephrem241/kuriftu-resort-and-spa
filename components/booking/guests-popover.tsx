@@ -40,7 +40,7 @@ function Stepper({
     <div className="flex items-center justify-between gap-6 py-3">
       <div>
         <p className="text-small font-bold text-charcoal">{label}</p>
-        <p className="text-caption text-muted">{hint}</p>
+        <p className="text-caption text-charcoal">{hint}</p>
       </div>
       <div className="flex items-center gap-3">
         <button
@@ -75,7 +75,7 @@ export function GuestsPopover({ adults, childCount, onChange }: GuestsPopoverPro
       <Popover.Trigger className={`${fieldShellClass} group cursor-pointer text-left`}>
         <Users aria-hidden="true" strokeWidth={1.5} className="size-5 shrink-0 text-forest" />
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="text-caption text-muted">Guests</span>
+          <span className="text-caption text-charcoal">Guests</span>
           <span className="truncate text-small text-charcoal">
             {guestsLabel(adults, childCount)}
           </span>

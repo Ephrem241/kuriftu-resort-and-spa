@@ -4,7 +4,7 @@ import { ContactActions } from "@/components/site/contact-actions"
 import type { ResortPage } from "@/lib/content/types"
 import { cn } from "@/lib/utils"
 
-const goldPill = "text-forest hover:text-ivory"
+const goldPill = "text-charcoal hover:text-ivory"
 
 /**
  * Forest panel that ends the page. Bookable resorts hand off to the booking

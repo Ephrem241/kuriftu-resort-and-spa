@@ -28,8 +28,9 @@ export async function SiteHeader() {
   return (
     <header className="absolute inset-x-0 top-0 z-30">
       <div className="container-site flex h-24 items-center justify-between gap-6 lg:h-32">
-        <Link href="/" aria-label={`${settings.brandName}, home`} className="shrink-0">
+        <Link href="/" className="shrink-0">
           <Wordmark />
+          <span className="sr-only">, home</span>
         </Link>
 
         <SiteNav items={items} />

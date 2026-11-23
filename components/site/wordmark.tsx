@@ -28,7 +28,7 @@ export function Wordmark({
         )}
       >
         KURIFTU
-      </span>
+      </span>{" "}
       <span className="mt-1.5 flex items-center gap-2">
         <span aria-hidden="true" className="h-px w-4 bg-gold" />
         <span

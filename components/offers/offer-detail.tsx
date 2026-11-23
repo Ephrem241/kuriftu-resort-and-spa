@@ -77,7 +77,7 @@ export function OfferDetail({ offer, reservations }: OfferDetailProps) {
           ) : null}
 
           {offer.description.length > 0 ? (
-            <PortableText value={offer.description} className="mt-8 text-body text-charcoal" />
+            <PortableText value={offer.description} headingLevel={2} className="mt-8 text-body text-charcoal" />
           ) : null}
 
           <aside aria-labelledby="offer-book-title" className="mt-10 rounded-xl bg-forest p-8 lg:p-10">
@@ -93,7 +93,7 @@ export function OfferDetail({ offer, reservations }: OfferDetailProps) {
                 resort={action.resort?.slug}
                 propertyId={action.resort?.bookingPropertyId}
                 variant="accent"
-                className="mt-6 text-forest hover:text-ivory"
+                className="mt-6 text-charcoal hover:text-ivory"
               />
             ) : (
               <ContactActions

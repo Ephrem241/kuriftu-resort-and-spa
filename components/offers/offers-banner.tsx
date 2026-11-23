@@ -23,7 +23,7 @@ export function OffersBanner({ banner }: { banner: Banner }) {
         </div>
 
         <div className="relative z-10 flex flex-col justify-center p-8 md:max-w-[50%] md:py-10 lg:px-14 lg:py-12">
-          {banner.eyebrow ? <p className="eyebrow text-gold">{banner.eyebrow}</p> : null}
+          {banner.eyebrow ? <p className="eyebrow text-beige">{banner.eyebrow}</p> : null}
           <h2 id="offers-banner-title" className="mt-2 max-w-md text-h3 text-ivory lg:text-[2.75rem] lg:leading-[1.08]">
             {banner.title}
           </h2>

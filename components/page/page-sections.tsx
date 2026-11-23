@@ -190,7 +190,7 @@ function CtaSection({ section }: { section: Extract<PageSection, { type: "cta" }
             href={section.link.href}
             variant="accent"
             arrow
-            className="mt-6 self-start text-forest hover:text-ivory"
+            className="mt-6 self-start text-charcoal hover:text-ivory"
           >
             {section.link.label}
           </ButtonLink>

@@ -69,7 +69,7 @@ export function HeroCarousel({ slides, storyEmbedUrl }: HeroCarouselProps) {
 
       <div className="relative z-10 order-1 container-site pt-32 pb-10 lg:flex lg:min-h-[44rem] lg:flex-col lg:justify-center lg:pt-36 lg:pb-40">
         <div aria-live="polite" className="max-w-xl">
-          <p className="eyebrow text-gold">{slide.eyebrow}</p>
+          <p className="eyebrow text-forest">{slide.eyebrow}</p>
           <h1 className="mt-3 text-[2.5rem] leading-[1.1] md:text-h1 lg:text-[3.5rem]">
             {slide.title}
           </h1>

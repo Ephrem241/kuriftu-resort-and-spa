@@ -30,7 +30,7 @@ export function SpaBooking({ id, content, options, reservationPhone }: SpaBookin
         ) : null}
 
         <div className="relative z-10 px-6 pt-8 pb-6 md:px-10 lg:py-12 lg:pr-10 lg:pl-[24%]">
-          <p className="eyebrow flex items-center gap-3 text-gold">
+          <p className="eyebrow flex items-center gap-3 text-beige">
             <span aria-hidden="true" className="h-px w-6 bg-gold" />
             {content.eyebrow}
           </p>
