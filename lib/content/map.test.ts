@@ -147,8 +147,7 @@ describe("mapResortPage", () => {
     heroImage: image("Lakeside pool at dusk"),
     heroVideoUrl: null,
     gallery: [image("Gallery one")],
-    bookable: true,
-    bookingPropertyId: null,
+    bookingProperty: { id: "29728", code: "2392" },
     phone: { display: "+251 924 949 494", tel: "+251924949494" },
     email: "booking@kurifturesorts.com",
     seo: { title: null, description: "Set against the tranquil shores." },
@@ -231,8 +230,7 @@ describe("mapRoomPage", () => {
       name: "Bishoftu",
       fullName: "Kuriftu Resort & Spa Bishoftu",
       slug: "bishoftu",
-      bookable: true,
-      bookingPropertyId: null,
+      bookingProperty: { id: "29728", code: "2392" },
       phone: { display: "+251 11 123 4567", tel: "+251111234567" },
       email: "bishoftu@example.com",
     },
@@ -306,8 +304,7 @@ describe("offers", () => {
     name: "Arba Minch",
     fullName: null,
     slug: "arba-minch",
-    bookable: true,
-    bookingPropertyId: "AM1",
+    bookingProperty: { id: "30539", code: "8068" },
     phone: null,
     email: null,
   }
@@ -320,7 +317,7 @@ describe("offers", () => {
       category: "deals",
       badge: "UP TO 25% OFF",
       showAsPopup: true,
-      resorts: [{ name: "Arba Minch", heading: "Arba Minch", slug: "arba-minch", bookable: true, bookingPropertyId: "AM1" }],
+      resorts: [{ name: "Arba Minch", heading: "Arba Minch", slug: "arba-minch", bookable: true, bookingProperty: { id: "30539", code: "8068" } }],
       noIndex: false,
       lastModified: doc._updatedAt,
     })
@@ -354,8 +351,7 @@ describe("offers", () => {
           name: "Arba Minch",
           fullName: "Kuriftu Resort & Spa Arba Minch",
           slug: "arba-minch",
-          bookable: null,
-          bookingPropertyId: null,
+          bookingProperty: null,
           phone: { display: "+251 999 222 211", tel: "+251999222211" },
           email: null,
         },
@@ -366,7 +362,7 @@ describe("offers", () => {
     expect(page.showAsPopup).toBe(false)
     expect(page.promoCode).toBe("NOV25")
     expect(page.description).toEqual([])
-    expect(page.resorts[0]).toMatchObject({ heading: "Kuriftu Resort & Spa Arba Minch", bookable: true, email: null })
+    expect(page.resorts[0]).toMatchObject({ heading: "Kuriftu Resort & Spa Arba Minch", bookable: false, bookingProperty: null, email: null })
   })
 })
 

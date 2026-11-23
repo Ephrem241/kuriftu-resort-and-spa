@@ -4,7 +4,7 @@ import type { VariantProps } from "class-variance-authority"
 
 import { buttonVariants } from "@/components/ui/button"
 import { track } from "@/lib/analytics"
-import { buildBookingUrl } from "@/lib/booking/handoff"
+import { buildBookingUrl, type BookingProperty } from "@/lib/booking/handoff"
 import { cn } from "@/lib/utils"
 import { ArrowRight } from "lucide-react"
 
@@ -15,8 +15,8 @@ type BookStayLinkProps = VariantProps<typeof buttonVariants> & {
   resort?: string
   /** Room slug, for analytics. */
   room?: string
-  /** TravelBook property id; sent only once its param is verified. */
-  propertyId?: string | null
+  /** TravelBook property; without one the group page opens. */
+  property?: BookingProperty | null
   label?: string
   className?: string
 }
@@ -26,14 +26,14 @@ export function BookStayLink({
   source,
   resort,
   room,
-  propertyId,
+  property,
   label = "Book Your Stay",
   variant = "primary",
   size = "pill",
   shape = "pill",
   className,
 }: BookStayLinkProps) {
-  const href = buildBookingUrl({ propertyId }) || "/contact"
+  const href = buildBookingUrl({ property }) || "/contact"
 
   return (
     <a

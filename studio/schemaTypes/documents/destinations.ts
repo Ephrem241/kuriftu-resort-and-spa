@@ -124,14 +124,40 @@ export const resort = defineType({
       type: 'boolean',
       group: 'booking',
       initialValue: true,
-      description: 'Off for the water park and day spa: their pages show an enquiry action instead of the search bar.',
+      description:
+        'Off for the water park and day spa. Online booking also needs both booking engine codes below; without them the site shows the reservation contact instead.',
     }),
     defineField({
       name: 'bookingPropertyId',
       title: 'Booking engine property id',
       type: 'string',
       group: 'booking',
+      description: 'TravelBook "id_albergo", e.g. 29728 for Bishoftu.',
       hidden: ({document}) => document?.bookable === false,
+      validation: (rule) => [
+        rule.regex(/^\d+$/, {name: 'digits'}).error('Digits only.'),
+        rule.custom((value, {document}) =>
+          document?.bookable !== false && !value
+            ? 'Without this, the site shows the reservation contact instead of online booking.'
+            : true,
+        ).warning(),
+      ],
+    }),
+    defineField({
+      name: 'bookingPropertyCode',
+      title: 'Booking engine property code',
+      type: 'string',
+      group: 'booking',
+      description: 'TravelBook "dc" code that goes with the property id, e.g. 2392 for Bishoftu.',
+      hidden: ({document}) => document?.bookable === false,
+      validation: (rule) => [
+        rule.regex(/^\d+$/, {name: 'digits'}).error('Digits only.'),
+        rule.custom((value, {document}) =>
+          document?.bookable !== false && !value
+            ? 'Without this, the site shows the reservation contact instead of online booking.'
+            : true,
+        ).warning(),
+      ],
     }),
     defineField({name: 'reservationContact', type: 'contactDetails', group: 'booking'}),
     defineField({name: 'seo', title: 'SEO', type: 'seo', group: 'seo'}),

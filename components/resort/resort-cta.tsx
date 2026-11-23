@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils"
 const goldPill = "text-charcoal hover:text-ivory"
 
 /**
- * Forest panel that ends the page. Bookable resorts hand off to the booking
- * engine; the water park and day spa show their own phone and email.
+ * Forest panel that ends the page. Resorts in the booking engine hand off to
+ * their TravelBook property; the rest (water park, day spa, and resorts
+ * TravelBook does not carry) show their own phone and email.
  */
 export function ResortCta({ resort }: { resort: ResortPage }) {
   return (
@@ -35,7 +36,7 @@ export function ResortCta({ resort }: { resort: ResortPage }) {
           <BookStayLink
             source="resort-cta"
             resort={resort.slug}
-            propertyId={resort.bookingPropertyId}
+            property={resort.bookingProperty}
             variant="accent"
             className={cn("mt-6 self-start", goldPill)}
           />

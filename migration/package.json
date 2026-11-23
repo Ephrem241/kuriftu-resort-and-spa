@@ -15,6 +15,7 @@
     "seed:events-page": "tsx scripts/seed-events-page.ts",
     "seed:contact-page": "tsx scripts/seed-contact-page.ts",
     "seed:gallery-page": "tsx scripts/seed-gallery-page.ts",
+    "seed:booking-properties": "tsx scripts/seed-booking-properties.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

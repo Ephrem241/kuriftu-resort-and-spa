@@ -12,6 +12,13 @@
     "boston": "daySpa"
   },
   "notBookable": ["waterpark", "boston"],
+  "bookingProperties": {
+    "$comment": "TravelBook id_albergo and dc, verified on the live engine 2026-11-24 (prompts/21). Resorts not listed are not in TravelBook and show their reservation contact.",
+    "bishoftu": { "id": "29728", "code": "2392" },
+    "africanVillage": { "id": "29733", "code": "2387" },
+    "entoto": { "id": "29777", "code": "4052" },
+    "arba-minch": { "id": "30539", "code": "8068" }
+  },
   "taglines": {
     "$comment": "From the approved home page design reference.",
     "bishoftu": "Lakeside Retreat",

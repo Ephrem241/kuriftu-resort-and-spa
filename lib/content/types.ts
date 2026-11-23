@@ -1,3 +1,4 @@
+import type { BookingProperty } from "@/lib/booking/handoff"
 import type { EventType } from "@/lib/enquiry/schema"
 
 import type { IconName } from "./icons"
@@ -29,10 +30,10 @@ export type ResortSummary = {
   /** Short location line shown on tiles, e.g. "Lakeside Retreat". */
   tagline: string
   image: ContentImage
-  /** Overnight stays can be booked (water park and day spa cannot). */
+  /** Can be booked online: bookable in Studio and carried by TravelBook. */
   bookable: boolean
-  /** TravelBook property id, when known. */
-  bookingPropertyId: string | null
+  /** TravelBook property; null exactly when `bookable` is false. */
+  bookingProperty: BookingProperty | null
 }
 
 /** One sitemap row: a site path and when its content last changed. */
@@ -71,7 +72,7 @@ export type SiteSettings = {
   /** Resorts listed in the Destinations nav and footer. */
   navResorts: Pick<ResortSummary, "name" | "slug">[]
   /** Resorts offered in the availability search. */
-  bookableResorts: Pick<ResortSummary, "name" | "slug" | "bookingPropertyId">[]
+  bookableResorts: Pick<ResortSummary, "name" | "slug" | "bookingProperty">[]
   experienceLinks: NavLink[]
   footerColumns: { title: string; links: NavLink[] }[]
   legalLinks: NavLink[]
@@ -178,7 +179,7 @@ export type RoomPage = {
     heading: string
     slug: string
     bookable: boolean
-    bookingPropertyId: string | null
+    bookingProperty: BookingProperty | null
   } & PropertyContact
   related: RoomSummary[]
 }
@@ -229,7 +230,7 @@ export type OfferResort = {
   heading: string
   slug: string
   bookable: boolean
-  bookingPropertyId: string | null
+  bookingProperty: BookingProperty | null
 } & PropertyContact
 
 export type OfferPage = Omit<OfferSummary, "resorts" | "noIndex" | "lastModified"> & {
@@ -437,7 +438,7 @@ export type ResortPage = {
   ctaImage: ContentImage
   heroVideoUrl: string | null
   bookable: boolean
-  bookingPropertyId: string | null
+  bookingProperty: BookingProperty | null
   phone: { display: string; tel: string } | null
   email: string | null
   seo: PageSeo

@@ -86,7 +86,7 @@ export function AvailabilityBar({
 
     setErrors({})
     const data = result.data
-    const propertyId = destinations.find((d) => d.slug === data.destination)?.bookingPropertyId
+    const property = destinations.find((d) => d.slug === data.destination)?.bookingProperty
     track("availability_search_submitted", {
       destination: data.destination,
       nights: nightsBetween(data.checkIn, data.checkOut),
@@ -94,7 +94,7 @@ export function AvailabilityBar({
     })
     track("booking_handoff_clicked", { source, resort: data.destination })
 
-    const url = buildBookingUrl({ propertyId, ...data })
+    const url = buildBookingUrl({ property, stay: data })
     window.location.assign(url || "/contact")
   }
 

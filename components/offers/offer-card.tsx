@@ -66,7 +66,7 @@ export function OfferCard({ offer }: { offer: OfferSummary }) {
             <BookStayLink
               source="offers"
               resort={action.resort?.slug}
-              propertyId={action.resort?.bookingPropertyId}
+              property={action.resort?.bookingProperty}
               label="Book Now"
               className="h-9 px-6"
             />

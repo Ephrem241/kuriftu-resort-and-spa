@@ -22,6 +22,17 @@ const LINK = /* groq */ `{
 
 const SEO = /* groq */ `{ title, description, noIndex, ogImage${IMAGE} }`
 
+/**
+ * The resort's TravelBook property, or null when it can't be booked online:
+ * not bookable (water park, day spa) or missing either engine code (resorts
+ * TravelBook does not carry). The web app derives `bookable` from this.
+ */
+const BOOKING_PROPERTY = /* groq */ `select(
+  coalesce(bookable, true) && defined(bookingPropertyId) && defined(bookingPropertyCode) =>
+    { "id": bookingPropertyId, "code": bookingPropertyCode },
+  null
+)`
+
 const ADDRESS = /* groq */ `{ streetAddress, locality, region, postalCode, country }`
 
 export const SITE_SETTINGS_QUERY = defineQuery(`*[_type == "siteSettings"][0]{
@@ -38,8 +49,8 @@ export const SITE_SETTINGS_QUERY = defineQuery(`*[_type == "siteSettings"][0]{
   experienceLinks[]${LINK},
   footerColumns[]{ title, links[]${LINK} },
   legalLinks[]${LINK},
-  "bookableResorts": *[_type == "resort" && bookable == true && defined(slug.current)] | order(name asc){
-    name, "slug": slug.current, bookingPropertyId
+  "bookableResorts": *[_type == "resort" && defined(slug.current) && defined(${BOOKING_PROPERTY})] | order(name asc){
+    name, "slug": slug.current, "bookingProperty": ${BOOKING_PROPERTY}
   }
 }`)
 
@@ -48,8 +59,7 @@ const RESORT_CARD = /* groq */ `{
   "slug": slug.current,
   tagline,
   locationLabel,
-  bookable,
-  bookingPropertyId,
+  "bookingProperty": ${BOOKING_PROPERTY},
   heroImage${IMAGE}
 }`
 
@@ -101,8 +111,7 @@ export const ROOM_PAGE_QUERY = defineQuery(`*[_type == "room" && slug.current ==
     name,
     fullName,
     "slug": slug.current,
-    bookable,
-    bookingPropertyId,
+    "bookingProperty": ${BOOKING_PROPERTY},
     "phone": reservationContact.phones[0]{ display, tel },
     "email": reservationContact.emails[0].address
   },
@@ -133,8 +142,7 @@ export const RESORT_PAGE_QUERY = defineQuery(`*[_type == "resort" && slug.curren
   heroImage${IMAGE},
   heroVideoUrl,
   "gallery": gallery[0...2]${IMAGE},
-  bookable,
-  bookingPropertyId,
+  "bookingProperty": ${BOOKING_PROPERTY},
   "phone": reservationContact.phones[0]{ display, tel },
   "email": reservationContact.emails[0].address,
   seo${SEO},
@@ -199,8 +207,7 @@ const OFFER_RESORT = /* groq */ `{
   name,
   fullName,
   "slug": slug.current,
-  bookable,
-  bookingPropertyId,
+  "bookingProperty": ${BOOKING_PROPERTY},
   "phone": reservationContact.phones[0]{ display, tel },
   "email": reservationContact.emails[0].address
 }`
@@ -244,8 +251,7 @@ export const DESTINATIONS_PAGE_QUERY = defineQuery(`{
     type,
     tagline,
     locationLabel,
-    bookable,
-    bookingPropertyId,
+    "bookingProperty": ${BOOKING_PROPERTY},
     heroImage${IMAGE}
   }
 }`)
