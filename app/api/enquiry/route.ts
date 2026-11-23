@@ -50,7 +50,11 @@ export async function POST(req: NextRequest) {
 
   let context: Awaited<ReturnType<typeof loadContext>>
   try {
-    context = await loadContext(enquiry.resort, enquiry.type === "spa" ? enquiry.treatment : undefined)
+    context = await loadContext(
+      enquiry.resort,
+      enquiry.type === "spa" ? enquiry.treatment : undefined,
+      enquiry.type === "event" || enquiry.type === "meeting" ? enquiry.package || undefined : undefined
+    )
   } catch {
     console.error("[enquiry] failed to load contacts")
     return fail(500, "We couldn't send your enquiry", { fallbackPhone: null })
@@ -58,6 +62,7 @@ export async function POST(req: NextRequest) {
 
   let resort: Resort = context.resort
   let treatment: { _id: string; title: string } | null = null
+  let eventPackage: { _id: string; title: string } | null = null
   if (enquiry.type === "spa") {
     // The treatment decides the resort: the posted one if it offers it, else its first.
     if (!context.treatment) {
@@ -66,6 +71,14 @@ export async function POST(req: NextRequest) {
     treatment = context.treatment
     const offeredAt = (context.treatment.resorts ?? []).filter((r) => r !== null)
     resort = offeredAt.find((r) => r.slug === enquiry.resort) ?? offeredAt[0] ?? null
+  } else if ((enquiry.type === "event" || enquiry.type === "meeting") && enquiry.package) {
+    // A package enquiry goes to the posted resort if it offers it, else the package's first.
+    if (!context.package) {
+      return fail(400, "Check the highlighted fields", { errors: { package: "Choose a package" } })
+    }
+    eventPackage = context.package
+    const offeredAt = (context.package.resorts ?? []).filter((r) => r !== null)
+    resort = offeredAt.find((r) => r.slug === enquiry.resort) ?? offeredAt[0] ?? resort
   } else if (enquiry.resort && !resort) {
     return fail(400, "Check the highlighted fields", { errors: { resort: "Choose a resort" } })
   }
@@ -79,24 +92,38 @@ export async function POST(req: NextRequest) {
 
   let enquiryId: string
   try {
-    enquiryId = await storeEnquiry(enquiry, resort?._id ?? null, treatment?._id ?? null)
+    enquiryId = await storeEnquiry(enquiry, {
+      resortId: resort?._id ?? null,
+      treatmentId: treatment?._id ?? null,
+      packageId: eventPackage?._id ?? null,
+    })
   } catch {
     console.error(`[enquiry] failed to store ${enquiry.type} enquiry`)
     return fail(500, "We couldn't send your enquiry", { fallbackPhone })
   }
 
-  const emailSent = await notify(enquiry, enquiryId, resort?.name ?? null, treatment?.title ?? null, contacts)
+  const emailSent = await notify(enquiry, enquiryId, contacts, {
+    resortName: resort?.name ?? null,
+    treatmentName: treatment?.title ?? null,
+    packageName: eventPackage?.title ?? null,
+  })
   return Response.json({ ok: true, emailSent, fallbackPhone })
 }
 
 type Context = Awaited<ReturnType<typeof loadContext>>
 type Resort = Pick<NonNullable<Context["resort"]>, "_id" | "name" | "reservationContact"> | null
 
-async function loadContext(slug: string | undefined, treatment: string | undefined) {
-  return freshClient.fetch(ENQUIRY_CONTEXT_QUERY, { slug: slug ?? "", treatment: treatment ?? "" })
+async function loadContext(slug: string | undefined, treatment: string | undefined, eventPackage: string | undefined) {
+  return freshClient.fetch(ENQUIRY_CONTEXT_QUERY, {
+    slug: slug ?? "",
+    treatment: treatment ?? "",
+    package: eventPackage ?? "",
+  })
 }
 
-async function storeEnquiry(enquiry: EnquiryInput, resortId: string | null, treatmentId: string | null): Promise<string> {
+type Refs = { resortId: string | null; treatmentId: string | null; packageId: string | null }
+
+async function storeEnquiry(enquiry: EnquiryInput, { resortId, treatmentId, packageId }: Refs): Promise<string> {
   const doc = {
     _type: "enquiry" as const,
     status: "new",
@@ -106,6 +133,8 @@ async function storeEnquiry(enquiry: EnquiryInput, resortId: string | null, trea
     ...(enquiry.phone ? { phone: enquiry.phone } : {}),
     ...(resortId ? { resort: { _type: "reference" as const, _ref: resortId } } : {}),
     ...(treatmentId ? { treatment: { _type: "reference" as const, _ref: treatmentId } } : {}),
+    ...(packageId ? { package: { _type: "reference" as const, _ref: packageId } } : {}),
+    ...("eventType" in enquiry && enquiry.eventType ? { eventType: enquiry.eventType } : {}),
     ...("startDate" in enquiry && enquiry.startDate ? { startDate: enquiry.startDate } : {}),
     ...("endDate" in enquiry && enquiry.endDate ? { endDate: enquiry.endDate } : {}),
     ...("time" in enquiry && enquiry.time ? { preferredTime: enquiry.time } : {}),
@@ -121,9 +150,8 @@ async function storeEnquiry(enquiry: EnquiryInput, resortId: string | null, trea
 async function notify(
   enquiry: EnquiryInput,
   enquiryId: string,
-  resortName: string | null,
-  treatmentName: string | null,
-  contacts: EnquiryContacts
+  contacts: EnquiryContacts,
+  names: { resortName: string | null; treatmentName: string | null; packageName: string | null }
 ): Promise<boolean> {
   const to = pickRecipient(enquiry.type, contacts)
   if (!to) {
@@ -134,8 +162,7 @@ async function notify(
   const { subject, text } = buildEnquiryEmail({
     enquiry,
     enquiryId,
-    resortName,
-    treatmentName,
+    ...names,
     studioUrl: process.env.SANITY_STUDIO_URL,
   })
   const sent = await sendEmail({ to, replyTo: enquiry.email || undefined, subject, text })

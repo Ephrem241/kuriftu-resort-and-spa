@@ -18,6 +18,29 @@ export const ENQUIRY_TYPE_LABELS: Record<EnquiryType, string> = {
   contact: "general",
 }
 
+/**
+ * Event types on the /event form. Each belongs to one enquiry type
+ * (corporate events and conferences are meetings).
+ */
+export const EVENT_TYPES = ["wedding", "corporate", "social", "private-party", "conference"] as const
+export type EventType = (typeof EVENT_TYPES)[number]
+
+export const EVENT_TYPE_ENQUIRY: Record<EventType, "event" | "meeting"> = {
+  wedding: "event",
+  corporate: "meeting",
+  social: "event",
+  "private-party": "event",
+  conference: "meeting",
+}
+
+export const EVENT_TYPE_LABELS: Record<EventType, string> = {
+  wedding: "Wedding",
+  corporate: "Corporate event",
+  social: "Social event",
+  "private-party": "Private party",
+  conference: "Conference",
+}
+
 export const ENQUIRY_LIMITS = {
   name: { min: 2, max: 100 },
   email: { max: 254 },
@@ -101,6 +124,15 @@ const resortSlug = line("Choose a resort").pipe(z.string().regex(SLUG, "Choose a
 
 const treatmentSlug = line("Choose a treatment").pipe(z.string().regex(SLUG, "Choose a treatment"))
 
+/** Event package slug, or empty. Matched against content on the server. */
+const optionalPackage = line("Choose a package")
+  .pipe(z.union([z.literal(""), z.string().regex(SLUG, "Choose a package")], "Choose a package"))
+  .optional()
+
+const optionalEventType = line("Choose an event type")
+  .pipe(z.union([z.literal(""), z.enum(EVENT_TYPES)], "Choose an event type"))
+  .optional()
+
 const optionalMessage = multiline("Enter a message")
   .pipe(z.string().max(ENQUIRY_LIMITS.message.max, "Message is too long"))
   .optional()
@@ -131,24 +163,45 @@ export function createEnquirySchema({ today }: { today: string }) {
     website: honeypot,
   }
 
+  const optionalDate = z.union([z.literal(""), date]).optional()
+
+  /**
+   * Event and meeting enquiries (the /event form): staff call back, so phone
+   * is required and email optional; date, guests and message are optional.
+   */
   const dated = {
     ...base,
+    email: optionalEmail,
+    phone: requiredPhone,
     resort: resortSlug.optional(),
+    package: optionalPackage,
+    eventType: optionalEventType,
     message: optionalMessage,
-    startDate: date,
-    endDate: date.optional(),
-    guests: guests(ENQUIRY_LIMITS.eventGuests),
+    startDate: optionalDate,
+    endDate: optionalDate,
+    guests: guests(ENQUIRY_LIMITS.eventGuests).optional(),
   }
 
   const endAfterStart = (v: { startDate?: string; endDate?: string }) =>
     !v.startDate || !v.endDate || v.endDate >= v.startDate
   const endAfterStartIssue = { path: ["endDate"], message: "End date must be on or after the start date" }
 
+  // The event type decides the enquiry type; a mismatch is a tampered post.
+  const typeMatches = (v: { type: "event" | "meeting"; eventType?: EventType | "" }) =>
+    !v.eventType || EVENT_TYPE_ENQUIRY[v.eventType] === v.type
+  const typeMatchesIssue = { path: ["eventType"], message: "Choose an event type" }
+
   return z.discriminatedUnion(
     "type",
     [
-      z.object({ type: z.literal("event"), ...dated }).refine(endAfterStart, endAfterStartIssue),
-      z.object({ type: z.literal("meeting"), ...dated }).refine(endAfterStart, endAfterStartIssue),
+      z
+        .object({ type: z.literal("event"), ...dated })
+        .refine(endAfterStart, endAfterStartIssue)
+        .refine(typeMatches, typeMatchesIssue),
+      z
+        .object({ type: z.literal("meeting"), ...dated })
+        .refine(endAfterStart, endAfterStartIssue)
+        .refine(typeMatches, typeMatchesIssue),
       z.object({
         type: z.literal("spa"),
         ...base,
@@ -182,6 +235,9 @@ export type EnquiryInput = z.infer<ReturnType<typeof createEnquirySchema>>
 
 /** The spa request form's fields (client and server share these rules). */
 export type SpaEnquiryInput = Extract<EnquiryInput, { type: "spa" }>
+
+/** The event enquiry form's fields (event or meeting). */
+export type EventEnquiryInput = Extract<EnquiryInput, { type: "event" | "meeting" }>
 
 /** First error message per top-level field. Messages are ours, never input. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {

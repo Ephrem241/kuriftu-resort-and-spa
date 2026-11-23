@@ -29,25 +29,40 @@ describe("enquiry schema", () => {
     expect(errorsOf({ ...contact, type: "booking" })).toHaveProperty("type")
   })
 
-  it("requires dates and guests for events", () => {
-    const errors = errorsOf({ type: "event", name: "Abebe", email: "a@b.co" })
-    expect(errors).toHaveProperty("startDate")
-    expect(errors).toHaveProperty("guests")
-  })
+  describe("event and meeting enquiries", () => {
+    const event = { type: "event", name: "Abebe", phone: "+251 911 123 456" }
 
-  it("rejects past dates and an end before the start", () => {
-    const base = { type: "meeting", name: "Abebe", email: "a@b.co", guests: 20 }
-    expect(errorsOf({ ...base, startDate: "2026-11-21" })).toEqual({ startDate: "Date can't be in the past" })
-    expect(errorsOf({ ...base, startDate: "2026-12-10", endDate: "2026-12-09" })).toEqual({
-      endDate: "End date must be on or after the start date",
+    it("needs only name and phone", () => {
+      expect(errorsOf(event)).toEqual({})
+      expect(errorsOf({ type: "event" })).toEqual({ name: "Enter your name", phone: "Enter your phone number" })
+      expect(errorsOf({ ...event, email: "", startDate: "", message: "", eventType: "", package: "" })).toEqual({})
     })
-    expect(errorsOf({ ...base, startDate: today, endDate: today })).toEqual({})
-  })
 
-  it("rejects impossible dates", () => {
-    expect(errorsOf({ type: "event", name: "Abebe", email: "a@b.co", guests: 2, startDate: "2026-02-30" })).toHaveProperty(
-      "startDate"
-    )
+    it("checks a given email, package and event type", () => {
+      expect(errorsOf({ ...event, email: "nope" })).toEqual({ email: "Enter a valid email address" })
+      expect(errorsOf({ ...event, package: "Weddings Bishoftu" })).toEqual({ package: "Choose a package" })
+      expect(errorsOf({ ...event, eventType: "funeral" })).toEqual({ eventType: "Choose an event type" })
+    })
+
+    it("matches the event type to the enquiry type", () => {
+      expect(errorsOf({ ...event, eventType: "wedding" })).toEqual({})
+      expect(errorsOf({ ...event, eventType: "conference" })).toEqual({ eventType: "Choose an event type" })
+      expect(errorsOf({ ...event, type: "meeting", eventType: "conference" })).toEqual({})
+      expect(errorsOf({ ...event, type: "meeting", eventType: "wedding" })).toEqual({ eventType: "Choose an event type" })
+    })
+
+    it("rejects past dates and an end before the start", () => {
+      const meeting = { ...event, type: "meeting", guests: 20 }
+      expect(errorsOf({ ...meeting, startDate: "2026-11-21" })).toEqual({ startDate: "Date can't be in the past" })
+      expect(errorsOf({ ...meeting, startDate: "2026-12-10", endDate: "2026-12-09" })).toEqual({
+        endDate: "End date must be on or after the start date",
+      })
+      expect(errorsOf({ ...meeting, startDate: today, endDate: today })).toEqual({})
+    })
+
+    it("rejects impossible dates", () => {
+      expect(errorsOf({ ...event, startDate: "2026-02-30" })).toHaveProperty("startDate")
+    })
   })
 
   describe("spa requests", () => {

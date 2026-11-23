@@ -12,6 +12,7 @@
     "seed:destinations-page": "tsx scripts/seed-destinations-page.ts",
     "seed:experiences-page": "tsx scripts/seed-experiences-page.ts",
     "seed:wellness-page": "tsx scripts/seed-wellness-page.ts",
+    "seed:events-page": "tsx scripts/seed-events-page.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

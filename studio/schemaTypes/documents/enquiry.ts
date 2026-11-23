@@ -41,6 +41,8 @@ export const enquiry = defineType({
     defineField({name: 'phone', type: 'string', readOnly: true}),
     defineField({name: 'resort', type: 'reference', to: [{type: 'resort'}], readOnly: true}),
     defineField({name: 'treatment', type: 'reference', to: [{type: 'spaTreatment'}], readOnly: true}),
+    defineField({name: 'eventType', type: 'string', readOnly: true}),
+    defineField({name: 'package', type: 'reference', to: [{type: 'eventPackage'}], readOnly: true}),
     defineField({name: 'startDate', title: 'Date from', type: 'date', readOnly: true}),
     defineField({name: 'endDate', title: 'Date to', type: 'date', readOnly: true}),
     defineField({name: 'preferredTime', type: 'string', readOnly: true}),

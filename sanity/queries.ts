@@ -166,6 +166,14 @@ export const SITEMAP_QUERY = defineQuery(`{
     _updatedAt,
     "noIndex": seo.noIndex == true,
     "treatmentsNoIndex": treatmentsSeo.noIndex == true
+  },
+  "events": *[_type == "eventsPage"][0]{
+    _updatedAt,
+    "noIndex": seo.noIndex == true,
+    "venuesNoIndex": venuesSeo.noIndex == true
+  },
+  "eventPackages": *[_type == "eventPackage" && defined(slug.current) && seo.noIndex != true] | order(title asc){
+    "slug": slug.current, _updatedAt
   }
 }`)
 
@@ -320,6 +328,91 @@ export const TREATMENTS_PAGE_QUERY = defineQuery(`{
   "treatments": *[_type == "spaTreatment" && defined(slug.current)] | order(title asc)${TREATMENT_CARD}
 }`)
 
+/** An event venue on a card: enough for the grid, its filter and the meta row. */
+const VENUE_CARD = /* groq */ `{
+  _id,
+  name,
+  capacity,
+  "setups": setups[].style,
+  "excerpt": pt::text(description),
+  "image": images[0]${IMAGE},
+  "resort": resort->{ name, fullName, "slug": slug.current }
+}`
+
+/** An event package on a card. */
+const PACKAGE_CARD = /* groq */ `{
+  title,
+  "slug": slug.current,
+  kind,
+  summary,
+  fromPrice{ amount, currency, unit },
+  "image": images[0]${IMAGE},
+  "resorts": resorts[]->{ name, fullName, "slug": slug.current }
+}`
+
+/**
+ * Copy and photography for /event, with the packages its cards point at,
+ * plus every package and every resort with a venue (the form's `?package=`
+ * and `?resort=` are matched against these).
+ */
+export const EVENTS_PAGE_QUERY = defineQuery(`{
+  "page": *[_type == "eventsPage"][0]{
+    hero { eyebrow, title, intro, image${IMAGE} },
+    eventTypes {
+      title, subtitle,
+      tiles[]{ _key, eventType, title, icon, image${IMAGE} }
+    },
+    venues {
+      title, subtitle, text,
+      "featured": featured->${VENUE_CARD},
+      "highlights": highlights[]->{ _id, name }
+    },
+    packages {
+      title, subtitle,
+      cards[]{ _key, kind, title, text, image${IMAGE}, "package": package->${PACKAGE_CARD} }
+    },
+    enquiry { title, text, image${IMAGE} },
+    seo${SEO}
+  },
+  "packageOptions": *[_type == "eventPackage" && defined(slug.current)] | order(title asc){
+    title, "slug": slug.current, kind, "resorts": resorts[]->{ name, fullName, "slug": slug.current }
+  },
+  "venueResorts": *[_type == "resort" && defined(slug.current) && count(*[_type == "eventVenue" && references(^._id)]) > 0] | order(name asc){
+    name, fullName, "slug": slug.current
+  }
+}`)
+
+/** Heading and SEO for /event/venues, with every venue. */
+export const VENUES_PAGE_QUERY = defineQuery(`{
+  "page": *[_type == "eventsPage"][0]{
+    venuesIndex { eyebrow, title, intro },
+    venuesSeo${SEO},
+    "fallbackImage": hero.image${IMAGE}
+  },
+  "venues": *[_type == "eventVenue" && defined(resort->slug.current)] | order(resort->name asc, name asc)${VENUE_CARD}
+}`)
+
+export const EVENT_PACKAGE_SLUGS_QUERY = defineQuery(
+  `*[_type == "eventPackage" && defined(slug.current)].slug.current`
+)
+
+/** One event package, its venues, and up to 3 others of the same kind. */
+export const EVENT_PACKAGE_QUERY = defineQuery(`*[_type == "eventPackage" && slug.current == $slug][0]{
+  title,
+  "slug": slug.current,
+  kind,
+  summary,
+  description,
+  inclusions,
+  fromPrice{ amount, currency, unit },
+  images[]${IMAGE},
+  seo${SEO},
+  "resorts": resorts[]->${OFFER_RESORT},
+  "venues": venues[]->{ _id, name, capacity, "resort": resort->{ name, fullName, "slug": slug.current } },
+  "fallbackImage": *[_type == "eventsPage"][0].hero.image${IMAGE},
+  "related": *[_type == "eventPackage" && _id != ^._id && kind == ^.kind && defined(slug.current)] | order(title asc)[0...3]${PACKAGE_CARD}
+}`)
+
 const ENQUIRY_CONTACT =/* groq */ `{ phones[]{ display, tel }, emails[]{ address } }`
 
 /**
@@ -333,6 +426,11 @@ export const ENQUIRY_CONTEXT_QUERY = defineQuery(`{
     reservationContact${ENQUIRY_CONTACT}
   },
   "treatment": *[_type == "spaTreatment" && slug.current == $treatment][0]{
+    _id,
+    title,
+    "resorts": resorts[]->{ _id, name, "slug": slug.current, reservationContact${ENQUIRY_CONTACT} }
+  },
+  "package": *[_type == "eventPackage" && slug.current == $package][0]{
     _id,
     title,
     "resorts": resorts[]->{ _id, name, "slug": slug.current, reservationContact${ENQUIRY_CONTACT} }
