@@ -16,6 +16,8 @@ import type {
   EVENT_PACKAGE_QUERY_RESULT,
   SITE_SETTINGS_QUERY_RESULT,
   PAGE_QUERY_RESULT,
+  CONTACT_PAGE_QUERY_RESULT,
+  GALLERY_PAGE_QUERY_RESULT,
 } from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
 import { toEmbedUrl } from "@/lib/video"
@@ -64,6 +66,9 @@ import type {
   VenuesPage,
   MarketingPage,
   PageSection,
+  ContactChannels,
+  ContactPage,
+  GalleryPage,
 } from "./types"
 
 /**
@@ -623,7 +628,90 @@ export function mapSitemap(doc: SITEMAP_QUERY_RESULT): SitemapEntry[] {
     const path = pathForDocument({ _type: "page", slug: p.slug })
     if (path) entries.push({ path, lastModified: p._updatedAt })
   }
+  // Both pages render with fallbacks, so they are listed until an editor sets noindex.
+  if (!doc.contact?.noIndex) entries.push({ path: "/contact", lastModified: doc.contact?._updatedAt })
+  if (!doc.gallery?.noIndex) entries.push({ path: "/gallery", lastModified: doc.gallery?._updatedAt })
   return entries
+}
+
+type ChannelsDoc = {
+  phones: Array<{ label: string | null; display: string; tel: string }> | null
+  emails: Array<{ label: string | null; address: string }> | null
+} | null | undefined
+
+/** Every complete phone and email of a contactDetails object. */
+export function mapChannels(doc: ChannelsDoc): ContactChannels {
+  return {
+    phones: (doc?.phones ?? []).flatMap((p) =>
+      p.display?.trim() && p.tel?.trim() ? [{ label: p.label?.trim() ?? "", display: p.display.trim(), tel: p.tel.trim() }] : []
+    ),
+    emails: (doc?.emails ?? []).flatMap((e) =>
+      e.address?.trim() ? [{ label: e.label?.trim() ?? "", address: e.address.trim() }] : []
+    ),
+  }
+}
+
+type HeroDoc = {
+  eyebrow?: string | null
+  title?: string | null
+  intro?: string | null
+  image?: SanityImage
+} | null | undefined
+
+function mapHero(hero: HeroDoc, fallback: { eyebrow: string; title: string }) {
+  return {
+    eyebrow: hero?.eyebrow?.trim() || fallback.eyebrow,
+    title: hero?.title?.trim() || fallback.title,
+    intro: hero?.intro?.trim() ?? "",
+    image: hero?.image?.asset ? toContentImage(hero.image) : null,
+  }
+}
+
+export function mapContactPage(doc: CONTACT_PAGE_QUERY_RESULT, fallbackDescription: string): ContactPage {
+  const hero = mapHero(doc.page?.hero, { eyebrow: "Contact Us", title: "Contact Us" })
+  const form = doc.page?.form
+  return {
+    hero,
+    form: {
+      eyebrow: form?.eyebrow?.trim() || "Get in Touch",
+      title: form?.title?.trim() || "Send Us a Message",
+      text: form?.text?.trim() ?? "",
+      image: form?.image?.asset ? toContentImage(form.image) : null,
+    },
+    directoryTitle: doc.page?.directoryTitle?.trim() || "Our Resorts",
+    reservations: mapChannels(doc.settings?.reservations),
+    headOffice: { ...mapChannels(doc.settings?.headOffice), address: mapAddress(doc.settings?.headOfficeAddress) },
+    resorts: doc.resorts.map((r) => ({
+      name: r.name,
+      heading: r.fullName?.trim() || r.name,
+      slug: r.slug,
+      locationLabel: r.locationLabel?.trim() ?? "",
+      address: mapAddress(r.address),
+      ...mapChannels(r.reservationContact),
+    })),
+    seo: mapSeo(doc.page?.seo, { title: hero.title, description: hero.intro || fallbackDescription }),
+  }
+}
+
+export function mapGalleryPage(doc: GALLERY_PAGE_QUERY_RESULT, fallbackDescription: string): GalleryPage {
+  const hero = mapHero(doc.page?.hero, { eyebrow: "Gallery", title: "Gallery" })
+  const resorts = doc.resorts.flatMap((r) => {
+    const images = (r.images ?? []).filter((image) => image?.asset)
+    return images.length > 0 ? [{ ...r, images }] : []
+  })
+  return {
+    hero,
+    resorts: resorts.map((r) => ({
+      name: r.name,
+      heading: r.fullName?.trim() || r.name,
+      slug: r.slug,
+      count: r.images.length,
+    })),
+    photos: resorts.flatMap((r) =>
+      r.images.map((image) => ({ image: toContentImage(image, r.name), resortSlug: r.slug, resortName: r.name }))
+    ),
+    seo: mapSeo(doc.page?.seo, { title: hero.title, description: hero.intro || fallbackDescription }),
+  }
 }
 
 type TreatmentCardDoc = WELLNESS_PAGE_QUERY_RESULT["treatments"][number]

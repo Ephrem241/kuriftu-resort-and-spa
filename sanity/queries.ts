@@ -177,7 +177,9 @@ export const SITEMAP_QUERY = defineQuery(`{
   },
   "pages": *[_type == "page" && defined(slug.current) && seo.noIndex != true] | order(title asc){
     "slug": slug.current, _updatedAt
-  }
+  },
+  "contact": *[_type == "contactPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },
+  "gallery": *[_type == "galleryPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true }
 }`)
 
 const OFFER_FIELDS = /* groq */ `
@@ -245,6 +247,49 @@ export const DESTINATIONS_PAGE_QUERY = defineQuery(`{
     bookable,
     bookingPropertyId,
     heroImage${IMAGE}
+  }
+}`)
+
+/** A contactDetails object as the contact page shows it: every phone and email. */
+const CONTACT_DETAILS = /* groq */ `{
+  "phones": phones[defined(display) && defined(tel)]{ label, display, tel },
+  "emails": emails[defined(address)]{ label, address }
+}`
+
+/** Copy for /contact, the site contacts, and every resort's own contacts. */
+export const CONTACT_PAGE_QUERY = defineQuery(`{
+  "page": *[_type == "contactPage"][0]{
+    hero { eyebrow, title, intro, image${IMAGE} },
+    form { eyebrow, title, text, image${IMAGE} },
+    directoryTitle,
+    seo${SEO}
+  },
+  "settings": *[_type == "siteSettings"][0]{
+    reservations${CONTACT_DETAILS},
+    headOffice${CONTACT_DETAILS},
+    headOfficeAddress${ADDRESS}
+  },
+  "resorts": *[_type == "resort" && defined(slug.current)] | order(name asc){
+    name,
+    fullName,
+    "slug": slug.current,
+    locationLabel,
+    address${ADDRESS},
+    reservationContact${CONTACT_DETAILS}
+  }
+}`)
+
+/** Copy for /gallery and every resort's gallery, in editor order. */
+export const GALLERY_PAGE_QUERY = defineQuery(`{
+  "page": *[_type == "galleryPage"][0]{
+    hero { eyebrow, title, intro, image${IMAGE} },
+    seo${SEO}
+  },
+  "resorts": *[_type == "resort" && defined(slug.current) && count(gallery) > 0] | order(name asc){
+    name,
+    fullName,
+    "slug": slug.current,
+    "images": gallery[defined(asset)]${IMAGE}
   }
 }`)
 

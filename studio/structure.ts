@@ -1,4 +1,4 @@
-import {CalendarIcon, CogIcon, EarthGlobeIcon, EnvelopeIcon, HomeIcon, RocketIcon, SparklesIcon, TagIcon} from '@sanity/icons'
+import {CalendarIcon, CogIcon, EarthGlobeIcon, EnvelopeIcon, HomeIcon, ImagesIcon, RocketIcon, SparklesIcon, TagIcon} from '@sanity/icons'
 import type {StructureBuilder, StructureResolver} from 'sanity/structure'
 
 function singleton(S: StructureBuilder, type: string, title: string, icon: typeof CogIcon) {
@@ -20,6 +20,8 @@ export const structure: StructureResolver = (S) =>
       singleton(S, 'wellnessPage', 'Wellness page', SparklesIcon),
       singleton(S, 'eventsPage', 'Events page', CalendarIcon),
       singleton(S, 'offersPage', 'Offers page', TagIcon),
+      singleton(S, 'contactPage', 'Contact page', EnvelopeIcon),
+      singleton(S, 'galleryPage', 'Gallery page', ImagesIcon),
       S.divider(),
       S.documentTypeListItem('destinationRegion').title('Regions'),
       S.documentTypeListItem('resort').title('Resorts'),

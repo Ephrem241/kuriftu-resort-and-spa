@@ -36,7 +36,7 @@ export type ResortSummary = {
 }
 
 /** One sitemap row: a site path and when its content last changed. */
-export type SitemapEntry = { path: string; lastModified: string }
+export type SitemapEntry = { path: string; lastModified?: string }
 
 /** Title, description, share image and indexing for one page. */
 export type PageSeo = {
@@ -471,5 +471,42 @@ export type MarketingPage = {
   slug: string
   hero: { eyebrow: string; title: string; intro: string; image: ContentImage | null }
   sections: PageSection[]
+  seo: PageSeo
+}
+
+export type ContactPhone = { label: string; display: string; tel: string }
+export type ContactEmail = { label: string; address: string }
+/** Every phone and email of one contactDetails object, in editor order. */
+export type ContactChannels = { phones: ContactPhone[]; emails: ContactEmail[] }
+
+/** One resort in the /contact directory, with its own reservation contacts. */
+export type ResortContact = ContactChannels & {
+  name: string
+  heading: string
+  slug: string
+  locationLabel: string
+  address: PostalAddress | null
+}
+
+export type ContactPage = {
+  hero: { eyebrow: string; title: string; intro: string; image: ContentImage | null }
+  form: { eyebrow: string; title: string; text: string; image: ContentImage | null }
+  directoryTitle: string
+  reservations: ContactChannels
+  headOffice: ContactChannels & { address: PostalAddress | null }
+  resorts: ResortContact[]
+  seo: PageSeo
+}
+
+/** A resort that has gallery photos, for the /gallery filter. */
+export type GalleryResort = { name: string; heading: string; slug: string; count: number }
+
+export type GalleryPhoto = { image: ContentImage; resortSlug: string; resortName: string }
+
+export type GalleryPage = {
+  hero: { eyebrow: string; title: string; intro: string; image: ContentImage | null }
+  resorts: GalleryResort[]
+  /** Every photo, resort by resort in name order, each in the editor's order. */
+  photos: GalleryPhoto[]
   seo: PageSeo
 }
