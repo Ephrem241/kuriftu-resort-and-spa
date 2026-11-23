@@ -74,7 +74,7 @@ describe("robotsRules", () => {
 })
 
 describe("mapSitemap", () => {
-  it("lists home, resorts, rooms and experiences by path, and skips a noindexed home", () => {
+  it("lists home, resorts, rooms, experiences and marketing pages by path, and skips a noindexed home", () => {
     const rows = {
       home: { _updatedAt: "2026-11-01T00:00:00Z", noIndex: false },
       resorts: [{ slug: "bishoftu", _updatedAt: "2026-11-02T00:00:00Z" }],
@@ -83,6 +83,7 @@ describe("mapSitemap", () => {
       wellness: { _updatedAt: "2026-11-05T00:00:00Z", noIndex: false, treatmentsNoIndex: false },
       events: { _updatedAt: "2026-11-06T00:00:00Z", noIndex: false, venuesNoIndex: false },
       eventPackages: [{ slug: "weddings-bishoftu", _updatedAt: "2026-11-07T00:00:00Z" }],
+      pages: [{ slug: "about", _updatedAt: "2026-11-08T00:00:00Z" }],
     }
     expect(mapSitemap(rows as Parameters<typeof mapSitemap>[0])).toEqual([
       { path: "/", lastModified: "2026-11-01T00:00:00Z" },
@@ -94,6 +95,7 @@ describe("mapSitemap", () => {
       { path: "/event", lastModified: "2026-11-06T00:00:00Z" },
       { path: "/event/venues", lastModified: "2026-11-06T00:00:00Z" },
       { path: "/event/weddings-bishoftu", lastModified: "2026-11-07T00:00:00Z" },
+      { path: "/about", lastModified: "2026-11-08T00:00:00Z" },
     ])
     const hidden = {
       ...rows,
@@ -104,6 +106,7 @@ describe("mapSitemap", () => {
       wellness: { ...rows.wellness, noIndex: true, treatmentsNoIndex: true },
       events: { ...rows.events, noIndex: true, venuesNoIndex: true },
       eventPackages: [],
+      pages: [],
     }
     expect(mapSitemap(hidden as Parameters<typeof mapSitemap>[0])).toEqual([])
     expect(mapSitemap({ ...hidden, wellness: null, events: null } as Parameters<typeof mapSitemap>[0])).toEqual([])

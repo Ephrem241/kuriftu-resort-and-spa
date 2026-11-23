@@ -11,8 +11,8 @@ type PageHeroProps = {
   title: string
   intro?: string
   image: ContentImage | null
-  /** Forest pill under the intro, usually an in-page anchor. */
-  cta: { label: string; href: string }
+  /** Forest pill under the intro, usually an in-page anchor. Omit for none. */
+  cta?: { label: string; href: string }
   /** Optional outline pill beside the main one, with a leading icon. */
   secondaryCta?: { label: string; href: string; icon?: LucideIcon }
 }
@@ -37,15 +37,17 @@ export function PageHero({ titleId, eyebrow, title, intro, image, cta, secondary
       ) : null}
 
       <div className="relative z-10 order-1 container-site animate-fade-in pt-32 pb-10 lg:flex lg:min-h-[32rem] lg:flex-col lg:justify-center lg:pt-36 lg:pb-28">
-        <p className="eyebrow flex items-center gap-3 text-forest">
-          <span aria-hidden="true" className="h-px w-8 bg-gold" />
-          {eyebrow}
-        </p>
-        <h1 id={titleId} className="mt-3 max-w-xl text-[2.75rem] leading-[1.1] md:text-h1 lg:text-[4rem]">
+        {eyebrow ? (
+          <p className="eyebrow mb-3 flex items-center gap-3 text-forest">
+            <span aria-hidden="true" className="h-px w-8 bg-gold" />
+            {eyebrow}
+          </p>
+        ) : null}
+        <h1 id={titleId} className="max-w-xl text-[2.75rem] leading-[1.1] md:text-h1 lg:text-[4rem]">
           {title}
         </h1>
         {intro ? <p className="mt-5 max-w-sm text-body text-charcoal lg:text-[1.0625rem]">{intro}</p> : null}
-        {secondaryCta ? (
+        {cta && secondaryCta ? (
           <div className="mt-7 flex flex-wrap items-center gap-3 md:gap-4">
             <ButtonLink href={cta.href} variant="primary" size="pill" shape="pill" arrow>
               {cta.label}
@@ -55,11 +57,11 @@ export function PageHero({ titleId, eyebrow, title, intro, image, cta, secondary
               {secondaryCta.label}
             </ButtonLink>
           </div>
-        ) : (
+        ) : cta ? (
           <ButtonLink href={cta.href} variant="primary" size="pill" shape="pill" arrow className="mt-7 self-start">
             {cta.label}
           </ButtonLink>
-        )}
+        ) : null}
       </div>
     </section>
   )

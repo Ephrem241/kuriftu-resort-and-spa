@@ -644,7 +644,7 @@ export function build({ ds, hints, categories, home, meta }: BuildInput, images:
       slug: { _type: "slug", current: slug },
       hero: { eyebrow: content.eyebrow, title: content.title && content.title !== title ? content.title : undefined, intro: content.intro, image: heroImage },
       sections,
-      seo: { _type: "seo", title: truncate(`${title} | Kuriftu Resorts`, 60), description: description ? truncate(description, 160) : undefined },
+      seo: { _type: "seo", title: truncate(title, 60), description: description ? truncate(description, 160) : undefined },
     })
   }
 

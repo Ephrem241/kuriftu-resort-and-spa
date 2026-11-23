@@ -16,6 +16,8 @@ import {
   OFFER_PAGE_QUERY,
   OFFERS_QUERY,
   OFFERS_PAGE_QUERY,
+  PAGE_QUERY,
+  PAGE_SLUGS_QUERY,
   RESORT_PAGE_QUERY,
   RESORT_SLUGS_QUERY,
   ROOM_PAGE_QUERY,
@@ -37,6 +39,7 @@ import {
   mapOffer,
   mapOfferPage,
   mapOffersPage,
+  mapPage,
   mapResortPage,
   mapRoomPage,
   mapSiteSettings,
@@ -53,6 +56,7 @@ import type {
   ExperiencePage,
   ExperiencesPage,
   HomePage,
+  MarketingPage,
   OfferPage,
   OffersPage,
   OfferSummary,
@@ -141,7 +145,7 @@ export async function getRoomPage(resort: string, room: string): Promise<RoomPag
 /** Indexable home, resort and room paths with their last change, for sitemap.xml. */
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   "use cache"
-  const tags = ["homePage", "resort", "room", "experience", "wellnessPage"]
+  const tags = ["homePage", "resort", "room", "experience", "wellnessPage", "eventsPage", "eventPackage", "page"]
   cacheTag(...tags)
   cacheLife("days")
 
@@ -295,6 +299,25 @@ export async function getEventPackagePage(slug: string): Promise<EventPackagePag
 
   const doc = await sanityFetch({ query: EVENT_PACKAGE_QUERY, params: { slug }, tags })
   return doc ? mapEventPackagePage(doc) : null
+}
+
+/** Every marketing page slug, read from the API (not the CDN) for static params. */
+export async function getPageSlugs(): Promise<string[]> {
+  "use cache"
+  cacheTag("page")
+  cacheLife("days")
+  return client.withConfig({ useCdn: false }).fetch(PAGE_SLUGS_QUERY)
+}
+
+/** One marketing page (About, Sustainability, …) with its sections; null if unknown. */
+export async function getPage(slug: string): Promise<MarketingPage | null> {
+  "use cache"
+  const tags = ["page", `page:${slug}`, ...LINKED_TYPES]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: PAGE_QUERY, params: { slug }, tags })
+  return doc ? mapPage(doc) : null
 }
 
 /** Revalidate at the next start or end. Next requires expire > revalidate. */

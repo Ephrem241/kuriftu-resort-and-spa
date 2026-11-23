@@ -23,6 +23,20 @@ export function slugRule(rule: SlugRule) {
   })
 }
 
+/**
+ * Top-level paths the web app owns. A marketing `page` lives at `/{slug}`, so
+ * a page with one of these slugs would never render. Keep in sync with `app/`.
+ */
+export const RESERVED_PAGE_SLUGS = ['destinations', 'resorts', 'experience', 'wellness', 'event', 'offers', 'api', 'design-system', 'sitemap', 'robots']
+
+/** `slugRule`, plus no slug that collides with a top-level route of the site. */
+export function pageSlugRule(rule: SlugRule) {
+  return slugRule(rule).custom((slug: SlugValue | undefined) => {
+    const current = slug?.current
+    return !current || !RESERVED_PAGE_SLUGS.includes(current) || `"/${current}" is already a section of the site. Choose another slug.`
+  })
+}
+
 /** YouTube or Vimeo URL only (no self-hosted video). */
 export function videoUrlRule(rule: UrlRule) {
   return rule.uri({scheme: ['https']}).custom((value: string | undefined) => {

@@ -15,8 +15,10 @@ import type {
   VENUES_PAGE_QUERY_RESULT,
   EVENT_PACKAGE_QUERY_RESULT,
   SITE_SETTINGS_QUERY_RESULT,
+  PAGE_QUERY_RESULT,
 } from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
+import { toEmbedUrl } from "@/lib/video"
 
 import { groupDestinations } from "./destinations"
 import { isIconName } from "./icons"
@@ -60,6 +62,8 @@ import type {
   PackageSummary,
   VenueSummary,
   VenuesPage,
+  MarketingPage,
+  PageSection,
 } from "./types"
 
 /**
@@ -615,6 +619,10 @@ export function mapSitemap(doc: SITEMAP_QUERY_RESULT): SitemapEntry[] {
     const path = pathForDocument({ _type: "eventPackage", slug: p.slug })
     if (path) entries.push({ path, lastModified: p._updatedAt })
   }
+  for (const p of doc.pages) {
+    const path = pathForDocument({ _type: "page", slug: p.slug })
+    if (path) entries.push({ path, lastModified: p._updatedAt })
+  }
   return entries
 }
 
@@ -888,5 +896,111 @@ export function mapEventPackagePage(doc: PackagePageDoc): EventPackagePage | nul
     ),
     related: (doc.related ?? []).map(mapPackage).filter(notNull),
     seo: mapSeo(doc.seo, { title: doc.title, description: summary }),
+  }
+}
+
+type PageDoc = NonNullable<PAGE_QUERY_RESULT>
+type SectionDoc = NonNullable<PageDoc["sections"]>[number]
+
+/** A labelled link that resolves to a real href, or null. */
+function toPageLink(link: (ContentLink & { label?: string | null }) | null | undefined): NavLink | null {
+  const label = link?.label?.trim()
+  const href = hrefFor(link)
+  return label && href !== "#" ? { label, href } : null
+}
+
+function hasImage(image: SanityImage | undefined): boolean {
+  return Boolean(image?.asset?._id)
+}
+
+/** One section block, or null when it lacks what it needs to render. */
+function mapPageSection(s: SectionDoc): PageSection | null {
+  const key = s._key
+  switch (s._type) {
+    case "textSection": {
+      const body = (s.body ?? []) as RichText
+      if (body.length === 0) return null
+      return { type: "text", key, eyebrow: s.eyebrow?.trim() ?? "", heading: s.heading?.trim() ?? "", body }
+    }
+    case "mediaText": {
+      const heading = s.heading?.trim() ?? ""
+      if (!heading || !hasImage(s.image)) return null
+      return {
+        type: "mediaText",
+        key,
+        eyebrow: s.eyebrow?.trim() ?? "",
+        heading,
+        body: (s.body ?? []) as RichText,
+        image: toContentImage(s.image, heading),
+        imagePosition: s.imagePosition === "end" ? "end" : "start",
+        link: toPageLink(s.link),
+      }
+    }
+    case "featureList": {
+      const items = mapIconFeatures((s.items ?? []).filter((i) => i.title?.trim()) as FeatureDoc[])
+      if (items.length === 0) return null
+      return { type: "features", key, heading: s.heading?.trim() ?? "", intro: s.intro?.trim() ?? "", items }
+    }
+    case "imageGallery": {
+      const heading = s.heading?.trim() ?? ""
+      const images = (s.images ?? [])
+        .filter(hasImage)
+        .map((img, i) => toContentImage(img, heading ? `${heading}, photo ${i + 1}` : ""))
+      if (images.length === 0) return null
+      return { type: "gallery", key, heading, images }
+    }
+    case "callToAction": {
+      const heading = s.heading?.trim() ?? ""
+      const link = toPageLink(s.link)
+      if (!heading || !link) return null
+      return {
+        type: "cta",
+        key,
+        heading,
+        text: s.text?.trim() ?? "",
+        link,
+        image: hasImage(s.backgroundImage) ? toContentImage(s.backgroundImage) : null,
+      }
+    }
+    case "videoEmbed": {
+      const title = s.title?.trim() ?? ""
+      const embedUrl = toEmbedUrl(s.url)
+      if (!title || !embedUrl || !hasImage(s.poster)) return null
+      return { type: "video", key, title, embedUrl, poster: toContentImage(s.poster, title) }
+    }
+    default:
+      return null
+  }
+}
+
+/** Plain text of the first paragraph-bearing section, for a fallback description. */
+function firstSectionText(sections: PageSection[]): string {
+  for (const section of sections) {
+    if (section.type !== "text" && section.type !== "mediaText") continue
+    const text = section.body
+      .flatMap((block) => (Array.isArray(block.children) ? block.children : []))
+      .map((child: { text?: unknown }) => (typeof child.text === "string" ? child.text : ""))
+      .join(" ")
+    if (text.trim()) return excerpt(text)
+  }
+  return ""
+}
+
+/** A marketing page; the hero title defaults to the page title. */
+export function mapPage(doc: PageDoc): MarketingPage {
+  const hero = doc.hero
+  const intro = hero?.intro?.trim() ?? ""
+  const sections = (doc.sections ?? []).map(mapPageSection).filter(notNull)
+  return {
+    title: doc.title,
+    slug: doc.slug,
+    hero: {
+      eyebrow: hero?.eyebrow?.trim() ?? "",
+      title: hero?.title?.trim() || doc.title,
+      intro,
+      image: hasImage(hero?.image) ? toContentImage(hero?.image, doc.title) : null,
+    },
+    sections,
+    seo: mapSeo(doc.seo, { title: doc.title, description: excerpt(intro) || firstSectionText(sections) }),
   }
 }
