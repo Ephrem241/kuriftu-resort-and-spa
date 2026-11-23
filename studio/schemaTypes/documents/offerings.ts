@@ -119,6 +119,14 @@ export const diningVenue = defineType({
     defineField({name: 'description', type: 'richText'}),
     defineField({name: 'hours', title: 'Opening hours', type: 'string', description: 'For example "Daily 06:30–22:30".'}),
     images,
+    defineField({
+      name: 'menu',
+      title: 'Menu (PDF)',
+      type: 'file',
+      description: 'Shown as "View Menu" on /dining. PDF only.',
+      options: {accept: 'application/pdf'},
+      fields: [defineField({name: 'label', type: 'string', description: 'For example "À la carte menu".'})],
+    }),
   ],
   preview: {select: {title: 'name', subtitle: 'resort.name', media: 'images.0'}},
 })

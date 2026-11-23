@@ -7,6 +7,7 @@ import {homePage} from './documents/homePage'
 import {destinationsPage} from './documents/destinationsPage'
 import {experiencesPage} from './documents/experiencesPage'
 import {wellnessPage} from './documents/wellnessPage'
+import {diningPage} from './documents/diningPage'
 import {eventsPage} from './documents/eventsPage'
 import {offersPage} from './documents/offersPage'
 import {contactPage} from './documents/contactPage'
@@ -23,7 +24,7 @@ import {richText} from './objects/richText'
 import {seo} from './objects/seo'
 
 /** Fixed-id documents, edited in place from the Structure. */
-export const SINGLETON_TYPES = ['siteSettings', 'homePage', 'offersPage', 'destinationsPage', 'experiencesPage', 'wellnessPage', 'eventsPage', 'contactPage', 'galleryPage']
+export const SINGLETON_TYPES = ['siteSettings', 'homePage', 'offersPage', 'destinationsPage', 'experiencesPage', 'wellnessPage', 'diningPage', 'eventsPage', 'contactPage', 'galleryPage']
 
 /** Documents only the web server writes. Never created in Studio. */
 export const SERVER_WRITTEN_TYPES = ['enquiry']
@@ -47,6 +48,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   destinationsPage,
   experiencesPage,
   wellnessPage,
+  diningPage,
   eventsPage,
   contactPage,
   galleryPage,

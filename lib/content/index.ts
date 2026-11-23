@@ -7,6 +7,7 @@ import { sanityFetch } from "@/sanity/lib/fetch"
 import {
   CONTACT_PAGE_QUERY,
   DESTINATIONS_PAGE_QUERY,
+  DINING_PAGE_QUERY,
   GALLERY_PAGE_QUERY,
   EVENT_PACKAGE_QUERY,
   EVENT_PACKAGE_SLUGS_QUERY,
@@ -34,6 +35,7 @@ import {
 import {
   mapContactPage,
   mapDestinationsPage,
+  mapDiningPage,
   mapGalleryPage,
   mapEventPackagePage,
   mapEventsPage,
@@ -56,6 +58,7 @@ import { cacheSeconds, isLive, type Dated } from "./offers"
 import type {
   ContactPage,
   DestinationsPage,
+  DiningPage,
   GalleryPage,
   EventPackagePage,
   EventsPage,
@@ -151,7 +154,7 @@ export async function getRoomPage(resort: string, room: string): Promise<RoomPag
 /** Indexable home, resort and room paths with their last change, for sitemap.xml. */
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   "use cache"
-  const tags = ["homePage", "resort", "room", "experience", "wellnessPage", "eventsPage", "eventPackage", "page", "contactPage", "galleryPage"]
+  const tags = ["homePage", "resort", "room", "experience", "wellnessPage", "diningPage", "eventsPage", "eventPackage", "page", "contactPage", "galleryPage"]
   cacheTag(...tags)
   cacheLife("days")
 
@@ -359,3 +362,14 @@ function missing(type: string) {
 }
 
 export type * from "./types"
+
+/** Copy for /dining with every venue and its resort's reservation contact; renders with fallbacks if unpublished. */
+export async function getDiningPage(fallbackDescription: string): Promise<DiningPage> {
+  "use cache"
+  const tags = ["diningPage", "diningVenue", "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: DINING_PAGE_QUERY, tags })
+  return mapDiningPage(doc, fallbackDescription)
+}

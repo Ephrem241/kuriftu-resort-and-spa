@@ -10,6 +10,7 @@ import type { SanityImage } from "./lib/images"
 import { ImageRegistry } from "./lib/images"
 import { groupPage, linearize, textOf, type PageContent } from "./lib/jsx"
 import type { Json } from "./lib/literals"
+import { menuSource } from "./lib/menus"
 import { parsePhones } from "./lib/phone"
 import { listToBlocks, textToBlocks, toBlocks, type Block, type TextPart } from "./lib/portable-text"
 import type { Report } from "./lib/report"
@@ -29,6 +30,7 @@ interface Hints {
   footerOrder: string[]
   notVenues: Record<string, string[]>
   notDiningVenues: string[]
+  notDiningMenus: { urls: string[] }
   wellnessFacilities: Record<string, string[]>
   packageResorts: Record<string, string[]>
   offer: { resort: string; startDate: string; endDate: string }
@@ -434,7 +436,9 @@ export function build({ ds, hints, categories, home, meta }: BuildInput, images:
       if (used.has(slug)) continue
       used.add(slug)
       const where = `dining ${slugOf(legacy)}/${slug}`
-      if (str(option.menuLink)) report.skip("dining menu PDF", `${name} / ${title}`, `No menu field in the schema (${str(option.menuLink)})`)
+      // Menu PDFs import as Sanity file assets (`npm run seed:dining-menus` adds them to a live dataset).
+      const menu = menuSource(str(option.menuLink), hints.notDiningMenus.urls)
+      if (str(option.menuLink) && !menu) report.skip("dining menu PDF", `${name} / ${title}`, `Not a menu PDF (${str(option.menuLink)})`)
       docs.push(
         compact({
           _id: `diningVenue.${slugOf(legacy)}.${slug}`,
@@ -443,6 +447,7 @@ export function build({ ds, hints, categories, home, meta }: BuildInput, images:
           resort: ref(resortId(legacy)),
           description: textToBlocks(`${where} description`, str(option.description)),
           images: images.images([option.image], where, () => `${title} at ${name}`),
+          menu: menu && { _type: "file", _sanityAsset: `file@${menu.url}`, label: menu.label },
         }),
       )
     }

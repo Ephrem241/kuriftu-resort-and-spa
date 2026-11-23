@@ -32,6 +32,8 @@ import {
   Wifi,
   Wind,
   Wine,
+  Star,
+  ConciergeBell,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react"
@@ -73,6 +75,8 @@ export const CONTENT_ICONS: Record<IconName, LucideIcon> = {
   briefcase: Briefcase,
   users: Users,
   wine: Wine,
+  star: Star,
+  "concierge-bell": ConciergeBell,
 }
 
 export function ContentIcon({ name, ...props }: { name: IconName } & LucideProps) {

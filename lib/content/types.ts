@@ -511,3 +511,40 @@ export type GalleryPage = {
   photos: GalleryPhoto[]
   seo: PageSeo
 }
+
+export type DiningResort = {
+  name: string
+  slug: string
+  /** The resort's first reservation phone and email; null when not entered. */
+  phone: { display: string; tel: string } | null
+  email: string | null
+}
+
+/** A dining venue on a /dining card. */
+export type DiningVenueSummary = {
+  id: string
+  name: string
+  /** Editor's cuisine line; empty when not set. */
+  cuisine: string
+  /** Editor's opening hours; empty when not set. */
+  hours: string
+  image: ContentImage
+  /** The venue's PDF menu on Sanity's CDN; null when none. */
+  menu: { url: string; label: string } | null
+  resort: DiningResort
+}
+
+/** Copy and photography for /dining, with every venue that has a photo. */
+export type DiningPage = {
+  hero: { eyebrow: string; title: string; intro: string; image: ContentImage | null }
+  /** Null when the editor left out its title or image. */
+  experience: { title: string; text: string; features: IconFeature[]; image: ContentImage } | null
+  restaurants: { title: string; subtitle: string }
+  /** Null when there are no highlight photos. */
+  highlights: { title: string; text: string; images: (ContentImage & { key: string })[] } | null
+  /** Null when the editor left out its title or image. */
+  events: { title: string; text: string; image: ContentImage } | null
+  reserve: { eyebrow: string; title: string; text: string; image: ContentImage | null }
+  venues: DiningVenueSummary[]
+  seo: PageSeo
+}

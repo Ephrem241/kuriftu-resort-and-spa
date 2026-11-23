@@ -42,6 +42,10 @@
     "africanVillage": ["Birthday"]
   },
   "notDiningVenues": ["Reserve a Table"],
+  "notDiningMenus": {
+    "$comment": "menuLink values on the old site that are not menus (skipped on import and by seed:dining-menus).",
+    "urls": ["https://kuriftu-media.s3.us-east-1.amazonaws.com/About/Entoto+Adventure+Park+Activities..pdf"]
+  },
   "wellnessFacilities": {
     "$comment": "Wellness entries that are facilities (become resort amenities), not treatments.",
     "africanVillage": ["Gym", "Swimming Pool"]

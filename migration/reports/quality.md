@@ -20,15 +20,11 @@ Source: https://www.kurifturesorts.com/static/js/main.c2aebc63.js (fetched 2026-
 
 ## Needs review
 
-### booking (7)
+### booking (3)
 
-- **Arba Minch**: Booking engine property id not in source; add it when the deep-link params are confirmed
-- **Entoto**: Booking engine property id not in source; add it when the deep-link params are confirmed
-- **Bishoftu**: Booking engine property id not in source; add it when the deep-link params are confirmed
-- **Lake Tana**: Booking engine property id not in source; add it when the deep-link params are confirmed
-- **Awash Falls**: Booking engine property id not in source; add it when the deep-link params are confirmed
-- **The Palm**: Booking engine property id not in source; add it when the deep-link params are confirmed
-- **African Village**: Booking engine property id not in source; add it when the deep-link params are confirmed
+- **Lake Tana**: Not in TravelBook; the site shows its reservation contact instead of online booking
+- **Awash Falls**: Not in TravelBook; the site shows its reservation contact instead of online booking
+- **The Palm**: Not in TravelBook; the site shows its reservation contact instead of online booking
 
 ### experience category (41)
 
@@ -161,28 +157,9 @@ Source: https://www.kurifturesorts.com/static/js/main.c2aebc63.js (fetched 2026-
 
 ## Skipped source content
 
-### dining menu PDF (20)
+### dining menu PDF (1)
 
-- Arba Minch / Breakfast Overlooking the Lake: No menu field in the schema (/assets/resorts/arba_minch/menus/canopy-menu.pdf)
-- Arba Minch / Private Poolside Dining: No menu field in the schema (/assets/resorts/arba_minch/menus/canopy-menu.pdf)
-- Arba Minch / Evenings Beneath the Southern Sky: No menu field in the schema (/assets/resorts/arba_minch/menus/canopy-menu.pdf)
-- Entoto / Entoto Peak Restaurant: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+Entoto+Al+a+Carte+Menu.pdf)
-- Entoto / The Riders Ranch: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/Entoto+Adventure+Park+Activities..pdf)
-- Entoto / Castel Bar & Grill: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+Entoto+Beverage+Menu.pdf)
-- Entoto / The Marksman Bar & Grill: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+Entoto+Beverage+Menu.pdf)
-- Entoto / Pit Stop Bar & Grill / Refuel: No menu field in the schema (https://kuriftu-media.s3.amazonaws.com/files/EntotoPitStopMenu.pdf)
-- Bishoftu / Lakefront Restaurant: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+Bishoftu+Lake+view+Menu.pdf)
-- Bishoftu / Cabana Restaurant: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+Bishoftu+Cabana+Menu.pdf)
-- Bishoftu / Lequanda: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+Bishoftu+Cabana+Menu.pdf)
-- Bishoftu / Waterpark Dinner: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+Bishoftu+Cabana+Menu.pdf)
-- Lake Tana / Tana Lakefront Restaurant: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+Lake+Tana+Al+a+Carte+Menu.pdf)
-- Lake Tana / Kuriftu Buffet: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+Lake+Tana+Al+a+Carte+Menu.pdf)
-- Lake Tana / Treat by the Porch: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+Lake+Tana+Beverage+Menu.pdf)
-- Awash Falls / The Falls Restaurant & Bar: No menu field in the schema (https://kuriftu-media.s3.amazonaws.com/files/AwashMenu.pdf)
-- Awash Falls / The Pool Bar & Grill: No menu field in the schema (https://kuriftu-media.s3.amazonaws.com/files/AwashMenu.pdf)
-- African Village / 1963 Restaurant: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+African+Village+Al+a+Carte+Menu.pdf)
-- African Village / Summit Restaurant: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+African+Village+Al+a+Carte+Menu.pdf)
-- African Village / Lobby bar: No menu field in the schema (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/KRS+African+Village+Al+a+Carte+Menu.pdf)
+- Entoto / The Riders Ranch: Not a menu PDF (https://kuriftu-media.s3.us-east-1.amazonaws.com/About/Entoto+Adventure+Park+Activities..pdf)
 
 ### dining venue (1)
 
