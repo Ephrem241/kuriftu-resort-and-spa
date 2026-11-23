@@ -18,6 +18,7 @@ import type {
   PAGE_QUERY_RESULT,
   CONTACT_PAGE_QUERY_RESULT,
   GALLERY_PAGE_QUERY_RESULT,
+  DINING_PAGE_QUERY_RESULT,
 } from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
 import type { BookingProperty } from "@/lib/booking/handoff"
@@ -70,6 +71,8 @@ import type {
   ContactChannels,
   ContactPage,
   GalleryPage,
+  DiningPage,
+  DiningVenueSummary,
 } from "./types"
 
 /**
@@ -625,6 +628,7 @@ export function mapSitemap(doc: SITEMAP_QUERY_RESULT): SitemapEntry[] {
     if (!doc.wellness.noIndex) entries.push({ path: "/wellness", lastModified })
     if (!doc.wellness.treatmentsNoIndex) entries.push({ path: "/wellness/treatments", lastModified })
   }
+  if (!doc.dining?.noIndex) entries.push({ path: "/dining", lastModified: doc.dining?._updatedAt })
   if (doc.events) {
     const lastModified = doc.events._updatedAt
     if (!doc.events.noIndex) entries.push({ path: "/event", lastModified })
@@ -1100,5 +1104,88 @@ export function mapPage(doc: PageDoc): MarketingPage {
     },
     sections,
     seo: mapSeo(doc.seo, { title: doc.title, description: excerpt(intro) || firstSectionText(sections) }),
+  }
+}
+
+/** Only PDFs Sanity serves are linked; anything else is dropped. */
+const SANITY_FILE_URL = /^https:\/\/cdn\.sanity\.io\/files\//
+
+type DiningVenueDoc = DINING_PAGE_QUERY_RESULT["venues"][number]
+
+export function mapDiningVenue(doc: DiningVenueDoc): DiningVenueSummary | null {
+  const resort = doc.resort
+  if (!resort?.slug || !doc.image?.asset) return null
+  const menuUrl = doc.menu?.url
+  const phone = resort.phone
+  return {
+    id: doc._id,
+    name: doc.name,
+    cuisine: doc.cuisine?.trim() ?? "",
+    hours: doc.hours?.trim() ?? "",
+    image: toContentImage(doc.image, `${doc.name} at ${resort.name}`),
+    menu: menuUrl && SANITY_FILE_URL.test(menuUrl) ? { url: menuUrl, label: doc.menu?.label?.trim() || "Menu" } : null,
+    resort: {
+      name: resort.name,
+      slug: resort.slug,
+      phone: phone?.display && phone.tel ? { display: phone.display, tel: phone.tel } : null,
+      email: resort.email?.trim() || null,
+    },
+  }
+}
+
+/** Dining page copy and every venue; null-safe so a missing singleton still renders. */
+export function mapDiningPage(doc: DINING_PAGE_QUERY_RESULT, fallbackDescription: string): DiningPage {
+  const page = doc.page
+  const hero = page?.hero
+  const experience = page?.experience
+  const highlights = page?.highlights
+  const events = page?.events
+  const reserve = page?.reserve
+  const title = hero?.title?.trim() || "Dining"
+  const intro = hero?.intro?.trim() ?? ""
+  const highlightImages = (highlights?.images ?? []).flatMap((img) =>
+    img.asset ? [{ ...toContentImage(img), key: img._key }] : []
+  )
+
+  return {
+    hero: {
+      eyebrow: hero?.eyebrow?.trim() || "Dining",
+      title,
+      intro,
+      image: hero?.image?.asset ? toContentImage(hero.image) : null,
+    },
+    experience:
+      experience?.title?.trim() && experience.image?.asset
+        ? {
+            title: experience.title.trim(),
+            text: experience.text?.trim() ?? "",
+            features: mapIconFeatures(experience.features),
+            image: toContentImage(experience.image),
+          }
+        : null,
+    restaurants: {
+      title: page?.restaurants?.title?.trim() || "Our Restaurants",
+      subtitle: page?.restaurants?.subtitle?.trim() ?? "",
+    },
+    highlights:
+      highlightImages.length > 0
+        ? {
+            title: highlights?.title?.trim() || "Menu Highlights",
+            text: highlights?.text?.trim() ?? "",
+            images: highlightImages,
+          }
+        : null,
+    events:
+      events?.title?.trim() && events.image?.asset
+        ? { title: events.title.trim(), text: events.text?.trim() ?? "", image: toContentImage(events.image) }
+        : null,
+    reserve: {
+      eyebrow: reserve?.eyebrow?.trim() || "Reserve a Table",
+      title: reserve?.title?.trim() || "Dine in Paradise",
+      text: reserve?.text?.trim() ?? "",
+      image: reserve?.image?.asset ? toContentImage(reserve.image) : null,
+    },
+    venues: doc.venues.flatMap((v) => mapDiningVenue(v) ?? []),
+    seo: mapSeo(page?.seo, { title, description: intro || fallbackDescription }),
   }
 }

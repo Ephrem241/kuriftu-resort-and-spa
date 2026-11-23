@@ -16,6 +16,8 @@
     "seed:contact-page": "tsx scripts/seed-contact-page.ts",
     "seed:gallery-page": "tsx scripts/seed-gallery-page.ts",
     "seed:booking-properties": "tsx scripts/seed-booking-properties.ts",
+    "seed:dining-menus": "tsx scripts/seed-dining-menus.ts",
+    "seed:dining-page": "tsx scripts/seed-dining-page.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

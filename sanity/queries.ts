@@ -175,6 +175,7 @@ export const SITEMAP_QUERY = defineQuery(`{
     "noIndex": seo.noIndex == true,
     "treatmentsNoIndex": treatmentsSeo.noIndex == true
   },
+  "dining": *[_type == "diningPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },
   "events": *[_type == "eventsPage"][0]{
     _updatedAt,
     "noIndex": seo.noIndex == true,
@@ -380,6 +381,37 @@ export const TREATMENTS_PAGE_QUERY = defineQuery(`{
     "fallbackImage": hero.image${IMAGE}
   },
   "treatments": *[_type == "spaTreatment" && defined(slug.current)] | order(title asc)${TREATMENT_CARD}
+}`)
+
+/**
+ * Copy and photography for /dining, with every dining venue that has a photo
+ * and its resort's reservation contact (the "Reserve a Table" band).
+ */
+export const DINING_PAGE_QUERY = defineQuery(`{
+  "page": *[_type == "diningPage"][0]{
+    hero { eyebrow, title, intro, image${IMAGE} },
+    experience { title, text, features[]${ICON_FEATURE}, image${IMAGE} },
+    restaurants { title, subtitle },
+    highlights { title, text, images[]{ _key, ...${IMAGE} } },
+    events { title, text, image${IMAGE} },
+    reserve { eyebrow, title, text, image${IMAGE} },
+    seo${SEO}
+  },
+  "venues": *[_type == "diningVenue" && defined(images[0].asset) && defined(resort->slug.current)]
+    | order(resort->name asc, name asc){
+      _id,
+      name,
+      cuisine,
+      hours,
+      "image": images[0]${IMAGE},
+      "menu": menu{ label, "url": asset->url },
+      "resort": resort->{
+        name,
+        "slug": slug.current,
+        "phone": reservationContact.phones[0]{ display, tel },
+        "email": reservationContact.emails[0].address
+      }
+    }
 }`)
 
 /** An event venue on a card: enough for the grid, its filter and the meta row. */

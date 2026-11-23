@@ -36,6 +36,8 @@ export const ICON_NAMES = [
   "briefcase",
   "users",
   "wine",
+  "star",
+  "concierge-bell",
 ] as const
 
 export type IconName = (typeof ICON_NAMES)[number]

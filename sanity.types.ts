@@ -60,6 +60,13 @@ export type Enquiry = {
   createdAt?: string;
 };
 
+export type SanityFileAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.fileAsset";
+};
+
 export type DiningVenue = {
   _id: string;
   _type: "diningVenue";
@@ -76,6 +83,12 @@ export type DiningVenue = {
       _key: string;
     } & AccessibleImage
   >;
+  menu?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    label?: string;
+    _type: "file";
+  };
 };
 
 export type RoomReference = {
@@ -260,7 +273,9 @@ export type EventsPage = {
         | "gem"
         | "briefcase"
         | "users"
-        | "wine";
+        | "wine"
+        | "star"
+        | "concierge-bell";
       image: AccessibleImage;
       _type: "eventTypeTile";
       _key: string;
@@ -351,6 +366,55 @@ export type ContactDetails = {
     _key: string;
   }>;
   whatsapp?: string;
+};
+
+export type DiningPage = {
+  _id: string;
+  _type: "diningPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  hero?: {
+    eyebrow?: string;
+    title: string;
+    intro?: string;
+    image: AccessibleImage;
+  };
+  experience?: {
+    title: string;
+    text?: string;
+    features?: Array<
+      {
+        _key: string;
+      } & Feature
+    >;
+    image: AccessibleImage;
+  };
+  restaurants?: {
+    title: string;
+    subtitle?: string;
+  };
+  highlights?: {
+    title: string;
+    text?: string;
+    images?: Array<
+      {
+        _key: string;
+      } & AccessibleImage
+    >;
+  };
+  events?: {
+    title: string;
+    text?: string;
+    image: AccessibleImage;
+  };
+  reserve?: {
+    eyebrow?: string;
+    title: string;
+    text?: string;
+    image: AccessibleImage;
+  };
+  seo?: Seo;
 };
 
 export type WellnessPage = {
@@ -541,7 +605,9 @@ export type HomePage = {
         | "gem"
         | "briefcase"
         | "users"
-        | "wine";
+        | "wine"
+        | "star"
+        | "concierge-bell";
       title: string;
       subtitle?: string;
       link?: Link;
@@ -734,7 +800,9 @@ export type Amenity = {
     | "gem"
     | "briefcase"
     | "users"
-    | "wine";
+    | "wine"
+    | "star"
+    | "concierge-bell";
   label: string;
 };
 
@@ -773,7 +841,9 @@ export type Feature = {
     | "gem"
     | "briefcase"
     | "users"
-    | "wine";
+    | "wine"
+    | "star"
+    | "concierge-bell";
   title: string;
   text?: string;
 };
@@ -1145,6 +1215,7 @@ export type AllSanitySchemaTypes =
   | SpaTreatmentReference
   | EventPackageReference
   | Enquiry
+  | SanityFileAssetReference
   | DiningVenue
   | RoomReference
   | ExperienceReference
@@ -1160,6 +1231,7 @@ export type AllSanitySchemaTypes =
   | EventsPage
   | EventVenue
   | ContactDetails
+  | DiningPage
   | WellnessPage
   | ExperiencesPage
   | DestinationsPage
@@ -1472,6 +1544,7 @@ export type HOME_PAGE_QUERY_RESULT = {
         | "calendar"
         | "car"
         | "coffee"
+        | "concierge-bell"
         | "dumbbell"
         | "eye"
         | "gem"
@@ -1487,6 +1560,7 @@ export type HOME_PAGE_QUERY_RESULT = {
         | "smile"
         | "snowflake"
         | "spa"
+        | "star"
         | "trees"
         | "tv"
         | "user"
@@ -1727,6 +1801,7 @@ export type ROOM_PAGE_QUERY_RESULT = {
       | "calendar"
       | "car"
       | "coffee"
+      | "concierge-bell"
       | "dumbbell"
       | "eye"
       | "gem"
@@ -1742,6 +1817,7 @@ export type ROOM_PAGE_QUERY_RESULT = {
       | "smile"
       | "snowflake"
       | "spa"
+      | "star"
       | "trees"
       | "tv"
       | "user"
@@ -1852,6 +1928,7 @@ export type RESORT_PAGE_QUERY_RESULT = {
       | "calendar"
       | "car"
       | "coffee"
+      | "concierge-bell"
       | "dumbbell"
       | "eye"
       | "gem"
@@ -1867,6 +1944,7 @@ export type RESORT_PAGE_QUERY_RESULT = {
       | "smile"
       | "snowflake"
       | "spa"
+      | "star"
       | "trees"
       | "tv"
       | "user"
@@ -2036,7 +2114,7 @@ export type RESORT_PAGE_QUERY_RESULT = {
 
 // Source: ../sanity/queries.ts
 // Variable: SITEMAP_QUERY
-// Query: {  "home": *[_type == "homePage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },  "resorts": *[_type == "resort" && defined(slug.current) && seo.noIndex != true] | order(name asc){    "slug": slug.current, _updatedAt  },  "rooms": *[_type == "room" && defined(slug.current) && defined(resort->slug.current) && seo.noIndex != true && resort->seo.noIndex != true] | order(title asc){    "slug": slug.current, "resortSlug": resort->slug.current, _updatedAt  },  "experiences": *[_type == "experience" && defined(slug.current) && seo.noIndex != true] | order(title asc){    "slug": slug.current, _updatedAt  },  "wellness": *[_type == "wellnessPage"][0]{    _updatedAt,    "noIndex": seo.noIndex == true,    "treatmentsNoIndex": treatmentsSeo.noIndex == true  },  "events": *[_type == "eventsPage"][0]{    _updatedAt,    "noIndex": seo.noIndex == true,    "venuesNoIndex": venuesSeo.noIndex == true  },  "eventPackages": *[_type == "eventPackage" && defined(slug.current) && seo.noIndex != true] | order(title asc){    "slug": slug.current, _updatedAt  },  "pages": *[_type == "page" && defined(slug.current) && seo.noIndex != true] | order(title asc){    "slug": slug.current, _updatedAt  },  "contact": *[_type == "contactPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },  "gallery": *[_type == "galleryPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true }}
+// Query: {  "home": *[_type == "homePage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },  "resorts": *[_type == "resort" && defined(slug.current) && seo.noIndex != true] | order(name asc){    "slug": slug.current, _updatedAt  },  "rooms": *[_type == "room" && defined(slug.current) && defined(resort->slug.current) && seo.noIndex != true && resort->seo.noIndex != true] | order(title asc){    "slug": slug.current, "resortSlug": resort->slug.current, _updatedAt  },  "experiences": *[_type == "experience" && defined(slug.current) && seo.noIndex != true] | order(title asc){    "slug": slug.current, _updatedAt  },  "wellness": *[_type == "wellnessPage"][0]{    _updatedAt,    "noIndex": seo.noIndex == true,    "treatmentsNoIndex": treatmentsSeo.noIndex == true  },  "dining": *[_type == "diningPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },  "events": *[_type == "eventsPage"][0]{    _updatedAt,    "noIndex": seo.noIndex == true,    "venuesNoIndex": venuesSeo.noIndex == true  },  "eventPackages": *[_type == "eventPackage" && defined(slug.current) && seo.noIndex != true] | order(title asc){    "slug": slug.current, _updatedAt  },  "pages": *[_type == "page" && defined(slug.current) && seo.noIndex != true] | order(title asc){    "slug": slug.current, _updatedAt  },  "contact": *[_type == "contactPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },  "gallery": *[_type == "galleryPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true }}
 export type SITEMAP_QUERY_RESULT = {
   home: {
     _updatedAt: string;
@@ -2059,6 +2137,10 @@ export type SITEMAP_QUERY_RESULT = {
     _updatedAt: string;
     noIndex: boolean | false;
     treatmentsNoIndex: boolean | false;
+  } | null;
+  dining: {
+    _updatedAt: string;
+    noIndex: boolean | false;
   } | null;
   events: {
     _updatedAt: string;
@@ -2821,6 +2903,7 @@ export type WELLNESS_PAGE_QUERY_RESULT = {
           | "calendar"
           | "car"
           | "coffee"
+          | "concierge-bell"
           | "dumbbell"
           | "eye"
           | "gem"
@@ -2836,6 +2919,7 @@ export type WELLNESS_PAGE_QUERY_RESULT = {
           | "smile"
           | "snowflake"
           | "spa"
+          | "star"
           | "trees"
           | "tv"
           | "user"
@@ -2915,6 +2999,7 @@ export type WELLNESS_PAGE_QUERY_RESULT = {
           | "calendar"
           | "car"
           | "coffee"
+          | "concierge-bell"
           | "dumbbell"
           | "eye"
           | "gem"
@@ -2930,6 +3015,7 @@ export type WELLNESS_PAGE_QUERY_RESULT = {
           | "smile"
           | "snowflake"
           | "spa"
+          | "star"
           | "trees"
           | "tv"
           | "user"
@@ -3115,6 +3201,218 @@ export type TREATMENTS_PAGE_QUERY_RESULT = {
 };
 
 // Source: ../sanity/queries.ts
+// Variable: DINING_PAGE_QUERY
+// Query: {  "page": *[_type == "diningPage"][0]{    hero { eyebrow, title, intro, image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} },    experience { title, text, features[]{ _key, icon, title }, image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} },    restaurants { title, subtitle },    highlights { title, text, images[]{ _key, ...{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} } },    events { title, text, image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} },    reserve { eyebrow, title, text, image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} },    seo{ title, description, noIndex, ogImage{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} }  },  "venues": *[_type == "diningVenue" && defined(images[0].asset) && defined(resort->slug.current)]    | order(resort->name asc, name asc){      _id,      name,      cuisine,      hours,      "image": images[0]{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }},      "menu": menu{ label, "url": asset->url },      "resort": resort->{        name,        "slug": slug.current,        "phone": reservationContact.phones[0]{ display, tel },        "email": reservationContact.emails[0].address      }    }}
+export type DINING_PAGE_QUERY_RESULT = {
+  page: {
+    hero: {
+      eyebrow: string | null;
+      title: string;
+      intro: string | null;
+      image: {
+        alt: string;
+        crop: SanityImageCrop | null;
+        hotspot: SanityImageHotspot | null;
+        asset: {
+          _id: string;
+          url: string;
+          metadata: {
+            lqip: string | null;
+            dimensions: {
+              width: number;
+              height: number;
+            } | null;
+          } | null;
+        } | null;
+      };
+    } | null;
+    experience: {
+      title: string;
+      text: string | null;
+      features: Array<{
+        _key: string;
+        icon:
+          | "activity"
+          | "baby"
+          | "bath"
+          | "bed"
+          | "briefcase"
+          | "calendar"
+          | "car"
+          | "coffee"
+          | "concierge-bell"
+          | "dumbbell"
+          | "eye"
+          | "gem"
+          | "heart"
+          | "landmark"
+          | "leaf"
+          | "map-pin"
+          | "mountain"
+          | "party-popper"
+          | "phone"
+          | "presentation"
+          | "refrigerator"
+          | "smile"
+          | "snowflake"
+          | "spa"
+          | "star"
+          | "trees"
+          | "tv"
+          | "user"
+          | "users"
+          | "utensils"
+          | "vault"
+          | "waves"
+          | "wifi"
+          | "wind"
+          | "wine"
+          | null;
+        title: string;
+      }> | null;
+      image: {
+        alt: string;
+        crop: SanityImageCrop | null;
+        hotspot: SanityImageHotspot | null;
+        asset: {
+          _id: string;
+          url: string;
+          metadata: {
+            lqip: string | null;
+            dimensions: {
+              width: number;
+              height: number;
+            } | null;
+          } | null;
+        } | null;
+      };
+    } | null;
+    restaurants: {
+      title: string;
+      subtitle: string | null;
+    } | null;
+    highlights: {
+      title: string;
+      text: string | null;
+      images: Array<{
+        _key: string;
+        alt: string;
+        crop: SanityImageCrop | null;
+        hotspot: SanityImageHotspot | null;
+        asset: {
+          _id: string;
+          url: string;
+          metadata: {
+            lqip: string | null;
+            dimensions: {
+              width: number;
+              height: number;
+            } | null;
+          } | null;
+        } | null;
+      }> | null;
+    } | null;
+    events: {
+      title: string;
+      text: string | null;
+      image: {
+        alt: string;
+        crop: SanityImageCrop | null;
+        hotspot: SanityImageHotspot | null;
+        asset: {
+          _id: string;
+          url: string;
+          metadata: {
+            lqip: string | null;
+            dimensions: {
+              width: number;
+              height: number;
+            } | null;
+          } | null;
+        } | null;
+      };
+    } | null;
+    reserve: {
+      eyebrow: string | null;
+      title: string;
+      text: string | null;
+      image: {
+        alt: string;
+        crop: SanityImageCrop | null;
+        hotspot: SanityImageHotspot | null;
+        asset: {
+          _id: string;
+          url: string;
+          metadata: {
+            lqip: string | null;
+            dimensions: {
+              width: number;
+              height: number;
+            } | null;
+          } | null;
+        } | null;
+      };
+    } | null;
+    seo: {
+      title: string | null;
+      description: string | null;
+      noIndex: boolean | null;
+      ogImage: {
+        alt: string;
+        crop: SanityImageCrop | null;
+        hotspot: SanityImageHotspot | null;
+        asset: {
+          _id: string;
+          url: string;
+          metadata: {
+            lqip: string | null;
+            dimensions: {
+              width: number;
+              height: number;
+            } | null;
+          } | null;
+        } | null;
+      } | null;
+    } | null;
+  } | null;
+  venues: Array<{
+    _id: string;
+    name: string;
+    cuisine: string | null;
+    hours: string | null;
+    image: {
+      alt: string;
+      crop: SanityImageCrop | null;
+      hotspot: SanityImageHotspot | null;
+      asset: {
+        _id: string;
+        url: string;
+        metadata: {
+          lqip: string | null;
+          dimensions: {
+            width: number;
+            height: number;
+          } | null;
+        } | null;
+      } | null;
+    } | null;
+    menu: {
+      label: string | null;
+      url: string | null;
+    } | null;
+    resort: {
+      name: string;
+      slug: string;
+      phone: {
+        display: string;
+        tel: string;
+      } | null;
+      email: string | null;
+    };
+  }>;
+};
+
+// Source: ../sanity/queries.ts
 // Variable: EVENTS_PAGE_QUERY
 // Query: {  "page": *[_type == "eventsPage"][0]{    hero { eyebrow, title, intro, image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} },    eventTypes {      title, subtitle,      tiles[]{ _key, eventType, title, icon, image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} }    },    venues {      title, subtitle, text,      "featured": featured->{  _id,  name,  capacity,  "setups": setups[].style,  "excerpt": pt::text(description),  "image": images[0]{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }},  "resort": resort->{ name, fullName, "slug": slug.current }},      "highlights": highlights[]->{ _id, name }    },    packages {      title, subtitle,      cards[]{ _key, kind, title, text, image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }}, "package": package->{  title,  "slug": slug.current,  kind,  summary,  fromPrice{ amount, currency, unit },  "image": images[0]{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }},  "resorts": resorts[]->{ name, fullName, "slug": slug.current }} }    },    enquiry { title, text, image{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} },    seo{ title, description, noIndex, ogImage{  alt,  crop,  hotspot,  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }} }  },  "packageOptions": *[_type == "eventPackage" && defined(slug.current)] | order(title asc){    title, "slug": slug.current, kind, "resorts": resorts[]->{ name, fullName, "slug": slug.current }  },  "venueResorts": *[_type == "resort" && defined(slug.current) && count(*[_type == "eventVenue" && references(^._id)]) > 0] | order(name asc){    name, fullName, "slug": slug.current  }}
 export type EVENTS_PAGE_QUERY_RESULT = {
@@ -3157,6 +3455,7 @@ export type EVENTS_PAGE_QUERY_RESULT = {
           | "calendar"
           | "car"
           | "coffee"
+          | "concierge-bell"
           | "dumbbell"
           | "eye"
           | "gem"
@@ -3172,6 +3471,7 @@ export type EVENTS_PAGE_QUERY_RESULT = {
           | "smile"
           | "snowflake"
           | "spa"
+          | "star"
           | "trees"
           | "tv"
           | "user"
@@ -3769,6 +4069,7 @@ export type PAGE_QUERY_RESULT = {
             | "calendar"
             | "car"
             | "coffee"
+            | "concierge-bell"
             | "dumbbell"
             | "eye"
             | "gem"
@@ -3784,6 +4085,7 @@ export type PAGE_QUERY_RESULT = {
             | "smile"
             | "snowflake"
             | "spa"
+            | "star"
             | "trees"
             | "tv"
             | "user"
@@ -3949,7 +4251,7 @@ declare module "@sanity/client" {
     '*[_type == "room" && slug.current == $room && resort->slug.current == $resort][0]{\n  _id,\n  title,\n  "slug": slug.current,\n  summary,\n  overviewTitle,\n  description,\n  videoUrl,\n  images[]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  maxGuests,\n  bedConfiguration,\n  sizeSqm,\n  view,\n  amenities[]{ _key, icon, label },\n  features,\n  fromPrice { amount, currency, unit },\n  seo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  "resort": resort->{\n    name,\n    fullName,\n    "slug": slug.current,\n    "bookingProperty": select(\n  coalesce(bookable, true) && defined(bookingPropertyId) && defined(bookingPropertyCode) =>\n    { "id": bookingPropertyId, "code": bookingPropertyCode },\n  null\n),\n    "phone": reservationContact.phones[0]{ display, tel },\n    "email": reservationContact.emails[0].address\n  },\n  "related": *[_type == "room" && resort._ref == ^.resort._ref && _id != ^._id && defined(slug.current)] | order(title asc)[0...3]{\n  title,\n  "slug": slug.current,\n  "resortSlug": resort->slug.current,\n  summary,\n  maxGuests,\n  sizeSqm,\n  "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n}\n}': ROOM_PAGE_QUERY_RESULT;
     '*[_type == "resort" && defined(slug.current)].slug.current': RESORT_SLUGS_QUERY_RESULT;
     '*[_type == "resort" && slug.current == $slug][0]{\n  _id,\n  name,\n  fullName,\n  "slug": slug.current,\n  type,\n  tagline,\n  summary,\n  introTitle,\n  locationLabel,\n  intro,\n  amenities[]{ _key, icon, label },\n  "country": address.country,\n  address{ streetAddress, locality, region, postalCode, country },\n  geo { lat, lng },\n  gettingHere,\n  heroImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  heroVideoUrl,\n  "gallery": gallery[0...2]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  "bookingProperty": select(\n  coalesce(bookable, true) && defined(bookingPropertyId) && defined(bookingPropertyCode) =>\n    { "id": bookingPropertyId, "code": bookingPropertyCode },\n  null\n),\n  "phone": reservationContact.phones[0]{ display, tel },\n  "email": reservationContact.emails[0].address,\n  seo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  "rooms": *[_type == "room" && resort._ref == ^._id && defined(slug.current)] | order(title asc){\n  title,\n  "slug": slug.current,\n  "resortSlug": resort->slug.current,\n  summary,\n  maxGuests,\n  sizeSqm,\n  "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n},\n  "experiences": *[_type == "experience" && references(^._id) && defined(slug.current)] | order(title asc){\n    category,\n    "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n  },\n  "spaImage": *[_type == "spaTreatment" && references(^._id) && defined(image.asset)] | order(title asc)[0].image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  "diningImage": *[_type == "diningVenue" && resort._ref == ^._id && defined(images[0].asset)] | order(name asc)[0].images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n}': RESORT_PAGE_QUERY_RESULT;
-    '{\n  "home": *[_type == "homePage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },\n  "resorts": *[_type == "resort" && defined(slug.current) && seo.noIndex != true] | order(name asc){\n    "slug": slug.current, _updatedAt\n  },\n  "rooms": *[_type == "room" && defined(slug.current) && defined(resort->slug.current) && seo.noIndex != true && resort->seo.noIndex != true] | order(title asc){\n    "slug": slug.current, "resortSlug": resort->slug.current, _updatedAt\n  },\n  "experiences": *[_type == "experience" && defined(slug.current) && seo.noIndex != true] | order(title asc){\n    "slug": slug.current, _updatedAt\n  },\n  "wellness": *[_type == "wellnessPage"][0]{\n    _updatedAt,\n    "noIndex": seo.noIndex == true,\n    "treatmentsNoIndex": treatmentsSeo.noIndex == true\n  },\n  "events": *[_type == "eventsPage"][0]{\n    _updatedAt,\n    "noIndex": seo.noIndex == true,\n    "venuesNoIndex": venuesSeo.noIndex == true\n  },\n  "eventPackages": *[_type == "eventPackage" && defined(slug.current) && seo.noIndex != true] | order(title asc){\n    "slug": slug.current, _updatedAt\n  },\n  "pages": *[_type == "page" && defined(slug.current) && seo.noIndex != true] | order(title asc){\n    "slug": slug.current, _updatedAt\n  },\n  "contact": *[_type == "contactPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },\n  "gallery": *[_type == "galleryPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true }\n}': SITEMAP_QUERY_RESULT;
+    '{\n  "home": *[_type == "homePage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },\n  "resorts": *[_type == "resort" && defined(slug.current) && seo.noIndex != true] | order(name asc){\n    "slug": slug.current, _updatedAt\n  },\n  "rooms": *[_type == "room" && defined(slug.current) && defined(resort->slug.current) && seo.noIndex != true && resort->seo.noIndex != true] | order(title asc){\n    "slug": slug.current, "resortSlug": resort->slug.current, _updatedAt\n  },\n  "experiences": *[_type == "experience" && defined(slug.current) && seo.noIndex != true] | order(title asc){\n    "slug": slug.current, _updatedAt\n  },\n  "wellness": *[_type == "wellnessPage"][0]{\n    _updatedAt,\n    "noIndex": seo.noIndex == true,\n    "treatmentsNoIndex": treatmentsSeo.noIndex == true\n  },\n  "dining": *[_type == "diningPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },\n  "events": *[_type == "eventsPage"][0]{\n    _updatedAt,\n    "noIndex": seo.noIndex == true,\n    "venuesNoIndex": venuesSeo.noIndex == true\n  },\n  "eventPackages": *[_type == "eventPackage" && defined(slug.current) && seo.noIndex != true] | order(title asc){\n    "slug": slug.current, _updatedAt\n  },\n  "pages": *[_type == "page" && defined(slug.current) && seo.noIndex != true] | order(title asc){\n    "slug": slug.current, _updatedAt\n  },\n  "contact": *[_type == "contactPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true },\n  "gallery": *[_type == "galleryPage"][0]{ _updatedAt, "noIndex": seo.noIndex == true }\n}': SITEMAP_QUERY_RESULT;
     '*[_type == "offer" && defined(slug.current) && endDate > $now] | order(endDate asc){\n  \n  _updatedAt,\n  title,\n  "slug": slug.current,\n  shortLine,\n  category,\n  badge,\n  startDate,\n  endDate,\n  showAsPopup,\n  image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  seo { noIndex },\n  "resorts": resorts[]->{\n  name,\n  fullName,\n  "slug": slug.current,\n  "bookingProperty": select(\n  coalesce(bookable, true) && defined(bookingPropertyId) && defined(bookingPropertyCode) =>\n    { "id": bookingPropertyId, "code": bookingPropertyCode },\n  null\n),\n  "phone": reservationContact.phones[0]{ display, tel },\n  "email": reservationContact.emails[0].address\n}\n}': OFFERS_QUERY_RESULT;
     '*[_type == "offer" && slug.current == $slug][0]{\n  \n  _updatedAt,\n  title,\n  "slug": slug.current,\n  shortLine,\n  category,\n  badge,\n  startDate,\n  endDate,\n  showAsPopup,\n  image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  description,\n  terms,\n  promoCode,\n  seo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  "resorts": resorts[]->{\n  name,\n  fullName,\n  "slug": slug.current,\n  "bookingProperty": select(\n  coalesce(bookable, true) && defined(bookingPropertyId) && defined(bookingPropertyCode) =>\n    { "id": bookingPropertyId, "code": bookingPropertyCode },\n  null\n),\n  "phone": reservationContact.phones[0]{ display, tel },\n  "email": reservationContact.emails[0].address\n}\n}': OFFER_PAGE_QUERY_RESULT;
     '*[_type == "offersPage"][0]{\n  hero { eyebrow, title, intro, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  banner { eyebrow, title, text, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}, link{\n  label,\n  linkType,\n  path,\n  url,\n  "target": reference->{ _type, "slug": slug.current, "resortSlug": resort->slug.current }\n} },\n  seo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} }\n}': OFFERS_PAGE_QUERY_RESULT;
@@ -3961,6 +4263,7 @@ declare module "@sanity/client" {
     '*[_type == "experience" && slug.current == $slug][0]{\n  title,\n  "slug": slug.current,\n  category,\n  summary,\n  description,\n  duration,\n  action,\n  images[]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  seo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n  "resorts": resorts[]->{\n  name,\n  fullName,\n  "slug": slug.current,\n  "bookingProperty": select(\n  coalesce(bookable, true) && defined(bookingPropertyId) && defined(bookingPropertyCode) =>\n    { "id": bookingPropertyId, "code": bookingPropertyCode },\n  null\n),\n  "phone": reservationContact.phones[0]{ display, tel },\n  "email": reservationContact.emails[0].address\n},\n  "related": *[_type == "experience" && _id != ^._id && defined(slug.current) && references(^.resorts[]._ref)] | order(title asc)[0...3]{\n  title,\n  "slug": slug.current,\n  category,\n  summary,\n  duration,\n  "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  "resorts": resorts[]->{ name, fullName, "slug": slug.current }\n}\n}': EXPERIENCE_PAGE_QUERY_RESULT;
     '{\n  "page": *[_type == "wellnessPage"][0]{\n    hero { eyebrow, title, intro, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    daySpa {\n      eyebrow, title, text, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n      features[]{ _key, icon, title },\n      "resort": resort->{ name, "slug": slug.current }\n    },\n    treatments {\n      title, subtitle,\n      cards[]{ _key, group, title, subtitle, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} }\n    },\n    booking { eyebrow, title, text, tagline, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    whyChoose { title, features[]{ _key, icon, title }, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    seo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} }\n  },\n  "treatments": *[_type == "spaTreatment" && defined(slug.current)] | order(title asc){\n  title,\n  "slug": slug.current,\n  category,\n  duration,\n  "excerpt": pt::text(description),\n  price{ amount, currency, unit },\n  image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  "resorts": resorts[]->{ name, fullName, "slug": slug.current }\n}\n}': WELLNESS_PAGE_QUERY_RESULT;
     '{\n  "page": *[_type == "wellnessPage"][0]{\n    treatmentsIndex { eyebrow, title, intro },\n    treatmentsSeo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    "fallbackImage": hero.image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n  },\n  "treatments": *[_type == "spaTreatment" && defined(slug.current)] | order(title asc){\n  title,\n  "slug": slug.current,\n  category,\n  duration,\n  "excerpt": pt::text(description),\n  price{ amount, currency, unit },\n  image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  "resorts": resorts[]->{ name, fullName, "slug": slug.current }\n}\n}': TREATMENTS_PAGE_QUERY_RESULT;
+    '{\n  "page": *[_type == "diningPage"][0]{\n    hero { eyebrow, title, intro, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    experience { title, text, features[]{ _key, icon, title }, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    restaurants { title, subtitle },\n    highlights { title, text, images[]{ _key, ...{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} } },\n    events { title, text, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    reserve { eyebrow, title, text, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    seo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} }\n  },\n  "venues": *[_type == "diningVenue" && defined(images[0].asset) && defined(resort->slug.current)]\n    | order(resort->name asc, name asc){\n      _id,\n      name,\n      cuisine,\n      hours,\n      "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n      "menu": menu{ label, "url": asset->url },\n      "resort": resort->{\n        name,\n        "slug": slug.current,\n        "phone": reservationContact.phones[0]{ display, tel },\n        "email": reservationContact.emails[0].address\n      }\n    }\n}': DINING_PAGE_QUERY_RESULT;
     '{\n  "page": *[_type == "eventsPage"][0]{\n    hero { eyebrow, title, intro, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    eventTypes {\n      title, subtitle,\n      tiles[]{ _key, eventType, title, icon, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} }\n    },\n    venues {\n      title, subtitle, text,\n      "featured": featured->{\n  _id,\n  name,\n  capacity,\n  "setups": setups[].style,\n  "excerpt": pt::text(description),\n  "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  "resort": resort->{ name, fullName, "slug": slug.current }\n},\n      "highlights": highlights[]->{ _id, name }\n    },\n    packages {\n      title, subtitle,\n      cards[]{ _key, kind, title, text, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}, "package": package->{\n  title,\n  "slug": slug.current,\n  kind,\n  summary,\n  fromPrice{ amount, currency, unit },\n  "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  "resorts": resorts[]->{ name, fullName, "slug": slug.current }\n} }\n    },\n    enquiry { title, text, image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    seo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} }\n  },\n  "packageOptions": *[_type == "eventPackage" && defined(slug.current)] | order(title asc){\n    title, "slug": slug.current, kind, "resorts": resorts[]->{ name, fullName, "slug": slug.current }\n  },\n  "venueResorts": *[_type == "resort" && defined(slug.current) && count(*[_type == "eventVenue" && references(^._id)]) > 0] | order(name asc){\n    name, fullName, "slug": slug.current\n  }\n}': EVENTS_PAGE_QUERY_RESULT;
     '{\n  "page": *[_type == "eventsPage"][0]{\n    venuesIndex { eyebrow, title, intro },\n    venuesSeo{ title, description, noIndex, ogImage{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n} },\n    "fallbackImage": hero.image{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n}\n  },\n  "venues": *[_type == "eventVenue" && defined(resort->slug.current)] | order(resort->name asc, name asc){\n  _id,\n  name,\n  capacity,\n  "setups": setups[].style,\n  "excerpt": pt::text(description),\n  "image": images[0]{\n  alt,\n  crop,\n  hotspot,\n  asset->{ _id, url, metadata { lqip, dimensions { width, height } } }\n},\n  "resort": resort->{ name, fullName, "slug": slug.current }\n}\n}': VENUES_PAGE_QUERY_RESULT;
     '*[_type == "eventPackage" && defined(slug.current)].slug.current': EVENT_PACKAGE_SLUGS_QUERY_RESULT;
