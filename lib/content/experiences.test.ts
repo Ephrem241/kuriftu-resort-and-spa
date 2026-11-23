@@ -28,7 +28,7 @@ const params = (query: string) => new URLSearchParams(query)
 const slugs = ["entoto", "bishoftu", "waterpark"]
 
 function contact(slug: string, bookable: boolean): OfferResort {
-  return { name: slug, heading: slug, slug, bookable, bookingPropertyId: null, phone: null, email: null }
+  return { name: slug, heading: slug, slug, bookable, bookingProperty: bookable ? { id: "1", code: "2" } : null, phone: null, email: null }
 }
 
 describe("isExperienceCategory", () => {

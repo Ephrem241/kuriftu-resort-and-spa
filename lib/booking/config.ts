@@ -1,34 +1,30 @@
 /**
- * TravelBook booking engine configuration. The base URL (including the
- * Kuriftu group ids) lives in env; see .env.example.
+ * TravelBook booking engine configuration.
  *
- * The query parameter names TravelBook accepts for property, dates, and
- * guests have NOT been verified. Each stays `null` until confirmed with
- * TravelBook, and a `null` param is never sent. Confirming one is a single
- * edit here plus the matching test in handoff.test.ts.
+ * `baseUrl` is the group "Reserve" link from env (see .env.example). The
+ * engine host, `id_stile` and `lingua_int` are read from it, so nothing about
+ * Kuriftu's account is hardcoded here.
+ *
+ * The page names and query params below were verified against the live engine
+ * on 2026-11-24 (its own search scripts plus live requests); see
+ * prompts/21-booking-handoff.md. A change on TravelBook's side is one edit
+ * here plus the matching tests in handoff.test.ts.
  */
-export type BookingParamMap = {
-  property: string | null
-  checkIn: string | null
-  checkOut: string | null
-  adults: string | null
-  children: string | null
-}
-
 export type BookingConfig = {
   baseUrl: string
-  paramMap: BookingParamMap
-}
-
-export const UNVERIFIED_PARAM_MAP: BookingParamMap = {
-  property: null,
-  checkIn: null,
-  checkOut: null,
-  adults: null,
-  children: null,
 }
 
 export const bookingConfig: BookingConfig = {
   baseUrl: process.env.NEXT_PUBLIC_BOOKING_ENGINE_URL ?? "",
-  paramMap: UNVERIFIED_PARAM_MAP,
 }
+
+/** Engine pages, relative to the group URL's directory (`/premium/`). */
+export const ENGINE_PAGES = {
+  /** One property's start page: its availability calendar. */
+  property: "index.html",
+  /** One property's room results for a given stay. */
+  propertyStay: "index2.html",
+} as const
+
+/** Params copied from the group URL onto property links. */
+export const SHARED_PARAMS = ["id_stile", "lingua_int"] as const

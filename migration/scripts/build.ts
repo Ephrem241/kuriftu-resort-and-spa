@@ -23,6 +23,7 @@ export interface Redirect {
 interface Hints {
   types: Record<string, string>
   notBookable: string[]
+  bookingProperties: Record<string, { id: string; code: string }>
   taglines: Record<string, string>
   address: Record<string, { streetAddress?: string; region?: string }>
   footerOrder: string[]
@@ -222,6 +223,8 @@ export function build({ ds, hints, categories, home, meta }: BuildInput, images:
         heroVideoUrl,
         gallery,
         bookable: bookable(legacy),
+        bookingPropertyId: hints.bookingProperties[legacy]?.id,
+        bookingPropertyCode: hints.bookingProperties[legacy]?.code,
         reservationContact: {
           _type: "contactDetails",
           phones: phones.map((p) => ({ _type: "phone", _key: stableKey(where, p.tel), label: "Reservations", ...p })),
@@ -230,7 +233,7 @@ export function build({ ds, hints, categories, home, meta }: BuildInput, images:
         seo: { _type: "seo", title: truncate(fullName, 60), description: truncate(description, 160) },
       }),
     )
-    if (bookable(legacy)) report.flag("booking", name, "Booking engine property id not in source; add it when the deep-link params are confirmed")
+    if (bookable(legacy) && !hints.bookingProperties[legacy]) report.flag("booking", name, "Not in TravelBook; the site shows its reservation contact instead of online booking")
   }
 
   // Camel-case resort slug: the old path keeps working through a 301.

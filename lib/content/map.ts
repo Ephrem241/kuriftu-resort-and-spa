@@ -20,6 +20,7 @@ import type {
   GALLERY_PAGE_QUERY_RESULT,
 } from "@/sanity.types"
 import { urlFor } from "@/sanity/lib/image"
+import type { BookingProperty } from "@/lib/booking/handoff"
 import { toEmbedUrl } from "@/lib/video"
 
 import { groupDestinations } from "./destinations"
@@ -188,7 +189,7 @@ export function mapSiteSettings(
     bookableResorts: doc.bookableResorts.map((r) => ({
       name: r.name,
       slug: r.slug,
-      bookingPropertyId: r.bookingPropertyId ?? null,
+      bookingProperty: mapBooking(r.bookingProperty).bookingProperty,
     })),
     experienceLinks: toNavLinks(doc.experienceLinks),
     footerColumns: (doc.footerColumns ?? []).map((col) => ({
@@ -205,7 +206,7 @@ type HomeDoc = NonNullable<HOME_PAGE_QUERY_RESULT>
 /** The resort card fields both the home and destinations queries project. */
 type ResortCard = Pick<
   NonNullable<NonNullable<HomeDoc["destinations"]>["resorts"]>[number],
-  "name" | "slug" | "tagline" | "locationLabel" | "bookable" | "bookingPropertyId" | "heroImage"
+  "name" | "slug" | "tagline" | "locationLabel" | "bookingProperty" | "heroImage"
 >
 type RoomCard = NonNullable<NonNullable<HomeDoc["rooms"]>["items"]>[number]
 
@@ -215,8 +216,7 @@ function mapResort(r: ResortCard): ResortSummary {
     slug: r.slug,
     tagline: r.tagline ?? r.locationLabel ?? "",
     image: toContentImage(r.heroImage, r.name),
-    bookable: r.bookable ?? true,
-    bookingPropertyId: r.bookingPropertyId ?? null,
+    ...mapBooking(r.bookingProperty),
   }
 }
 
@@ -309,6 +309,19 @@ function mapContact(
   }
 }
 
+/**
+ * Online booking from the projected TravelBook property: a resort is bookable
+ * exactly when it has a valid one (see BOOKING_PROPERTY in sanity/queries.ts).
+ */
+function mapBooking(
+  property: { id?: string | null; code?: string | null } | null | undefined
+): { bookable: boolean; bookingProperty: BookingProperty | null } {
+  const id = property?.id?.trim()
+  const code = property?.code?.trim()
+  const bookingProperty = id && code ? { id, code } : null
+  return { bookable: bookingProperty !== null, bookingProperty }
+}
+
 /** A text paragraph as Portable Text, for fallbacks. */
 function paragraph(text: string, key: string): RichText {
   return [
@@ -360,8 +373,7 @@ export function mapRoomPage(doc: RoomDoc): RoomPage | null {
       name: resort.name,
       heading: resortHeading,
       slug: resort.slug,
-      bookable: resort.bookable ?? true,
-      bookingPropertyId: resort.bookingPropertyId ?? null,
+      ...mapBooking(resort.bookingProperty),
       ...mapContact(resort.phone, resort.email),
     },
     related: (doc.related ?? []).flatMap((r) => {
@@ -398,8 +410,7 @@ export function mapResortPage(doc: ResortDoc): ResortPage {
     aboutImage: first?.asset ? toContentImage(first, heading) : heroImage,
     ctaImage: second?.asset ? toContentImage(second, heading) : heroImage,
     heroVideoUrl: doc.heroVideoUrl ?? null,
-    bookable: doc.bookable ?? true,
-    bookingPropertyId: doc.bookingPropertyId ?? null,
+    ...mapBooking(doc.bookingProperty),
     ...mapContact(doc.phone, doc.email),
     seo: mapSeo(doc.seo, { title: heading, description: doc.summary?.trim() || "" }),
     rooms: (doc.rooms ?? []).flatMap((r) => {
@@ -424,8 +435,7 @@ function mapOfferResorts(resorts: OfferResortDoc[] | null | undefined): OfferRes
       name: r.name,
       heading: r.fullName?.trim() || r.name,
       slug: r.slug,
-      bookable: r.bookable ?? true,
-      bookingPropertyId: r.bookingPropertyId ?? null,
+      ...mapBooking(r.bookingProperty),
       ...mapContact(r.phone, r.email),
     }))
 }

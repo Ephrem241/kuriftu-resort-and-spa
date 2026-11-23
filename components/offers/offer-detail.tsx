@@ -91,7 +91,7 @@ export function OfferDetail({ offer, reservations }: OfferDetailProps) {
               <BookStayLink
                 source="offer"
                 resort={action.resort?.slug}
-                propertyId={action.resort?.bookingPropertyId}
+                property={action.resort?.bookingProperty}
                 variant="accent"
                 className="mt-6 text-charcoal hover:text-ivory"
               />

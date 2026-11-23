@@ -53,7 +53,7 @@ export function RoomBookPanel({ room, wide, image }: RoomBookPanelProps) {
             source="room-cta"
             resort={resort.slug}
             room={room.slug}
-            propertyId={resort.bookingPropertyId}
+            property={resort.bookingProperty}
             label="Check Availability"
             variant="accent"
             className="mt-6 self-start text-charcoal hover:text-ivory"

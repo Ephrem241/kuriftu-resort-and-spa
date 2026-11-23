@@ -138,7 +138,7 @@ describe("offerAction", () => {
     heading: slug,
     slug,
     bookable,
-    bookingPropertyId: null,
+    bookingProperty: bookable ? { id: "1", code: "2" } : null,
     phone: null,
     email: null,
   })
