@@ -56,7 +56,7 @@ export function RoomBookPanel({ room, wide, image }: RoomBookPanelProps) {
             propertyId={resort.bookingPropertyId}
             label="Check Availability"
             variant="accent"
-            className="mt-6 self-start text-forest hover:text-ivory"
+            className="mt-6 self-start text-charcoal hover:text-ivory"
           />
         ) : (
           <ContactActions phone={resort.phone} email={resort.email} source="room-cta" className="mt-6" />

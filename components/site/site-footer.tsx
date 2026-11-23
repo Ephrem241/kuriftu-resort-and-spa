@@ -27,8 +27,9 @@ export async function SiteFooter() {
     <footer className="bg-forest text-ivory">
       <div className="container-site grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1.3fr_auto] lg:gap-0 lg:py-12">
         <div className="lg:border-r lg:border-ivory/15 lg:pr-10">
-          <Link href="/" aria-label={`${settings.brandName}, home`} className="inline-block">
+          <Link href="/" className="inline-block">
             <Wordmark tone="ivory" size="lg" />
+            <span className="sr-only">, home</span>
           </Link>
           <p className="accent mt-4 text-small text-ivory">{settings.footerTagline}</p>
         </div>
@@ -102,7 +103,7 @@ export async function SiteFooter() {
             {settings.legalLinks.map((link, i) => (
               <li key={link.href} className="flex items-center gap-3">
                 {i > 0 ? <span aria-hidden="true" className="h-3 w-px bg-gold/60" /> : null}
-                <Link href={link.href} className="text-gold hover:text-ivory">
+                <Link href={link.href} className="text-beige hover:text-ivory">
                   {link.label}
                 </Link>
               </li>
@@ -112,7 +113,7 @@ export async function SiteFooter() {
                 {settings.legalLinks.length > 0 ? (
                   <span aria-hidden="true" className="h-3 w-px bg-gold/60" />
                 ) : null}
-                <CookieSettingsButton className="cursor-pointer text-gold hover:text-ivory" />
+                <CookieSettingsButton className="cursor-pointer text-beige hover:text-ivory" />
               </li>
             ) : null}
           </ul>

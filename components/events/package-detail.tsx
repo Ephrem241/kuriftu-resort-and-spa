@@ -89,7 +89,7 @@ export function PackageDetail({ pkg }: { pkg: EventPackagePage }) {
             ) : null}
 
             {pkg.description.length > 0 ? (
-              <PortableText value={pkg.description} className="mt-8 text-body text-charcoal" />
+              <PortableText value={pkg.description} headingLevel={2} className="mt-8 text-body text-charcoal" />
             ) : null}
 
             {pkg.inclusions.length > 0 ? (
@@ -160,7 +160,7 @@ export function PackageDetail({ pkg }: { pkg: EventPackagePage }) {
                 size="pill"
                 shape="pill"
                 arrow
-                className="mt-6 text-forest hover:text-ivory"
+                className="mt-6 text-charcoal hover:text-ivory"
               >
                 Enquire Now
               </ButtonLink>

@@ -26,7 +26,7 @@ export function ContactActions({
           href={`tel:${phone.tel}`}
           className={cn(
             buttonVariants({ variant: "accent", size: "pill", shape: "pill" }),
-            "text-forest hover:text-ivory"
+            "text-charcoal hover:text-ivory"
           )}
         >
           <Phone aria-hidden="true" strokeWidth={1.5} />

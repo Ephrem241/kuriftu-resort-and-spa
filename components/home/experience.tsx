@@ -30,7 +30,7 @@ export function Experience({ content }: { content: HomePage["experience"] }) {
                     className="size-10 text-forest transition-transform duration-hover ease-soft group-hover/pillar:-translate-y-0.5"
                   />
                   <span className="mt-4 text-small font-bold text-charcoal">{pillar.title}</span>
-                  <span className="mt-1 text-caption text-muted">{pillar.subtitle}</span>
+                  <span className="mt-1 text-caption text-charcoal">{pillar.subtitle}</span>
                 </Link>
               </li>
             )

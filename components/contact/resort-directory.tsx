@@ -30,10 +30,10 @@ export function ResortDirectory({ id, title, resorts }: { id: string; title: str
                 {href ? (
                   <Link
                     href={href}
-                    aria-label={`View ${resort.heading}`}
                     className="eyebrow group/link mt-5 inline-flex items-center gap-2 self-start text-forest hover:text-gold"
                   >
                     View resort
+                    <span className="sr-only">: {resort.heading}</span>
                     <ArrowRight
                       aria-hidden="true"
                       strokeWidth={1.5}

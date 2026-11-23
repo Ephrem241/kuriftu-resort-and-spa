@@ -36,7 +36,7 @@ export function FieldTrigger({
         className="size-5 shrink-0 text-forest"
       />
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="text-caption text-muted">{label}</span>
+        <span className="text-caption text-charcoal">{label}</span>
         <span className="truncate text-small text-charcoal">{value}</span>
       </span>
       <ChevronDown

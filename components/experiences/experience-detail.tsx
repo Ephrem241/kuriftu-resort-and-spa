@@ -88,7 +88,7 @@ export function ExperienceDetail({ experience, reservations }: ExperienceDetailP
             </ul>
 
             {experience.description.length > 0 ? (
-              <PortableText value={experience.description} className="mt-8 text-body text-charcoal" />
+              <PortableText value={experience.description} headingLevel={2} className="mt-8 text-body text-charcoal" />
             ) : null}
 
             <aside aria-labelledby="experience-action-title" className="mt-10 rounded-xl bg-forest p-8 lg:p-10">
@@ -106,7 +106,7 @@ export function ExperienceDetail({ experience, reservations }: ExperienceDetailP
                   resort={action.resort?.slug}
                   propertyId={action.resort?.bookingPropertyId}
                   variant="accent"
-                  className="mt-6 text-forest hover:text-ivory"
+                  className="mt-6 text-charcoal hover:text-ivory"
                 />
               ) : (
                 <ContactActions

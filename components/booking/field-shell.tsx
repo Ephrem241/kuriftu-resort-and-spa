@@ -31,7 +31,7 @@ export function FieldShell({
     <div className={cn(fieldShellClass, invalid && "border-error")}>
       <Icon aria-hidden="true" strokeWidth={1.5} className="size-5 shrink-0 text-forest" />
       <span className="flex min-w-0 flex-1 flex-col">
-        <label htmlFor={htmlFor} className="text-caption text-muted">
+        <label htmlFor={htmlFor} className="text-caption text-charcoal">
           {label}
         </label>
         <span aria-hidden="true" className="truncate text-small text-charcoal">

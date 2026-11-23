@@ -18,7 +18,7 @@ export function DaySpa({ daySpa }: { daySpa: DaySpa }) {
 
       <div>
         {daySpa.eyebrow ? (
-          <p className="eyebrow flex items-center gap-3 text-gold">
+          <p className="eyebrow flex items-center gap-3 text-forest">
             <span aria-hidden="true" className="h-px w-6 bg-gold" />
             {daySpa.eyebrow}
             <span aria-hidden="true" className="h-px w-6 bg-gold" />
