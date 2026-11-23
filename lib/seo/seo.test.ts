@@ -84,6 +84,8 @@ describe("mapSitemap", () => {
       events: { _updatedAt: "2026-11-06T00:00:00Z", noIndex: false, venuesNoIndex: false },
       eventPackages: [{ slug: "weddings-bishoftu", _updatedAt: "2026-11-07T00:00:00Z" }],
       pages: [{ slug: "about", _updatedAt: "2026-11-08T00:00:00Z" }],
+      contact: { _updatedAt: "2026-11-09T00:00:00Z", noIndex: false },
+      gallery: { _updatedAt: "2026-11-10T00:00:00Z", noIndex: false },
     }
     expect(mapSitemap(rows as Parameters<typeof mapSitemap>[0])).toEqual([
       { path: "/", lastModified: "2026-11-01T00:00:00Z" },
@@ -96,6 +98,8 @@ describe("mapSitemap", () => {
       { path: "/event/venues", lastModified: "2026-11-06T00:00:00Z" },
       { path: "/event/weddings-bishoftu", lastModified: "2026-11-07T00:00:00Z" },
       { path: "/about", lastModified: "2026-11-08T00:00:00Z" },
+      { path: "/contact", lastModified: "2026-11-09T00:00:00Z" },
+      { path: "/gallery", lastModified: "2026-11-10T00:00:00Z" },
     ])
     const hidden = {
       ...rows,
@@ -107,9 +111,16 @@ describe("mapSitemap", () => {
       events: { ...rows.events, noIndex: true, venuesNoIndex: true },
       eventPackages: [],
       pages: [],
+      contact: { ...rows.contact, noIndex: true },
+      gallery: { ...rows.gallery, noIndex: true },
     }
     expect(mapSitemap(hidden as Parameters<typeof mapSitemap>[0])).toEqual([])
     expect(mapSitemap({ ...hidden, wellness: null, events: null } as Parameters<typeof mapSitemap>[0])).toEqual([])
+    // Unpublished contact and gallery pages still render (with fallbacks), so they stay listed.
+    expect(mapSitemap({ ...hidden, contact: null, gallery: null } as Parameters<typeof mapSitemap>[0])).toEqual([
+      { path: "/contact", lastModified: undefined },
+      { path: "/gallery", lastModified: undefined },
+    ])
   })
 })
 

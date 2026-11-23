@@ -5,7 +5,9 @@ import { cacheLife, cacheTag } from "next/cache"
 import { client } from "@/sanity/lib/client"
 import { sanityFetch } from "@/sanity/lib/fetch"
 import {
+  CONTACT_PAGE_QUERY,
   DESTINATIONS_PAGE_QUERY,
+  GALLERY_PAGE_QUERY,
   EVENT_PACKAGE_QUERY,
   EVENT_PACKAGE_SLUGS_QUERY,
   EVENTS_PAGE_QUERY,
@@ -30,7 +32,9 @@ import {
 } from "@/sanity/queries"
 
 import {
+  mapContactPage,
   mapDestinationsPage,
+  mapGalleryPage,
   mapEventPackagePage,
   mapEventsPage,
   mapExperiencePage,
@@ -50,7 +54,9 @@ import {
 } from "./map"
 import { cacheSeconds, isLive, type Dated } from "./offers"
 import type {
+  ContactPage,
   DestinationsPage,
+  GalleryPage,
   EventPackagePage,
   EventsPage,
   ExperiencePage,
@@ -145,7 +151,7 @@ export async function getRoomPage(resort: string, room: string): Promise<RoomPag
 /** Indexable home, resort and room paths with their last change, for sitemap.xml. */
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   "use cache"
-  const tags = ["homePage", "resort", "room", "experience", "wellnessPage", "eventsPage", "eventPackage", "page"]
+  const tags = ["homePage", "resort", "room", "experience", "wellnessPage", "eventsPage", "eventPackage", "page", "contactPage", "galleryPage"]
   cacheTag(...tags)
   cacheLife("days")
 
@@ -318,6 +324,28 @@ export async function getPage(slug: string): Promise<MarketingPage | null> {
 
   const doc = await sanityFetch({ query: PAGE_QUERY, params: { slug }, tags })
   return doc ? mapPage(doc) : null
+}
+
+/** Copy for /contact with the site and per-resort contacts; renders with fallbacks if unpublished. */
+export async function getContactPage(fallbackDescription: string): Promise<ContactPage> {
+  "use cache"
+  const tags = ["contactPage", "siteSettings", "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: CONTACT_PAGE_QUERY, tags })
+  return mapContactPage(doc, fallbackDescription)
+}
+
+/** Copy for /gallery with every resort's gallery photos; renders with fallbacks if unpublished. */
+export async function getGalleryPage(fallbackDescription: string): Promise<GalleryPage> {
+  "use cache"
+  const tags = ["galleryPage", "resort"]
+  cacheTag(...tags)
+  cacheLife("days")
+
+  const doc = await sanityFetch({ query: GALLERY_PAGE_QUERY, tags })
+  return mapGalleryPage(doc, fallbackDescription)
 }
 
 /** Revalidate at the next start or end. Next requires expire > revalidate. */

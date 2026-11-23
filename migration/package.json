@@ -13,6 +13,8 @@
     "seed:experiences-page": "tsx scripts/seed-experiences-page.ts",
     "seed:wellness-page": "tsx scripts/seed-wellness-page.ts",
     "seed:events-page": "tsx scripts/seed-events-page.ts",
+    "seed:contact-page": "tsx scripts/seed-contact-page.ts",
+    "seed:gallery-page": "tsx scripts/seed-gallery-page.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
