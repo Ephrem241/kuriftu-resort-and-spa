@@ -6,6 +6,7 @@ import { PackageDetail } from "@/components/events/package-detail"
 import { getEventPackagePage, getEventPackageSlugs, getSiteSettings } from "@/lib/content"
 import { pathForDocument } from "@/lib/content/routes"
 import { pageMetadata } from "@/lib/seo/metadata"
+import { PageContentFallback } from "@/components/ui/page-content-fallback"
 
 /** Cache Components needs at least one param, so a placeholder (which 404s) stands in when there are none. */
 export async function generateStaticParams() {
@@ -32,7 +33,7 @@ export default function Page({ params }: PageProps<"/event/[slug]">) {
   return (
     <main id="main" tabIndex={-1} className="flex-1 outline-none">
       {/* params are read inside the boundary so the route keeps one App Shell. */}
-      <Suspense fallback={<div aria-busy="true" className="min-h-[40rem]" />}>
+      <Suspense fallback={<PageContentFallback />}>
         <PackageContent params={params} />
       </Suspense>
     </main>

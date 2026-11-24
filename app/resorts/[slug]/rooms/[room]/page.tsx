@@ -12,6 +12,7 @@ import { getRoomPage, getRoomParams, getSiteSettings } from "@/lib/content"
 import { pathForDocument } from "@/lib/content/routes"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { cn } from "@/lib/utils"
+import { PageContentFallback } from "@/components/ui/page-content-fallback"
 
 /**
  * Both segments come from here: the resort page's generateStaticParams lives
@@ -47,7 +48,7 @@ export default function Page({ params }: PageProps<"/resorts/[slug]/rooms/[room]
   return (
     <main id="main" tabIndex={-1} className="flex-1 outline-none">
       {/* params are read inside the boundary so the route keeps one App Shell. */}
-      <Suspense fallback={<div aria-busy="true" className="min-h-[40rem]" />}>
+      <Suspense fallback={<PageContentFallback />}>
         <RoomContent params={params} />
       </Suspense>
     </main>
