@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { OfferPopup } from "@/components/offers/offer-popup";
 import { Lato, Playfair_Display } from "next/font/google";
 import { JsonLd } from "@/components/seo/json-ld";
-import { ConsentBanner } from "@/components/site/consent-banner";
+import { ConsentBannerLoader } from "@/components/site/consent-banner-loader";
 import { analyticsEnabled } from "@/lib/analytics/posthog";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
@@ -77,7 +77,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Suspense fallback={null}>
           <OfferPopup />
         </Suspense>
-        {analyticsEnabled() ? <ConsentBanner /> : null}
+        {analyticsEnabled() ? <ConsentBannerLoader /> : null}
       </body>
     </html>
   );
