@@ -1,11 +1,9 @@
 import { z } from "zod"
 
 import { isIsoDate } from "./dates"
+import { GUEST_LIMITS } from "./guest-limits"
 
-export const GUEST_LIMITS = {
-  adults: { min: 1, max: 8 },
-  children: { min: 0, max: 6 },
-} as const
+export { GUEST_LIMITS }
 
 /**
  * Availability search rules. `bookableSlugs` and `today` are injected so the

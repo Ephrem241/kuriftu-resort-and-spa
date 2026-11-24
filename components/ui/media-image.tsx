@@ -8,7 +8,11 @@ type MediaImageProps = {
   image: ContentImage
   /** Responsive sizes hint for next/image. */
   sizes: string
-  priority?: boolean
+  /**
+   * "high" for the page's LCP (hero) image: fetched eagerly at high priority.
+   * Replaces next/image's `priority`, deprecated in Next 16.
+   */
+  fetchPriority?: "high"
   className?: string
 }
 
@@ -16,7 +20,7 @@ type MediaImageProps = {
  * Fills its positioned parent with a content image. Until real photography
  * exists in Sanity, renders an on-brand placeholder (never stock imagery).
  */
-export function MediaImage({ image, sizes, priority, className }: MediaImageProps) {
+export function MediaImage({ image, sizes, fetchPriority, className }: MediaImageProps) {
   if (image.src) {
     return (
       <Image
@@ -24,7 +28,8 @@ export function MediaImage({ image, sizes, priority, className }: MediaImageProp
         alt={image.alt}
         fill
         sizes={sizes}
-        priority={priority}
+        fetchPriority={fetchPriority}
+        loading={fetchPriority === "high" ? "eager" : undefined}
         placeholder={image.lqip ? "blur" : "empty"}
         blurDataURL={image.lqip}
         className={cn("object-cover", className)}

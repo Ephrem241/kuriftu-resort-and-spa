@@ -3,7 +3,7 @@ import { offerSubtitle, pickPopupOffer } from "@/lib/content/offers"
 import { pathForDocument } from "@/lib/content/routes"
 import { analyticsEnabled } from "@/lib/analytics/posthog"
 
-import { OfferPopupCard } from "./offer-popup-card"
+import { OfferPopupLoader } from "./offer-popup-loader"
 
 /** Site-wide popup for the live "Show as popup" offer ending soonest. */
 export async function OfferPopup() {
@@ -11,7 +11,7 @@ export async function OfferPopup() {
   if (!offer) return null
 
   return (
-    <OfferPopupCard
+    <OfferPopupLoader
       consentRequired={analyticsEnabled()}
       offer={{
         slug: offer.slug,

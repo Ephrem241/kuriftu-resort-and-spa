@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { track } from "@/lib/analytics"
 import { addDays, nightsBetween, todayInResortZone } from "@/lib/booking/dates"
 import { buildBookingUrl } from "@/lib/booking/handoff"
-import { createSearchSchema } from "@/lib/booking/search-schema"
 import type { SiteSettings } from "@/lib/content/types"
 import { cn } from "@/lib/utils"
 
@@ -41,6 +40,14 @@ function formatDate(iso: string) {
 const inputOverlay =
   "absolute inset-0 size-full cursor-pointer appearance-none opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
 
+/**
+ * The search schema (and Zod) load on first interaction, not with the page.
+ * Client validation still runs before every hand-off.
+ */
+function loadSearchSchema() {
+  return import("@/lib/booking/search-schema").then((m) => m.createSearchSchema)
+}
+
 function openPicker(e: React.MouseEvent<HTMLInputElement>) {
   try {
     e.currentTarget.showPicker?.()
@@ -66,8 +73,17 @@ export function AvailabilityBar({
   const destinationName = destinations.find((d) => d.slug === destination)?.name
   const checkOutMin = checkIn ? addDays(checkIn, 1) : today ? addDays(today, 1) : undefined
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    let createSearchSchema: Awaited<ReturnType<typeof loadSearchSchema>>
+    try {
+      createSearchSchema = await loadSearchSchema()
+    } catch {
+      // The chunk failed to load (offline): skip prefill, hand off to the property.
+      const property = destinations.find((d) => d.slug === destination)?.bookingProperty
+      window.location.assign(buildBookingUrl({ property }) || "/contact")
+      return
+    }
     const schema = createSearchSchema({
       bookableSlugs: destinations.map((d) => d.slug),
       today: today || todayInResortZone(),
@@ -105,6 +121,7 @@ export function AvailabilityBar({
     <form
       noValidate
       onSubmit={onSubmit}
+      onFocus={() => void loadSearchSchema().catch(() => {})}
       aria-label="Check availability"
       className={cn(
         "rounded-lg border border-line bg-white p-4 shadow-xl shadow-charcoal/10 md:p-5",

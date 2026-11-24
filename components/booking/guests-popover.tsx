@@ -3,7 +3,7 @@
 import { Popover } from "@base-ui/react/popover"
 import { ChevronDown, Minus, Plus, Users } from "lucide-react"
 
-import { GUEST_LIMITS } from "@/lib/booking/search-schema"
+import { GUEST_LIMITS } from "@/lib/booking/guest-limits"
 
 import { fieldShellClass } from "./field-shell"
 

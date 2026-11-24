@@ -81,7 +81,7 @@
 @theme inline {
   --font-sans: var(--font-lato), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-playfair), ui-serif, Georgia, serif;
-  --font-accent: var(--font-playfair), ui-serif, Georgia, serif;
+  --font-accent: var(--font-playfair-italic), ui-serif, Georgia, serif;
 
   /* Type scale (mobile first; desktop values swap in at ≥1025px below) */
   --text-h1: var(--fs-h1);

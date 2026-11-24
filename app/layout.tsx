@@ -17,14 +17,24 @@ import "./globals.css";
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
-  style: ["normal", "italic"],
+  style: "normal",
   display: "swap",
+});
+
+// Accent taglines only, always below the fold: not preloaded, swaps in.
+const playfairItalic = Playfair_Display({
+  variable: "--font-playfair-italic",
+  subsets: ["latin"],
+  style: "italic",
+  display: "swap",
+  preload: false,
 });
 
 const lato = Lato({
   variable: "--font-lato",
   subsets: ["latin"],
-  weight: ["300", "400", "700"],
+  // 300 was loaded but never used; only regular and bold are in the design.
+  weight: ["400", "700"],
   display: "swap",
 });
 
@@ -52,7 +62,7 @@ async function OrganizationJsonLd() {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${playfair.variable} ${lato.variable} h-full`}>
+    <html lang="en" className={`${playfair.variable} ${playfairItalic.variable} ${lato.variable} h-full`}>
       <body className="relative flex min-h-full flex-col">
         <a
           href="#main"

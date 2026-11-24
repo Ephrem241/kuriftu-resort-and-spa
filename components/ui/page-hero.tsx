@@ -24,7 +24,7 @@ export function PageHero({ titleId, eyebrow, title, intro, image, cta, secondary
     <section aria-labelledby={titleId} className="relative isolate flex flex-col overflow-hidden lg:block">
       {image ? (
         <div className="relative order-2 aspect-4/3 w-full md:aspect-video lg:absolute lg:inset-y-0 lg:right-0 lg:aspect-auto lg:w-[72%]">
-          <MediaImage image={image} sizes="(min-width: 1025px) 72vw, 100vw" priority className="animate-fade-in" />
+          <MediaImage image={image} sizes="(min-width: 1025px) 72vw, 100vw" fetchPriority="high" className="animate-fade-in" />
           <div
             aria-hidden="true"
             className="absolute inset-y-0 left-0 hidden w-3/5 bg-linear-to-r from-ivory via-ivory/75 to-transparent lg:block"

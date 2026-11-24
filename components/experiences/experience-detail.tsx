@@ -47,7 +47,7 @@ export function ExperienceDetail({ experience, reservations }: ExperienceDetailP
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start lg:gap-16">
           <div className="order-first flex flex-col gap-3 lg:sticky lg:top-28 lg:order-last">
             <div className="relative aspect-4/3 overflow-hidden rounded-xl bg-beige">
-              <MediaImage image={hero} sizes="(min-width: 1025px) 50vw, 100vw" priority className="animate-fade-in" />
+              <MediaImage image={hero} sizes="(min-width: 1025px) 50vw, 100vw" fetchPriority="high" className="animate-fade-in" />
             </div>
             {more.length > 0 ? (
               <ul aria-label="More photos" className="grid grid-cols-3 gap-3">

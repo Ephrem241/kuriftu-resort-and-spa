@@ -5,6 +5,8 @@ import type { ResortPage } from "@/lib/content/types"
 import { googleMapsUrl, osmEmbedUrl } from "@/lib/maps"
 import { cn } from "@/lib/utils"
 
+import { DeferredMap } from "./deferred-map"
+
 /** "Location": directions copy and an embedded map with the resort's pin. */
 export function ResortLocation({ resort }: { resort: ResortPage }) {
   if (!resort.geo) return null
@@ -41,13 +43,7 @@ export function ResortLocation({ resort }: { resort: ResortPage }) {
       </div>
 
       <div className="relative aspect-[16/10.5] overflow-hidden rounded-xl border border-line bg-beige">
-        <iframe
-          src={embed}
-          title={`Map showing ${resort.heading}`}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          className="absolute inset-0 size-full border-0"
-        />
+        <DeferredMap src={embed} title={`Map showing ${resort.heading}`} />
         <div className="pointer-events-none absolute top-1/4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-card px-3 py-2 text-caption font-bold text-charcoal shadow-md">
           <MapPin aria-hidden="true" strokeWidth={1.5} className="size-5 fill-error text-card" />
           <span className="max-w-36">{resort.heading}</span>
