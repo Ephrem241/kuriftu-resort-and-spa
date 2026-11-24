@@ -4,40 +4,44 @@ import { Mail, MapPin, Phone } from "lucide-react"
 import { BookStayLink } from "@/components/booking/book-stay-link"
 import { analyticsEnabled } from "@/lib/analytics/posthog"
 import { getSiteSettings } from "@/lib/content"
+import { cn } from "@/lib/utils"
 
 import { ContactLink } from "./contact-link"
 import { CookieSettingsButton } from "./cookie-settings-button"
-import { Wordmark } from "./wordmark"
+import { Logo } from "./logo"
 
-const headingClass = "border-b border-ivory/15 pb-3 font-sans text-small font-bold text-ivory"
+const headingClass = "border-b border-ivory/15 pb-2 font-sans text-small font-bold text-ivory"
 const linkClass = "text-small text-ivory/85 transition-colors duration-hover hover:text-gold"
 
 export async function SiteFooter() {
   const settings = await getSiteSettings()
 
+  const resorts = settings.navResorts.map((r) => ({ label: r.name, href: `/resorts/${r.slug}` }))
   const columns = [
-    ...settings.footerColumns,
-    {
-      title: "Our Resorts",
-      links: settings.navResorts.map((r) => ({ label: r.name, href: `/resorts/${r.slug}` })),
-    },
+    ...settings.footerColumns.map((col) => ({ ...col, wide: false })),
+    // A long resort list splits into two sub-columns so it doesn't set the footer's height.
+    { title: "Our Resorts", links: resorts, wide: resorts.length > 4 },
   ]
 
   return (
     <footer className="bg-forest text-ivory">
-      <div className="container-site grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1.3fr_auto] lg:gap-0 lg:py-12">
-        <div className="lg:border-r lg:border-ivory/15 lg:pr-10">
+      <div className="container-site grid grid-cols-2 gap-x-6 gap-y-8 py-10 md:gap-x-10 lg:grid-cols-[1.35fr_0.9fr_0.9fr_1.4fr_1.3fr_auto] lg:gap-0">
+        <div className="col-span-2 lg:col-span-1 lg:border-r lg:border-ivory/15 lg:pr-10">
           <Link href="/" className="inline-block">
-            <Wordmark tone="ivory" size="lg" />
+            <Logo tone="light" className="h-14 lg:h-16" />
             <span className="sr-only">, home</span>
           </Link>
-          <p className="accent mt-4 text-small text-ivory">{settings.footerTagline}</p>
+          <p className="accent mt-3 text-small text-ivory">{settings.footerTagline}</p>
         </div>
 
         {columns.map((col) => (
-          <nav key={col.title} aria-label={col.title} className="lg:px-8">
+          <nav
+            key={col.title}
+            aria-label={col.title}
+            className={cn("lg:col-span-1 lg:px-8", col.wide && "col-span-2")}
+          >
             <h2 className={headingClass}>{col.title}</h2>
-            <ul className="mt-4 space-y-2.5">
+            <ul className={cn("mt-3 text-small", col.wide ? "grid grid-cols-2 gap-x-6 gap-y-2" : "space-y-2")}>
               {col.links.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className={linkClass}>
@@ -49,9 +53,9 @@ export async function SiteFooter() {
           </nav>
         ))}
 
-        <div className="lg:border-l lg:border-ivory/15 lg:px-8">
+        <div className="col-span-2 lg:col-span-1 lg:border-l lg:border-ivory/15 lg:px-8">
           <h2 className={headingClass}>Contact Us</h2>
-          <ul className="mt-4 space-y-3 text-small">
+          <ul className="mt-3 space-y-2.5 text-small">
             {settings.reservationPhone && (
               <li>
                 <ContactLink
@@ -85,7 +89,7 @@ export async function SiteFooter() {
           </ul>
         </div>
 
-        <div className="md:col-span-2 lg:col-span-1">
+        <div className="col-span-2 lg:col-span-1">
           <BookStayLink
             source="footer"
             variant="accent"
