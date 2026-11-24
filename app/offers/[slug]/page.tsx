@@ -7,6 +7,7 @@ import { OfferViewed } from "@/components/offers/offer-viewed"
 import { getOfferPage, getOffers, getSiteSettings } from "@/lib/content"
 import { pathForDocument } from "@/lib/content/routes"
 import { pageMetadata } from "@/lib/seo/metadata"
+import { PageContentFallback } from "@/components/ui/page-content-fallback"
 
 /**
  * Live offers only. Cache Components needs at least one param to validate
@@ -40,7 +41,7 @@ export default function Page({ params }: PageProps<"/offers/[slug]">) {
   return (
     <main id="main" tabIndex={-1} className="flex-1 outline-none">
       {/* params are read inside the boundary so the route keeps one App Shell. */}
-      <Suspense fallback={<div aria-busy="true" className="min-h-[40rem]" />}>
+      <Suspense fallback={<PageContentFallback />}>
         <OfferContent params={params} />
       </Suspense>
     </main>

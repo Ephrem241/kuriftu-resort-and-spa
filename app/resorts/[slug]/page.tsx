@@ -16,6 +16,7 @@ import { pathForDocument } from "@/lib/content/routes"
 import { resortJsonLd } from "@/lib/seo/json-ld"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { absoluteUrl, siteUrl } from "@/lib/seo/site-url"
+import { PageContentFallback } from "@/components/ui/page-content-fallback"
 
 export async function generateStaticParams() {
   const slugs = await getResortSlugs()
@@ -46,7 +47,7 @@ export default function Page({ params }: PageProps<"/resorts/[slug]">) {
   return (
     <main id="main" tabIndex={-1} className="flex-1 outline-none">
       {/* params are read inside the boundary so the route keeps one App Shell. */}
-      <Suspense fallback={<div aria-busy="true" className="min-h-[40rem]" />}>
+      <Suspense fallback={<PageContentFallback />}>
         <ResortContent params={params} />
       </Suspense>
     </main>
