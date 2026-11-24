@@ -58,3 +58,9 @@ export function browserStorage(): Storage | undefined {
     return undefined
   }
 }
+
+/** Window event the footer "Cookie settings" button dispatches. */
+export const OPEN_CONSENT_EVENT = "kuriftu:open-consent"
+
+/** Window event fired after the guest accepts or declines (the offer popup waits for it). */
+export const CONSENT_DECIDED_EVENT = "kuriftu:consent-decided"

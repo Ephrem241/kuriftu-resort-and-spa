@@ -5,10 +5,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ArrowRight, X } from "lucide-react"
 
-import { CONSENT_DECIDED_EVENT } from "@/components/site/consent-banner"
 import { MediaImage } from "@/components/ui/media-image"
 import { track } from "@/lib/analytics"
-import { browserStorage, readConsent } from "@/lib/analytics/consent"
+import { browserStorage, CONSENT_DECIDED_EVENT, readConsent } from "@/lib/analytics/consent"
 import type { ContentImage } from "@/lib/content/types"
 
 export type PopupOffer = {

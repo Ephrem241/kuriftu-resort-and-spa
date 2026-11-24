@@ -3,38 +3,47 @@
 import { useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { browserStorage, readConsent, writeConsent, type ConsentChoice } from "@/lib/analytics/consent"
+import {
+  browserStorage,
+  CONSENT_DECIDED_EVENT,
+  OPEN_CONSENT_EVENT,
+  readConsent,
+  writeConsent,
+  type ConsentChoice,
+} from "@/lib/analytics/consent"
 import { loadPostHog, optOut } from "@/lib/analytics/posthog"
 
-/** Window event the footer "Cookie settings" button dispatches. */
-export const OPEN_CONSENT_EVENT = "kuriftu:open-consent"
-
-/** Window event fired after the guest accepts or declines (the offer popup waits for it). */
-export const CONSENT_DECIDED_EVENT = "kuriftu:consent-decided"
+/** A "Cookie settings" press that happened before this module loaded. */
+export type EarlyOpen = { target: HTMLElement | null }
 
 /**
  * Non-blocking consent panel. Nothing is tracked until Accept; a previous
- * grant loads PostHog on mount. Rendered only when a PostHog key is set.
+ * grant loads PostHog on mount. Rendered only when a PostHog key is set,
+ * and loaded after idle by ConsentBannerLoader.
  */
-export function ConsentBanner() {
+export function ConsentBanner({ earlyOpen }: { earlyOpen?: EarlyOpen }) {
   const [open, setOpen] = useState(false)
   const [reopened, setReopened] = useState(false)
   const panelRef = useRef<HTMLElement>(null)
   const returnFocusRef = useRef<HTMLElement | null>(null)
+  const earlyOpenRef = useRef(earlyOpen)
 
   useEffect(() => {
+    function reopen(target: EventTarget | null) {
+      returnFocusRef.current = (target instanceof HTMLElement ? target : null) ??
+        (document.activeElement as HTMLElement | null)
+      setReopened(true)
+      setOpen(true)
+    }
+
     const state = readConsent(browserStorage())
     if (state === "granted") void loadPostHog()
     // Reading storage only works after mount, so this cannot be initial state.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     else if (state === "undecided") setOpen(true)
+    if (earlyOpenRef.current) reopen(earlyOpenRef.current.target)
 
-    function onOpen(e: Event) {
-      returnFocusRef.current = (e.target instanceof HTMLElement ? e.target : null) ??
-        (document.activeElement as HTMLElement | null)
-      setReopened(true)
-      setOpen(true)
-    }
+    const onOpen = (e: Event) => reopen(e.target)
     window.addEventListener(OPEN_CONSENT_EVENT, onOpen)
     return () => window.removeEventListener(OPEN_CONSENT_EVENT, onOpen)
   }, [])

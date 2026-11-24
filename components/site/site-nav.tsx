@@ -1,10 +1,12 @@
 "use client"
 
+import { useEffect, useRef, type KeyboardEvent } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu } from "@base-ui/react/menu"
 import { ChevronDown } from "lucide-react"
 
+import { useDisclosure } from "@/components/ui/use-disclosure"
+import { stepIndex } from "@/lib/content/gallery"
 import type { NavLink } from "@/lib/content/types"
 import { cn } from "@/lib/utils"
 
@@ -19,6 +21,74 @@ function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href)
 }
 
+/** Dropdown of links (disclosure pattern): ArrowUp/Down move, Escape closes. */
+function NavDropdown({ label, links }: { label: string; links: NavLink[] }) {
+  const { setOpen, close, mounted, rootProps, triggerProps, panelProps } = useDisclosure<
+    HTMLSpanElement,
+    HTMLUListElement
+  >()
+  const focusFirst = useRef(false)
+
+  // ArrowDown on the button opens the list and moves into it.
+  useEffect(() => {
+    if (!mounted || !focusFirst.current) return
+    focusFirst.current = false
+    panelProps.ref.current?.querySelector("a")?.focus()
+  }, [mounted, panelProps.ref])
+
+  function onTriggerKeyDown(e: KeyboardEvent) {
+    if (e.key !== "ArrowDown") return
+    e.preventDefault()
+    const first = panelProps.ref.current?.querySelector("a")
+    if (first) first.focus()
+    else {
+      focusFirst.current = true
+      setOpen(true)
+    }
+  }
+
+  function onPanelKeyDown(e: KeyboardEvent) {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return
+    e.preventDefault()
+    const items = Array.from(panelProps.ref.current?.querySelectorAll("a") ?? [])
+    const at = items.indexOf(document.activeElement as HTMLAnchorElement)
+    items[stepIndex(at, e.key === "ArrowDown" ? 1 : -1, items.length)]?.focus()
+  }
+
+  return (
+    <span {...rootProps} className="relative inline-flex">
+      <button {...triggerProps} onKeyDown={onTriggerKeyDown} className={cn(linkClass, "cursor-pointer")}>
+        {label}
+        <ChevronDown
+          aria-hidden="true"
+          strokeWidth={1.5}
+          className="size-3.5 transition-transform duration-hover data-popup-open:rotate-180"
+        />
+      </button>
+      {mounted ? (
+        <ul
+          {...panelProps}
+          aria-label={label}
+          onKeyDown={onPanelKeyDown}
+          className="absolute top-full left-0 z-40 mt-2 w-max min-w-56 rounded-md border border-line bg-ivory p-2 shadow-lg transition-opacity duration-hover data-ending-style:opacity-0 data-starting-style:opacity-0"
+        >
+          {links.map((child) => (
+            <li key={child.href}>
+              <Link
+                href={child.href}
+                onClick={() => close()}
+                className="block rounded-sm px-4 py-2.5 text-small text-charcoal outline-none hover:bg-beige hover:text-forest focus-visible:bg-beige focus-visible:text-forest"
+              >
+                {child.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </span>
+  )
+}
+
 /** Desktop navigation (≥1025px) with click/keyboard dropdowns. */
 export function SiteNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname()
@@ -29,32 +99,7 @@ export function SiteNav({ items }: { items: NavItem[] }) {
         {items.map((item) => (
           <li key={item.label}>
             {item.children ? (
-              <Menu.Root>
-                <Menu.Trigger className={cn(linkClass, "cursor-pointer")}>
-                  {item.label}
-                  <ChevronDown
-                    aria-hidden="true"
-                    strokeWidth={1.5}
-                    className="size-3.5 transition-transform duration-hover data-popup-open:rotate-180"
-                  />
-                </Menu.Trigger>
-                <Menu.Portal>
-                  <Menu.Positioner sideOffset={8} align="start" className="z-40">
-                    <Menu.Popup className="min-w-56 rounded-md border border-line bg-ivory p-2 shadow-lg transition-opacity duration-hover data-ending-style:opacity-0 data-starting-style:opacity-0">
-                      {item.children.map((child) => (
-                        <Menu.LinkItem
-                          key={child.href}
-                          closeOnClick
-                          render={<Link href={child.href} />}
-                          className="block rounded-sm px-4 py-2.5 text-small text-charcoal outline-none data-highlighted:bg-beige data-highlighted:text-forest"
-                        >
-                          {child.label}
-                        </Menu.LinkItem>
-                      ))}
-                    </Menu.Popup>
-                  </Menu.Positioner>
-                </Menu.Portal>
-              </Menu.Root>
+              <NavDropdown label={item.label} links={item.children} />
             ) : (
               <Link
                 href={item.href}

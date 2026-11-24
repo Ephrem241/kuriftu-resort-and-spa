@@ -1,6 +1,5 @@
 import type { ComponentProps } from "react"
 import Link from "next/link"
-import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 import { ArrowRight } from "lucide-react"
 
@@ -74,17 +73,19 @@ function Button({
   shape,
   arrow = false,
   children,
+  type = "button",
   ...props
-}: ButtonPrimitive.Props & VariantOptions) {
+}: ComponentProps<"button"> & VariantOptions) {
   return (
-    <ButtonPrimitive
+    <button
       data-slot="button"
+      type={type}
       className={cn(buttonVariants({ variant, size, shape }), className)}
       {...props}
     >
       {children}
       {arrow ? <ArrowIcon /> : null}
-    </ButtonPrimitive>
+    </button>
   )
 }
 
