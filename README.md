@@ -18,11 +18,11 @@ Copy `.env.example` to `.env.local` and fill it in, then `npm install` and `npm 
 
 ## Sanity Studio
 
-The Studio is its own workspace in `studio/`. Copy `studio/.env.example` to `studio/.env`, then run `npm install` and `npm run dev` in `studio/` (http://localhost:3333). It is not part of the Vercel project; host it with `npx sanity deploy` from `studio/`.
+The Studio is its own workspace in `studio/`. Copy `studio/.env.example` to `studio/.env`, then run `npm install` and `npm run dev` in `studio/` (http://localhost:3333). It is not part of the Vercel project. It is hosted at https://kuriftu.sanity.studio (project members only). Redeploy it with `npm run deploy` from `studio/`, which also deploys the schema.
 
 ## Deploying
 
 - Vercel project `kuriftu-resort-and-spa`: a plain Next.js app from the repo root, with no `vercel.json`. Pushes to `main` deploy to production.
 - Environment variables: every key in `.env.example`, marked Sensitive. `NEXT_PUBLIC_*` values are inlined at build time, so changing one needs a redeploy.
 - `NEXT_PUBLIC_SITE_URL` must be the origin the site is served from. Canonicals, the sitemap and the enquiry same-origin check all use it, and enquiries return 403 from any other origin.
-- Sanity webhook: a GROQ webhook on create/update/delete that POSTs to `<site>/api/revalidate`, with the same secret as `SANITY_REVALIDATE_SECRET`.
+- Sanity webhook (sanity.io/manage → API → Webhooks): POST to `<site>/api/revalidate` on Create, Update and Delete, with no filter, projection `{_type, "slug": slug.current}`, drafts and versions off, and the same secret as `SANITY_REVALIDATE_SECRET`. A publish then refreshes the site within a minute, with no redeploy.
