@@ -5,6 +5,8 @@ import { ArrowRight, ChevronLeft } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+import { HeroVideo } from "./hero-video"
+
 type HeroSlidesProps = {
   /** Server-rendered image per slide. */
   images: ReactNode[]
@@ -12,6 +14,8 @@ type HeroSlidesProps = {
   copies: ReactNode[]
   /** Server-rendered call-to-action row (shared by all slides). */
   actions: ReactNode
+  /** Optional muted background loop shown over the first slide's image. */
+  videoSrc?: string
   /** Server-rendered decoration after the copy (the wave). */
   children?: ReactNode
 }
@@ -20,7 +24,7 @@ type HeroSlidesProps = {
  * The home hero's only client logic: which slide shows, the prev/next and dot
  * controls, and when slides 2+ mount. All markup arrives from the server.
  */
-export function HeroSlides({ images, copies, actions, children }: HeroSlidesProps) {
+export function HeroSlides({ images, copies, actions, videoSrc, children }: HeroSlidesProps) {
   const [index, setIndex] = useState(0)
   // Hidden slides sit inside the viewport, so `loading="lazy"` can't hold them
   // back: mount them once the guest reaches for the carousel instead.
@@ -54,6 +58,7 @@ export function HeroSlides({ images, copies, actions, children }: HeroSlidesProp
             </div>
           ) : null
         )}
+        {videoSrc ? <HeroVideo src={videoSrc} active={index === 0} /> : null}
         {/* Soft ivory fade so copy sits on ivory (desktop). */}
         <div
           aria-hidden="true"

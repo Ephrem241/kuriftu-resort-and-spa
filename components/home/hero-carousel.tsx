@@ -9,6 +9,9 @@ import { cn } from "@/lib/utils"
 
 import { HeroSlides } from "./hero-slides"
 
+/** Ambient loop behind the first slide (static file in /public). */
+const HERO_VIDEO_SRC = "/videos/hero.mp4"
+
 type HeroCarouselProps = {
   slides: HeroSlide[]
   /** Validated YouTube/Vimeo embed URL for "Our Story", or null. */
@@ -70,7 +73,7 @@ export function HeroCarousel({ slides, storyEmbedUrl }: HeroCarouselProps) {
   )
 
   return (
-    <HeroSlides images={images} copies={copies} actions={actions}>
+    <HeroSlides images={images} copies={copies} actions={actions} videoSrc={HERO_VIDEO_SRC}>
       {/* Soft wave at the bottom edge (shape only, not brand artwork). */}
       <svg
         aria-hidden="true"

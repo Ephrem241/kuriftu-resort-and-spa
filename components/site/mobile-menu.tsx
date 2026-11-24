@@ -8,7 +8,7 @@ import { BookStayLink } from "@/components/booking/book-stay-link"
 import { Modal } from "@/components/ui/modal"
 
 import type { NavItem } from "./site-nav"
-import { Wordmark } from "./wordmark"
+import { Logo } from "./logo"
 
 /** Navigation sheet below 1025px. Modal (page inert), Escape closes. */
 export function MobileMenu({ items }: { items: NavItem[] }) {
@@ -40,7 +40,7 @@ export function MobileMenu({ items }: { items: NavItem[] }) {
       >
         <div className="flex h-24 items-center justify-between">
           <span id={titleId}>
-            <Wordmark />
+            <Logo />
           </span>
           <button
             type="button"

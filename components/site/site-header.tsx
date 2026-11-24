@@ -5,7 +5,7 @@ import { getSiteSettings } from "@/lib/content"
 
 import { MobileMenu } from "./mobile-menu"
 import { SiteNav, type NavItem } from "./site-nav"
-import { Wordmark } from "./wordmark"
+import { Logo } from "./logo"
 
 export async function SiteHeader() {
   const settings = await getSiteSettings()
@@ -29,7 +29,7 @@ export async function SiteHeader() {
     <header className="absolute inset-x-0 top-0 z-30">
       <div className="container-site flex h-24 items-center justify-between gap-6 lg:h-32">
         <Link href="/" className="shrink-0">
-          <Wordmark />
+          <Logo priority className="h-12 lg:h-14" />
           <span className="sr-only">, home</span>
         </Link>
 
