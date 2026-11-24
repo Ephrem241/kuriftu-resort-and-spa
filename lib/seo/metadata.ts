@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 import { ogImage } from "@/lib/content/og"
 import type { ContentImage } from "@/lib/content/types"
 
+import { isIndexable } from "./site-url"
+
 /** Shared by every page: a page's openGraph replaces the layout's (shallow merge). */
 export const OG_LOCALE = "en_US"
 
@@ -19,8 +21,11 @@ type PageMetadataInput = {
   titleAbsolute?: boolean
 }
 
+/** Robots for a deployment that must not be indexed (see isIndexable). */
+export const NOT_INDEXABLE_ROBOTS = { index: false, follow: false } as const
+
 /** Title, description, canonical, Open Graph, Twitter and robots for one page. */
-export function pageMetadata(input: PageMetadataInput): Metadata {
+export function pageMetadata(input: PageMetadataInput, env: Record<string, string | undefined> = process.env): Metadata {
   const description = input.description || undefined
   const images = input.image ? ogImage(input.image) : undefined
 
@@ -43,6 +48,8 @@ export function pageMetadata(input: PageMetadataInput): Metadata {
       description,
       images: images?.map((i) => i.url),
     },
-    ...(input.noIndex && { robots: { index: false, follow: true } }),
+    ...(!isIndexable(env)
+      ? { robots: NOT_INDEXABLE_ROBOTS }
+      : input.noIndex && { robots: { index: false, follow: true } }),
   }
 }

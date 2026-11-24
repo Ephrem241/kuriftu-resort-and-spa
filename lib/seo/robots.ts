@@ -1,14 +1,13 @@
 import type { MetadataRoute } from "next"
 
-import { absoluteUrl } from "./site-url"
+import { absoluteUrl, isIndexable } from "./site-url"
 
 /**
- * robots.txt rules. Vercel preview deployments (VERCEL_ENV other than
- * "production") are closed to all crawlers so they never get indexed.
+ * robots.txt rules. Deployments that must not be indexed (Vercel previews,
+ * *.vercel.app test hosts) are closed to all crawlers.
  */
 export function robotsRules(env: Record<string, string | undefined> = process.env): MetadataRoute.Robots {
-  const vercelEnv = env.VERCEL_ENV
-  if (vercelEnv && vercelEnv !== "production") {
+  if (!isIndexable(env)) {
     return { rules: { userAgent: "*", disallow: "/" } }
   }
   return {
