@@ -18,6 +18,18 @@ export function siteUrl(env: Record<string, string | undefined> = process.env): 
   return "http://localhost:3000"
 }
 
+/**
+ * Whether search engines may index this deployment. False for Vercel
+ * previews and for any build whose public origin is a *.vercel.app test
+ * host. Setting NEXT_PUBLIC_SITE_URL to the real domain (and redeploying)
+ * opens the site to crawlers.
+ */
+export function isIndexable(env: Record<string, string | undefined> = process.env): boolean {
+  if (env.VERCEL_ENV && env.VERCEL_ENV !== "production") return false
+  const host = new URL(siteUrl(env)).hostname
+  return host !== "vercel.app" && !host.endsWith(".vercel.app")
+}
+
 /** Absolute URL for a site path. */
 export function absoluteUrl(path: string, env?: Record<string, string | undefined>): string {
   return new URL(path, siteUrl(env)).toString()

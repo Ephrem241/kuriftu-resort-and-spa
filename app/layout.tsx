@@ -10,8 +10,8 @@ import { SiteHeader } from "@/components/site/site-header";
 import { getSiteSettings } from "@/lib/content";
 import { ogImage } from "@/lib/content/og";
 import { organizationJsonLd } from "@/lib/seo/json-ld";
-import { OG_LOCALE } from "@/lib/seo/metadata";
-import { siteUrl } from "@/lib/seo/site-url";
+import { NOT_INDEXABLE_ROBOTS, OG_LOCALE } from "@/lib/seo/metadata";
+import { isIndexable, siteUrl } from "@/lib/seo/site-url";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -51,6 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     openGraph: { type: "website", locale: OG_LOCALE, siteName: brandName, title: seo.title, description, images },
     twitter: { card: "summary_large_image" },
+    ...(!isIndexable() && { robots: NOT_INDEXABLE_ROBOTS }),
   };
 }
 

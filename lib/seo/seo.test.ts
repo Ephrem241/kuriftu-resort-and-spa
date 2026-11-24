@@ -6,7 +6,7 @@ import type { ResortPage, SiteSettings } from "@/lib/content/types"
 import { organizationJsonLd, resortJsonLd, serializeJsonLd } from "./json-ld"
 import { pageMetadata } from "./metadata"
 import { robotsRules } from "./robots"
-import { absoluteUrl, siteUrl } from "./site-url"
+import { absoluteUrl, isIndexable, siteUrl } from "./site-url"
 
 const ORIGIN = "https://www.example.com"
 const sanityImage = (alt: string) => ({
@@ -70,6 +70,38 @@ describe("robotsRules", () => {
     expect(robotsRules({ NEXT_PUBLIC_SITE_URL: ORIGIN, VERCEL_ENV: "preview" })).toEqual({
       rules: { userAgent: "*", disallow: "/" },
     })
+  })
+
+  it("closes a production deployment served from *.vercel.app", () => {
+    expect(
+      robotsRules({ NEXT_PUBLIC_SITE_URL: "https://kuriftu-test.vercel.app", VERCEL_ENV: "production" })
+    ).toEqual({ rules: { userAgent: "*", disallow: "/" } })
+  })
+})
+
+describe("isIndexable", () => {
+  it("is true on the real domain in production", () => {
+    expect(isIndexable({ NEXT_PUBLIC_SITE_URL: ORIGIN, VERCEL_ENV: "production" })).toBe(true)
+    expect(isIndexable({ NEXT_PUBLIC_SITE_URL: ORIGIN })).toBe(true)
+  })
+
+  it("is false for previews and vercel.app hosts", () => {
+    expect(isIndexable({ NEXT_PUBLIC_SITE_URL: ORIGIN, VERCEL_ENV: "preview" })).toBe(false)
+    expect(isIndexable({ NEXT_PUBLIC_SITE_URL: "https://kuriftu-test.vercel.app" })).toBe(false)
+  })
+
+  it("does not treat a lookalike domain as vercel.app", () => {
+    expect(isIndexable({ NEXT_PUBLIC_SITE_URL: "https://notvercel.app" })).toBe(true)
+  })
+})
+
+describe("pageMetadata on a non-indexable deployment", () => {
+  it("sends noindex, nofollow on every page", () => {
+    const env = { NEXT_PUBLIC_SITE_URL: "https://kuriftu-test.vercel.app" }
+    const page = { title: "T", description: "D", path: "/x", siteName: "S", image: null }
+    expect(pageMetadata(page, env).robots).toEqual({ index: false, follow: false })
+    expect(pageMetadata({ ...page, noIndex: true }, env).robots).toEqual({ index: false, follow: false })
+    expect(pageMetadata(page, { NEXT_PUBLIC_SITE_URL: ORIGIN }).robots).toBeUndefined()
   })
 })
 
