@@ -19,7 +19,7 @@ export function ResortHero({ resort }: { resort: ResortPage }) {
     <section aria-labelledby="resort-title" className="relative isolate flex flex-col overflow-hidden lg:block">
       {/* Image: right ~68% on desktop, full-width block below the copy on smaller screens. */}
       <div className="relative order-2 aspect-4/3 w-full md:aspect-video lg:absolute lg:inset-y-0 lg:right-0 lg:aspect-auto lg:w-[68%]">
-        <MediaImage image={resort.heroImage} sizes="(min-width: 1025px) 68vw, 100vw" priority />
+        <MediaImage image={resort.heroImage} sizes="(min-width: 1025px) 68vw, 100vw" fetchPriority="high" />
         <div
           aria-hidden="true"
           className="absolute inset-y-0 left-0 hidden w-1/2 bg-linear-to-r from-ivory via-ivory/70 to-transparent lg:block"

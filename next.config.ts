@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     return legacyRedirects.map(({ source, destination }) => ({ source, destination, permanent: true }))
   },
   images: {
+    // AVIF first (smaller at the same quality), WebP for browsers without it.
+    formats: ["image/avif", "image/webp"],
     // Only this project's Sanity image CDN. `search` is left out on purpose:
     // Sanity image URLs carry transform params (?w=…&auto=format), and the
     // `new URL()` form would only match URLs with no query string.

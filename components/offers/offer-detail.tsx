@@ -43,7 +43,7 @@ export function OfferDetail({ offer, reservations }: OfferDetailProps) {
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start lg:gap-16">
         <div className="relative order-first aspect-4/3 overflow-hidden rounded-xl bg-beige lg:sticky lg:top-28 lg:order-last">
-          <MediaImage image={offer.image} sizes="(min-width: 1025px) 50vw, 100vw" priority />
+          <MediaImage image={offer.image} sizes="(min-width: 1025px) 50vw, 100vw" fetchPriority="high" />
         </div>
 
         <div>

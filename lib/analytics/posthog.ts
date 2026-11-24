@@ -37,6 +37,20 @@ export function captureException(error: unknown): void {
   instance?.captureException(error)
 }
 
+/** Resolves when the browser is idle (or after `timeout` ms at most). */
+export function whenIdle(timeout = 3000): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(() => resolve(), { timeout })
+    } else if (document.readyState === "complete") {
+      setTimeout(resolve, 200)
+    } else {
+      // No requestIdleCallback (Safari): wait for load, then yield once more.
+      window.addEventListener("load", () => setTimeout(resolve, 200), { once: true })
+    }
+  })
+}
+
 /** Idempotent. Call only once the guest has granted consent. */
 export function loadPostHog(): Promise<PostHog | null> {
   if (typeof window === "undefined" || !analyticsEnabled()) return Promise.resolve(null)
@@ -50,7 +64,10 @@ export function loadPostHog(): Promise<PostHog | null> {
   }
   if (loading) return loading
 
-  loading = import("posthog-js")
+  // `loading` is set now so events queue; the SDK itself waits for idle,
+  // keeping it off the page's critical path.
+  loading = whenIdle()
+    .then(() => import("posthog-js"))
     .then(({ default: posthog }) => {
       posthog.init(posthogKey(), {
         api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
